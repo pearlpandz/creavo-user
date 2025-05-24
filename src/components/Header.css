@@ -1,0 +1,44 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #333;
+  color: #fff;
+  padding: 10px 20px;
+}
+
+.header__logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.header__nav {
+  display: flex;
+  gap: 15px;
+}
+
+.header__link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+}
+
+.header__link:hover {
+  text-decoration: underline;
+}
+
+.header__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header__user-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.header__user-name {
+  font-size: 1rem;
+}
