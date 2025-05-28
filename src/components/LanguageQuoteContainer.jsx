@@ -2,12 +2,12 @@ import { useMemo, useState } from 'react';
 import MediaList from './MediaList';
 import { Box, Button, Typography } from '@mui/material';
 
-const MediaContainer = ({ data, title='Trending', handleSelectedImg }) => { 
+const LanguageQuoteContainer = ({ data, title = 'Trending', handleSelectedImg }) => {
 
     const [selectedSubcategory, setSelectedSubcategory] = useState('all');
 
     const mediaList = useMemo(() => {
-        if(data?.subcategories?.length > 0) {
+        if (data?.subcategories?.length > 0) {
             if (selectedSubcategory?.toLowerCase() !== 'all') {
                 const subcategoryData = data.subcategories.find(item => item.name.toLowerCase() === selectedSubcategory.toLowerCase());
                 return subcategoryData ? subcategoryData.media : [];
@@ -59,9 +59,9 @@ const MediaContainer = ({ data, title='Trending', handleSelectedImg }) => {
                     </>
                 )
             }
-            <MediaList data={mediaList} handleSelectedImg={handleSelectedImg} />
+            <MediaList data={mediaList} handleSelectedImg={handleSelectedImg} shouldShow={false} />
         </Box>
     )
 }
 
-export default MediaContainer;
+export default LanguageQuoteContainer;

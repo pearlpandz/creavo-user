@@ -2,9 +2,16 @@ import EventCard from "./EventCard";
 import { IoTodaySharp } from "react-icons/io5";
 
 import './EventList.css';
+import { useState } from "react";
+import { useEventData } from "../hook/usePageData";
 
-const EventList = ({ data, selectedDay, setSelectedDay }) => {
+const EventList = () => {
+    const today = new Date();
+    const [selectedDay, setSelectedDay] = useState({ day: today, stringDay: today.toLocaleDateString('en-GB').split('/').join('-') });
+    const { data } = useEventData(selectedDay.stringDay);
     const currentYear = new Date().getFullYear();
+
+    console.log('events', data);
 
     const nextSevenDays = Array.from({ length: 7 }, (_, i) => {
         const date = new Date();
@@ -27,7 +34,11 @@ const EventList = ({ data, selectedDay, setSelectedDay }) => {
             <div className="day-container">
                 {
                     nextSevenDays.map(day => (
-                        <div key={day} onClick={() => setSelectedDay(day)} className={`day-card ${isSameDays(selectedDay, day) && 'active'}`}>
+                        <div key={day} onClick={() => setSelectedDay({
+                            day,
+                            stringDay: day?.toLocaleDateString('en-GB').split('/').join('-')
+                        })}
+                            className={`day-card ${isSameDays(selectedDay?.day, day) && 'active'}`}>
                             <h6>{day?.toLocaleDateString('en-US', { day: '2-digit', month: 'short' })}</h6>
                         </div>
                     ))

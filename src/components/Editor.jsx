@@ -1,38 +1,16 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import './Editor.css';
 import CanvasRenderer from "../CanvasComponents/CanvasRenderer";
-import { SETTINGS, SIDEBAR } from "../constants";
+import { SIDEBAR } from "../constants";
+import { SETTINGS } from "../constants/settings";
 
 function Editor(props) {
-    const { selectedImg } = props;
-    const [selectedTemplate, setSelectedTemplate] = useState();
-    const [templates, setTemplates] = useState([]);
+    const { selectedImg, selectedTemplate, templates, setSelectedTemplate } = props;
+
+
     const [selectedSidebar, setSelectedSidebar] = useState(SIDEBAR[0].key)
     const [selectedTheme, setSelectedTheme] = useState({ color: 'white', background: 'red' })
     const businessDetails = JSON.parse(localStorage.getItem('companyDetails')) ?? {}
-
-    const getTemplates = async () => {
-        try {
-            const response = await fetch(`${SETTINGS.FRAME_SERVICE_URL}/api/frame/list`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }});
-            const data = await response.json();
-            if (response.ok) {
-                setTemplates(data);
-                setSelectedTemplate(data[3]);
-            } else {
-                console.error('Error fetching templates:', data.message);
-            }
-        } catch (error) {
-            console.error('Error fetching templates:', error);
-        }
-    }
-
-    useEffect(() => {
-        getTemplates();
-    }, []);
 
     const framesContainer = useMemo(() => {
         return (
@@ -81,7 +59,7 @@ function Editor(props) {
                 </div>
             </div>
         )
-    }, [templates])
+    }, [setSelectedTemplate, templates])
 
     const handleColorChange = (type, color) => {
         if (type === 'bg') {

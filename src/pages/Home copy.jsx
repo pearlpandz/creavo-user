@@ -1,4 +1,3 @@
-import { Box, Typography } from "@mui/material";
 import React, { useEffect, useMemo, useState } from "react";
 import Modal from "../components/Modal";
 import Editor from "../components/Editor";
@@ -6,9 +5,7 @@ import { useMediaData } from "../hook/usePageData";
 import EventList from "../components/EventList";
 import MediaContainer from "../components/MediaContainer";
 import { SETTINGS } from "../constants/settings";
-import BannerComponent from "../components/Home/BannerComponent";
-import TemplateCardList from "../components/Home/TemplateCategory/List";
-import CategoryContainer from "../components/CategoryContainer";
+
 
 const HomePage = () => {
     const [templates, setTemplates] = useState([]);
@@ -56,38 +53,36 @@ const HomePage = () => {
 
     const groupedMedia = useMemo(() => {
         if (media?.length > 0) {
-            return media?.filter(a => !['trending'].includes(a.category?.toLowerCase()))
+            return media?.filter(a => a.category?.toLowerCase() !== 'trending')
         } else {
             return [];
         }
     }, [media])
 
+    // if (mediaLoading || eventLoading) {
+    //     return (
+    //         <div style={{ padding: 20 }}>
+    //             <h2>Loading...</h2>
+    //         </div>
+    //     );
+    // }
+
     return (
-        <Box sx={{ p: 2 }}>
-            {/* Banner */}
-            <BannerComponent />
+        <div style={{ padding: 20 }}>
+            <MediaContainer data={trendingMedia} handleSelectedImg={handleSelectedImg} />
 
-            {/* Categories */}
-            <TemplateCardList />
+            <EventList />
 
-            {/* Trendings */}
-            {trendingMedia?.length > 0 && <MediaContainer data={trendingMedia} handleSelectedImg={handleSelectedImg} />}
-
-            {/* Event Calendar */}
-            {/* <EventList /> */}
-
-            {/* List of Media by Category  */}
             {
                 groupedMedia?.map((item) => (
-                    <CategoryContainer key={item.category} item={item} handleSelectedImg={handleSelectedImg} />
+                    <MediaContainer key={item.category} title={item.category} data={item} handleSelectedImg={handleSelectedImg} />
                 ))
             }
 
-            {/* Modal - Editor */}
             <Modal show={showModal} onClose={() => setShowModal(false)}>
                 <Editor selectedImg={selectedImg} templates={templates} selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} />
             </Modal>
-        </Box>
+        </div>
     );
 };
 
