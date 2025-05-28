@@ -4,7 +4,7 @@ import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-rou
 import { lightTheme, darkTheme } from './theme'
 import Login from './pages/Login'
 import Signup from './pages/Register'
-import ForgetPassword from './pages/forgetpassword'
+import ForgetPassword from './pages/ForgetPassword'
 import Home from './pages/Home'
 import TopNav from './components/TopNav'
 import Sidebar from './components/Sidebar'
