@@ -1,18 +1,16 @@
 import { useState, useEffect } from "react";
 import { useKeenSlider } from "keen-slider/react";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
-import { useNavigate } from "react-router";
-import MediaCard from "./MediaCard";
+import "keen-slider/keen-slider.min.css";
 
-const MediaList = ({ data, handleSelectedImg, shouldShow = true, noOfCards = 6, pk }) => {
-    const navigate = useNavigate();
+const MediaListSquareItems = ({ data, handleSelectedImg, pk }) => {
     const [sliderInstanceRef, slider] = useKeenSlider({
         loop: false,
         mode: "snap",
         slides: {
-            perView: noOfCards,
-            spacing: 3,
+            perView: 8,
+            spacing: 16,
         },
         breakpoints: {
             "(max-width: 1200px)": {
@@ -93,44 +91,39 @@ const MediaList = ({ data, handleSelectedImg, shouldShow = true, noOfCards = 6, 
             )}
 
             {/* Slider */}
-
             <Box ref={sliderInstanceRef} className="keen-slider" sx={{ width: '100%' }}>
-                {data?.length > 0 ? (
-                    <>
-                        {
-                            data.map((item) => (
-                                <Box
-                                    key={item.id}
-                                    className="keen-slider__slide"
-                                    onClick={() => handleSelectedImg(item.image)}
-                                    sx={{ p: 1, cursor: 'pointer' }}
-                                >
-                                    <MediaCard item={item} height={noOfCards > 5 ? 120 : 180} width='100%' shouldShow={shouldShow} />
-                                </Box>
-                            ))
-                        }
-                        <Box
-                            className="keen-slider__slide"
-                            onClick={() => { navigate(`/category/${pk}`) }}
-                            sx={{ p: 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', }}
-                        >
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }} component='div'>
-                                <Box sx={{
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #444',
-                                    width: 24,
-                                    height: 24,
-                                    borderRadius: 50
-                                }} component='div'><ArrowForwardIos sx={{ ml: 0, width: 16 }} /></Box>
-                                <Typography sx={{ fontSize: 14 }}>View All</Typography>
-                            </Box>
+                {data.map((item, index) => (
+                    <Box
+                        key={item.id}
+                        className="keen-slider__slide"
+                        onClick={() => handleSelectedImg(item.image)}
+                        sx={{
+                            borderRadius: 2,
+                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                            cursor: 'pointer',
+                            transition: 'transform 0.3s',
+                            "&:hover": { transform: 'scale(1.05)' },
+                            overflow: 'hidden',
+                        }}
+                    >
+                        <Box sx={{ width: '100%', height: 200 }}>
+                            <img
+                                src={item.image}
+                                alt={`media-${index}`}
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    display: 'block',
+                                }}
+                                loading="lazy"
+                            />
                         </Box>
-                    </>
-                ) : (
-                    <Typography>No Media Found!</Typography>
-                )}
+                    </Box>
+                ))}
             </Box>
         </Box>
     );
 };
 
-export default MediaList;
+export default MediaListSquareItems;

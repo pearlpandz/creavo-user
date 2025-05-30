@@ -1,6 +1,6 @@
 import { Box, Grid, Typography } from '@mui/material';
 
-const DailyInspirationContainer = ({ data, title = 'Trending' }) => {
+const DailyInspirationContainer = ({ data, title = 'Trending', media }) => {
 
     if (!data) {
         return null;
@@ -23,11 +23,11 @@ const DailyInspirationContainer = ({ data, title = 'Trending' }) => {
                 data?.subcategories?.length > 0 && (
                     <Grid container spacing={1} sx={{ mt: 2 }}>
                         {
-                            data?.subcategories?.map((item) => (
+                            data?.subcategories?.map((item, index) => (
                                 <Grid size={{ xs: 12, sm: 6, md: 3, xl: 2 }} key={item.name} sx={{ borderRadius: 2, overflow: 'hidden' }}>
                                     <Box sx={{
                                         cursor: 'pointer',
-                                        backgroundImage: `url(${item.media?.[0]?.image})`,
+                                        backgroundImage: `url(${item.image ?? media?.[index]?.image})`,
                                         backgroundSize: 'cover',
                                         backgroundPosition: 'center',
                                         backgroundRepeat: 'no-repeat',

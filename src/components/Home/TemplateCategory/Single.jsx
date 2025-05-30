@@ -44,12 +44,12 @@ const styles = {
     },
 };
 
-const TemplateCard = () => {
+const TemplateCard = ({ item }) => {
     return (
         <Card sx={styles.card}>
             <CardContent sx={{ py: '0 !important', width: '100%' }}>
                 <CampaignIcon sx={styles.icon} />
-                <Typography sx={styles.title}>Digital Marketing</Typography>
+                <Typography sx={styles.title}>{item.name}</Typography>
                 <Typography sx={styles.count}>40 Templates</Typography>
                 <Button sx={styles.gradientButton}>Browse Templates</Button>
             </CardContent>

@@ -1,28 +1,40 @@
+import { useState } from 'react';
+import { useMediaData } from '../hook/usePageData';
 import DailyInspirationContainer from './DailyInspirationContainer';
 import LanguageQuoteContainer from './LanguageQuoteContainer';
 import MediaContainer from './MediaContainer';
 
 function CategoryContainer(props) {
     const { item, handleSelectedImg } = props;
+    const limit = 15;
+    const skip = 0;
+    //const [skip, setSkip] = useState(0);
+    const [subCategoryId, setSelectedSubcategory] = useState('all');
+    const { data } = useMediaData({
+        categoryId: item.id,
+        limit,
+        skip,
+        subCategoryId: 'all'
+    });
 
-    if (!item || !item.category) {
+    if (!item || !item.name) {
         return null; // Return null if item or category is not defined
     }
 
-    if (item.category.toLowerCase() === 'daily inspiration') {
+    if (item.name.toLowerCase() === 'daily inspiration') {
         return (
-            <DailyInspirationContainer key={item.category} title={item.category} data={item} />
+            <DailyInspirationContainer pk={item.id} title={item.name} data={item} media={data?.media} />
         )
     }
 
-    if (item.category.toLowerCase() === 'language quotes') {
+    if (item.name.toLowerCase() === 'language quotes') {
         return (
-            <LanguageQuoteContainer key={item.category} title={item.category} data={item} handleSelectedImg={handleSelectedImg} />
+            <LanguageQuoteContainer pk={item.id} title={item.name} data={item} handleSelectedImg={handleSelectedImg} media={data?.media} subCategoryId={subCategoryId} setSelectedSubcategory={setSelectedSubcategory} />
         )
     }
 
     return (
-        <MediaContainer key={item.category} title={item.category} data={item} handleSelectedImg={handleSelectedImg} />
+        <MediaContainer pk={item.id} title={item.name} data={item} handleSelectedImg={handleSelectedImg} media={data?.media} subCategoryId={subCategoryId} setSelectedSubcategory={setSelectedSubcategory} />
     )
 }
 

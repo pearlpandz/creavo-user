@@ -18,6 +18,7 @@ const menu = [
 ];
 
 export default function Sidebar({ open }) {
+    const isOpen = open === 'true';
     const navigate = useNavigate()
     const location = useLocation();
     const { logout } = useAuth()
@@ -25,8 +26,8 @@ export default function Sidebar({ open }) {
     return (
         <Box
             sx={{
-                opacity: open ? 1 : 0,
-                width: open ? 220 : 0,
+                opacity: isOpen ? 1 : 0,
+                width: isOpen ? 220 : 0,
                 // transition: '0.3s',
                 overflow: 'hidden',
                 bgcolor: (theme) => theme.palette.mode === 'dark' ? theme.palette.background.paper : theme.palette.primary.main,
@@ -34,7 +35,7 @@ export default function Sidebar({ open }) {
                 height: '100vh',
                 position: 'fixed',
                 zIndex: 1200,
-                p: open ? 2 : 0,
+                p: isOpen ? 2 : 0,
             }}
         >
             {/* <Typography variant="h6" sx={{ mb: 3, fontWeight: 700 }}>

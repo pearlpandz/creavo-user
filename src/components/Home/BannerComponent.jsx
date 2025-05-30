@@ -9,7 +9,8 @@ const BannerComponent = () => {
                 p: { xs: 2, sm: 4 },
                 textAlign: 'center',
                 color: theme.palette.mode === 'dark' ? theme.palette.grey[100] : '#fff',
-                margin: '0 auto',
+                mx: 0,
+                my: 2,
                 boxShadow: theme.shadows[2]
             })}
             component='div'

@@ -1,10 +1,8 @@
-import { Box, Typography } from "@mui/material";
-import React, { useEffect, useMemo, useState } from "react";
+import { Box } from "@mui/material";
+import { useEffect, useState, useCallback } from "react";
 import Modal from "../components/Modal";
 import Editor from "../components/Editor";
-import { useMediaData } from "../hook/usePageData";
-import EventList from "../components/EventList";
-import MediaContainer from "../components/MediaContainer";
+import { useCategory } from "../hook/usePageData";
 import { SETTINGS } from "../constants/settings";
 import BannerComponent from "../components/Home/BannerComponent";
 import TemplateCardList from "../components/Home/TemplateCategory/List";
@@ -15,16 +13,21 @@ const HomePage = () => {
     const [selectedTemplate, setSelectedTemplate] = useState();
     const [showModal, setShowModal] = useState(false);
     const [selectedImg, setSelectedImg] = useState(null);
-    const { data: media } = useMediaData();
+
+    const limit = 2;
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+    } = useCategory(limit);
+
+    const allCategories = data?.pages.flatMap(page => page.categories) ?? [];
 
     const getTemplates = async () => {
         try {
-            const response = await fetch(`${SETTINGS.FRAME_SERVICE_URL}/api/frame/list`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
+            const response = await fetch(`${SETTINGS.FRAME_SERVICE_URL}/api/frame/list`);
             const data = await response.json();
             if (response.ok) {
                 setTemplates(data);
@@ -35,7 +38,7 @@ const HomePage = () => {
         } catch (error) {
             console.error('Error fetching templates:', error);
         }
-    }
+    };
 
     useEffect(() => {
         getTemplates();
@@ -44,48 +47,47 @@ const HomePage = () => {
     const handleSelectedImg = (img) => {
         setSelectedImg(img);
         setShowModal(true);
-    }
+    };
 
-    const trendingMedia = useMemo(() => {
-        if (media?.length > 0) {
-            return media?.find(a => a.category?.toLowerCase() === 'trending')
-        } else {
-            return [];
-        }
-    }, [media]);
+    // Scroll handler: only triggers near bottom
+    const handleScroll = useCallback(() => {
+        console.log("scrolling"); // debug line
+        const scrollHeight = document.documentElement.scrollHeight;
+        const scrollTop = document.documentElement.scrollTop;
+        const clientHeight = window.innerHeight;
 
-    const groupedMedia = useMemo(() => {
-        if (media?.length > 0) {
-            return media?.filter(a => !['trending'].includes(a.category?.toLowerCase()))
-        } else {
-            return [];
+        const isNearBottom = scrollTop + clientHeight >= scrollHeight - 50;
+
+        if (isNearBottom && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
         }
-    }, [media])
+    }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+    // Attach scroll listener
+    useEffect(() => {
+        const container = document.getElementById('scrollable-container');
+        container?.addEventListener('scrollend', handleScroll);
+        return () => container?.removeEventListener('scrollend', handleScroll);
+    }, [handleScroll]);
 
     return (
-        <Box sx={{ p: 2 }}>
-            {/* Banner */}
+        <Box sx={{ p: 2, width: '100%' }}>
             <BannerComponent />
+            <TemplateCardList data={allCategories} />
 
-            {/* Categories */}
-            <TemplateCardList />
+            {allCategories.map((item) => (
+                <CategoryContainer key={item.id} item={item} handleSelectedImg={handleSelectedImg} />
+            ))}
 
-            {/* Trendings */}
-            {trendingMedia?.length > 0 && <MediaContainer data={trendingMedia} handleSelectedImg={handleSelectedImg} />}
+            {isFetchingNextPage && <Box sx={{ textAlign: 'center', mt: 2 }}>Loading more...</Box>}
 
-            {/* Event Calendar */}
-            {/* <EventList /> */}
-
-            {/* List of Media by Category  */}
-            {
-                groupedMedia?.map((item) => (
-                    <CategoryContainer key={item.category} item={item} handleSelectedImg={handleSelectedImg} />
-                ))
-            }
-
-            {/* Modal - Editor */}
             <Modal show={showModal} onClose={() => setShowModal(false)}>
-                <Editor selectedImg={selectedImg} templates={templates} selectedTemplate={selectedTemplate} setSelectedTemplate={setSelectedTemplate} />
+                <Editor
+                    selectedImg={selectedImg}
+                    templates={templates}
+                    selectedTemplate={selectedTemplate}
+                    setSelectedTemplate={setSelectedTemplate}
+                />
             </Modal>
         </Box>
     );

@@ -12,6 +12,7 @@ import { AuthContext } from './context/auth.context'
 import TanstackProvider from './tanstack-query/Provider';
 import './App.css'
 import ComingSoon from './components/ComingSoon'
+import CategoryPage from './pages/Category'
 
 function ProtectedRoute({ isAuthenticated }) {
     return isAuthenticated ? <Outlet /> : <Navigate to='/' />
@@ -20,10 +21,10 @@ function ProtectedRoute({ isAuthenticated }) {
 function ProtectedLayout({ isAuthenticated, sidebarOpen, setSidebarOpen, onToggleTheme, darkMode }) {
     return isAuthenticated ? (
         <div style={{ display: 'flex', minHeight: '100vh', background: '#f6f6fd', overflow: 'hidden', width: "-webkit-fill-available" }}>
-            <Sidebar open={sidebarOpen} />
-            <div style={{ width: sidebarOpen ? "calc(100% - 220px)" : "auto", flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', marginLeft: sidebarOpen ? 220 : 0, transition: 'margin-left 0.3s' }}>
+            <Sidebar open={sidebarOpen?.toString()} />
+            <div style={{ width: sidebarOpen ? "calc(100% - 220px)" : "100%", flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', marginLeft: sidebarOpen ? 220 : 0, transition: 'margin-left 0.3s' }}>
                 <TopNav onMenuClick={() => setSidebarOpen(!sidebarOpen)} onToggleTheme={onToggleTheme} darkMode={darkMode} />
-                <div style={{ flex: 1, overflowY: 'auto' }}>
+                <div style={{ flex: 1, overflowY: 'auto' }} id="scrollable-container">
                     <Outlet />
                 </div>
             </div>
@@ -75,7 +76,6 @@ function App() {
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/signup" element={<Signup />} />
                                 <Route path="/forget-password" element={<ForgetPassword />} />
-                                <Route path="/home" element={<Home />} />
                             </Route>
                             <Route
                                 element={
@@ -90,6 +90,7 @@ function App() {
                             >
                                 <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
                                     <Route path="/" element={<Home />} />
+                                    <Route path="/category/:id" element={<CategoryPage />} />
                                 </Route>
                             </Route>
                             <Route path="*" element={<ComingSoon />} />
