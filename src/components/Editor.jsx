@@ -30,18 +30,9 @@ function Editor(props) {
 
     const themesContainer = useMemo(() => {
         return (
-            <>
-                <div className="bg-picker">
-                    <h4>Background</h4>
-                    <input type="color" onChange={(event) => handleColorChange('bgColor', event.target.value)} />
-                </div>
-                <div className="txt-picker">
-                    <h4>Text</h4>
-                    <input type="color" onChange={(event) => handleColorChange('text', event.target.value)} />
-                </div>
-            </>
+            <ThemesContainer handleColorChange={handleColorChange} selectedTheme={selectedTheme} />
         )
-    }, [])
+    }, [selectedTheme])
 
     const currentSidebarElement = useMemo(() => {
         switch (selectedSidebar) {
@@ -63,7 +54,7 @@ function Editor(props) {
                 <div className="sidebar-container">
                     {
                         SIDEBAR.map(item => (
-                            <div key={item.key} onClick={() => setSelectedSidebar(item.key)} className="sidebar-item">
+                            <div key={item.key} onClick={() => setSelectedSidebar(item.key)} className={selectedSidebar === item.key ? "active sidebar-item" : "sidebar-item"}>
                                 <item.icon />
                                 <h6>{item.name}</h6>
                             </div>
@@ -110,6 +101,31 @@ const FramesContainer = ({ templates, setSelectedTemplate }) => {
                                 )) :
                                 <p>No Frames found.</p>
                         }
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+const ThemesContainer = ({ handleColorChange, selectedTheme }) => {
+    const types = [
+        { lable: 'background', value: 'bgColor' },
+        { lable: 'text', value: 'textColor' }
+    ];
+    const [selectedType, setSelectedType] = useState(types[0])
+    return (
+        <div className="frame-container">
+            <div className="frames-section">
+                <ul className="frame-list">
+                    {types.map(type => (
+                        <li key={type.value} className={selectedType.value === type.value ? 'active' : ''}>
+                            <button onClick={() => setSelectedType(type)}>{type.lable}</button>
+                        </li>))}
+                </ul>
+                <div className="frame-scroll-view">
+                    <div className="frames">
+                        <input type="color" value={selectedTheme[selectedType.value]} onChange={(event) => handleColorChange(selectedType.value, event.target.value)} />
                     </div>
                 </div>
             </div>

@@ -44,3 +44,26 @@ canvas size
  500 * 700 (product)
 
 
+Company Details
+---------------
+companyName
+description
+email
+contact number 1
+contact number 2
+logo
+
+Product
+---------
+product-img1
+product-img2
+product-img3
+
+Political
+---------
+leader-name
+leader-designation
+leader-image
+political-supporter-1
+political-supporter-2
+political-supporter-3

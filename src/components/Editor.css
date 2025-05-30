@@ -12,19 +12,32 @@
     .sidebar-container {
         display: flex;
         flex-direction: column;
-        width: 75px;
+        width: 60px;
         background: #eaeaea;
         align-items: center;
+        padding-top: 15px;
+            gap: 15px;
 
         .sidebar-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-bottom: 20px;
-            padding-top: 20px;
+svg {
+        width: 25px;
+    }
 
             h6 {
-                margin-top: 10px;
+                margin: 10px 0 0 0;
+                }
+                
+                &.active {
+                    svg {
+                        stroke: #3f51b5
+                    }
+                
+                    h6 {
+                        color: #3f51b5;
+                    }
             }
         }
     }
@@ -40,7 +53,7 @@
             font-size: 16px;
             margin: 0 0 10px 0;
         }
-        
+
         p {
             font-size: 12px;
         }
@@ -53,26 +66,26 @@
 
         .frame-container {
             width: 100%;
-    
+
             .frames-section {
-                margin-bottom: 20px;
-                
+
                 .frame-scroll-view {
-                        height: calc(100vh - 160px);
+                    height: calc(100vh - 180px);
                         overflow-y: auto;
                     }
+
                 .frames {
                     display: flex;
                     gap: 10px;
                     flex-wrap: wrap;
-    
+
                     button {
                         width: 80px;
-                            height: 80px;
+                        height: 80px;
                         overflow: hidden;
                         border: 1px dashed #444;
                         padding: 10px;
-    
+
                         img {
                             width: 100%;
                             height: 100%;
@@ -82,7 +95,6 @@
             }
         }
     }
-
 
     .canvas-container {
         flex: 1;
@@ -94,7 +106,7 @@
 
         .download-button {
             padding: 10px 20px;
-            background-color: #007BFF;
+            background-color: #007bff;
             color: #fff;
             border: none;
             border-radius: 5px;
@@ -102,6 +114,7 @@
         }
     }
 }
+
 ul.frame-list {
     margin: 0 0 20px 0;
     padding: 0;
@@ -117,7 +130,7 @@ ul.frame-list {
 }
 
 .frame-list li.active button {
-    background: #3F51B5;
+    background: #3f51b5;
     box-shadow: 0 0 6px 3px rgb(63 81 181 / 25%);
     color: #fff;
 }
