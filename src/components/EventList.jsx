@@ -11,8 +11,6 @@ const EventList = () => {
     const { data } = useEventData(selectedDay.stringDay);
     const currentYear = new Date().getFullYear();
 
-    console.log('events', data);
-
     const nextSevenDays = Array.from({ length: 7 }, (_, i) => {
         const date = new Date();
         date.setDate(date.getDate() + i);

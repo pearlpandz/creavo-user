@@ -74,8 +74,7 @@ export const usePatchTemplate = () => {
     // Mutations
   const mutation = useMutation({
     mutationFn: patchTemplate,
-    onSuccess: (data, variables) => {
-        console.log(variables, data)
+      onSuccess: (data, variables) => {
       queryClient.setQueryData(['template', variables._id], data);
     },
   })
@@ -100,8 +99,7 @@ export const useCreateTemplate = () => {
     // Mutations
   const mutation = useMutation({
     mutationFn: createTemplate,
-    onSuccess: (data, variables) => {
-        console.log(variables, data)
+      onSuccess: (data, variables) => {
       queryClient.setQueryData(['template', variables._id], data);
     },
   })

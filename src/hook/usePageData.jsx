@@ -2,6 +2,11 @@ import { useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-quer
 import { SETTINGS } from '../constants/settings';
 import axios from '../utils/axios-interceptor';
 
+const fetchTemplates = async () => {
+    const res = await axios.get(`${SETTINGS.FRAME_SERVICE_URL}/api/frame/list`);
+    return res.data;
+};
+
 const fetchCategories = async ({ limit, skip }) => {
     const res = await axios.get(`${SETTINGS.DJANGO_URL}/api/categories/list/?limit=${limit}&skip=${skip}`);
     return res.data;
@@ -17,6 +22,23 @@ const fetchMedia = async ({ categoryId, limit, skip, subCategoryId = 'all' }) =>
     return res.data;
 };
 
+// useTemplates for editor
+export const useTemplates = () => {
+    const queryClient = useQueryClient();
+    return useQuery({
+        queryKey: ['templates'],
+        queryFn: async () => {
+            const cached = queryClient.getQueryData(['templates']);
+            if (cached) return cached;
+            return await fetchTemplates()
+        },
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 10, // 10 mins
+        cacheTime: 1000 * 60 * 10, // 10 mins
+    });
+};
+
+// using this hook in homepage - infinite scroll for category section loading
 export const useCategory = (limit) => {
     return useInfiniteQuery({
         queryKey: ['category'],
@@ -27,11 +49,15 @@ export const useCategory = (limit) => {
             const loaded = allPages.reduce((acc, page) => acc + (page.categories?.length || 0), 0);
             return loaded < lastPage.total ? loaded : undefined;
         },
+        keepPreviousData: true,
         refetchOnWindowFocus: false,
+        refetchOnMount: false,   // Don't refetch on component mount if data is fresh
+        staleTime: Infinity,     // Data considered fresh forever (while app is running)
+        cacheTime: 1000 * 60 * 5, // Cache kept for 5min
     });
 };
 
-
+// used this hook in homepage caetgory media
 export const useMediaData = (params) => {
     const queryClient = useQueryClient();
     return useQuery({
@@ -44,6 +70,25 @@ export const useMediaData = (params) => {
         refetchOnWindowFocus: false,
         staleTime: 1000 * 60 * 10, // 10 mins
         cacheTime: 1000 * 60 * 10, // 10 mins
+    });
+}
+
+// used this hook in category page
+export const useCateogryMediaData = ({ categoryId, limit, subCategoryId }) => {
+    return useInfiniteQuery({
+        queryKey: ['category', categoryId, subCategoryId],
+        queryFn: async ({ pageParam = 0 }) => {
+            return await fetchMedia({ categoryId, skip: pageParam, limit, subCategoryId });
+        },
+        getNextPageParam: (lastPage, allPages) => {
+            const loaded = allPages.reduce((acc, page) => acc + (page.media?.length || 0), 0);
+            return loaded < lastPage.total ? loaded : undefined;
+        },
+        keepPreviousData: true,
+        refetchOnWindowFocus: false,
+        refetchOnMount: false,   // Don't refetch on component mount if data is fresh
+        staleTime: Infinity,     // Data considered fresh forever (while app is running)
+        cacheTime: 1000 * 60 * 5, // Cache kept for 5min
     });
 }
 

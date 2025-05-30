@@ -1,6 +1,8 @@
 import { Box, Typography, Button, Stack } from '@mui/material';
+import React from 'react';
 
-const BannerComponent = () => {
+const BannerComponent = (params) => {
+    const { title, description } = params;
     return (
         <Box
             sx={theme => ({
@@ -23,7 +25,7 @@ const BannerComponent = () => {
                     color: theme.palette.mode === 'dark' ? theme.palette.grey[100] : '#fff',
                 })}
             >
-                Create Stunning Posters in Just a Few Clicks
+                {title}
             </Typography>
             <Typography
                 variant="body1"
@@ -32,7 +34,7 @@ const BannerComponent = () => {
                     color: theme.palette.mode === 'dark' ? theme.palette.grey[300] : theme.palette.grey[100],
                 })}
             >
-                Bring your ideas to life with our intuitive editor. Fast, flexible, and designer-approved.
+                {description}
             </Typography>
             <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
                 <Button
@@ -72,4 +74,4 @@ const BannerComponent = () => {
     );
 };
 
-export default BannerComponent;
+export default React.memo(BannerComponent);

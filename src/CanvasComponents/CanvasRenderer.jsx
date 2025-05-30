@@ -118,7 +118,6 @@ const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
         textColor: theme?.color,
       };
     });
-    console.log(updatedElements);
     setElements(updatedElements);
   }, [theme, template, businessDetails, selectedImg]);
 

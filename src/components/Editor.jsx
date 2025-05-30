@@ -3,11 +3,13 @@ import './Editor.css';
 import CanvasRenderer from "../CanvasComponents/CanvasRenderer";
 import { SIDEBAR } from "../constants";
 import { SETTINGS } from "../constants/settings";
+import { useQueryClient } from "@tanstack/react-query";
 
 function Editor(props) {
-    const { selectedImg, selectedTemplate, templates, setSelectedTemplate } = props;
-
-
+    const { selectedImg } = props;
+    const queryClient = useQueryClient();
+    const templates = queryClient.getQueryData(['templates']); // your query key
+    const [selectedTemplate, setSelectedTemplate] = useState(templates[0])
     const [selectedSidebar, setSelectedSidebar] = useState(SIDEBAR[0].key)
     const [selectedTheme, setSelectedTheme] = useState({ color: 'white', background: 'red' })
     const businessDetails = JSON.parse(localStorage.getItem('companyDetails')) ?? {}
@@ -25,7 +27,7 @@ function Editor(props) {
                                         <img src={template.image} alt={template.name} />
                                     </button>
                                 )) :
-                            <p>No Frames found.</p>
+                                <p>No Frames found.</p>
                         }
                     </div>
                 </div>
@@ -39,7 +41,7 @@ function Editor(props) {
                                         <img src={SETTINGS.api_endpoint + '/' + template.image} alt={template.name} />
                                     </button>
                                 )) :
-                            <p>No Frames found.</p>
+                                <p>No Frames found.</p>
                         }
                     </div>
                 </div>
@@ -53,7 +55,7 @@ function Editor(props) {
                                         <img src={SETTINGS.api_endpoint + '/' + template.image} alt={template.name} />
                                     </button>
                                 )) :
-                            <p>No Frames found.</p>
+                                <p>No Frames found.</p>
                         }
                     </div>
                 </div>
@@ -97,7 +99,6 @@ function Editor(props) {
     }, [])
 
     const currentSidebarElement = useMemo(() => {
-        console.log(selectedSidebar)
         switch (selectedSidebar) {
             case 'frames':
                 return framesContainer;

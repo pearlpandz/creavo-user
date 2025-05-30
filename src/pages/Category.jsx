@@ -1,24 +1,68 @@
-import React, { useState } from 'react'
-import { useMediaData } from '../hook/usePageData'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useCateogryMediaData, useTemplates } from '../hook/usePageData'
 import { useParams } from 'react-router'
 import { Box, Grid, Typography } from '@mui/material';
 import MediaCard from '../components/MediaCard';
 import BannerComponent from '../components/Home/BannerComponent';
+import Modal from '../components/Modal';
+import Editor from '../components/Editor';
 
 function CategoryPage() {
+    useTemplates();
     const { id } = useParams();
-    const [skip, setSkip] = useState(0);
+    const [showModal, setShowModal] = useState(false);
+    const [selectedImg, setSelectedImg] = useState(null);
+
     const params = {
         categoryId: id,
         limit: 25,
-        skip,
+        skip: 0,
         subCategoryId: 'all'
     }
-    const { data } = useMediaData(params)
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isLoading,
+    } = useCateogryMediaData(params)
+
+    const allMedia = data?.pages.flatMap(page => page.media) ?? [];
+
+    const handleSelectedImg = (img) => {
+        setSelectedImg(img);
+        setShowModal(true);
+    };
+
+    // Scroll handler: only triggers near bottom
+    const handleScroll = useCallback(() => {
+        const scrollHeight = document.documentElement.scrollHeight;
+        const scrollTop = document.documentElement.scrollTop;
+        const clientHeight = window.innerHeight;
+
+        const isNearBottom = scrollTop + clientHeight >= scrollHeight - 50;
+
+        if (isNearBottom && hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+        }
+    }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
+    // Attach scroll listener
+    useEffect(() => {
+        const container = document.getElementById('scrollable-container');
+        container?.addEventListener('scrollend', handleScroll);
+        return () => {
+            container?.removeEventListener('scrollend', handleScroll)
+        };
+    }, [handleScroll]);
+
     return (
         <Box sx={{ p: 2, width: '100%' }}>
             {/* Banner */}
-            <BannerComponent />
+            <BannerComponent
+                title="Create Stunning Posters in Just a Few Clicks"
+                description="Bring your ideas to life with our intuitive editor. Fast, flexible, and designer-approved."
+            />
 
             {/* List of Media */}
             <Box sx={{ mt: 4 }}>
@@ -26,8 +70,8 @@ function CategoryPage() {
                 <Box component='div' sx={{ px: 4, mt: 2 }}>
                     <Grid container spacing={2}>
                         {
-                            data?.media?.map((item) => (
-                                <Grid key={item.id} size={{ xs: 12, sm: 4, md: 3, xl: 2 }} >
+                            allMedia?.map((item) => (
+                                <Grid key={item.id} size={{ xs: 12, sm: 4, md: 3, xl: 2 }} component='div' onClick={() => handleSelectedImg(item.image)}>
                                     <MediaCard item={item} shouldShow={true} width='100%' height={200} />
                                 </Grid>
                             ))
@@ -35,6 +79,10 @@ function CategoryPage() {
                     </Grid>
                 </Box>
             </Box>
+
+            <Modal show={showModal} onClose={() => setShowModal(false)}>
+                <Editor selectedImg={selectedImg} />
+            </Modal>
         </Box>
     )
 }

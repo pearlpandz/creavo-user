@@ -20,7 +20,6 @@ export default function MasonryImageList() {
             const response = await fetch('https://picsum.photos/v2/list?page=1&limit=40');
             const data = await response.json();
             const photos = await data.map((item) => item.download_url);
-            console.log(photos)
             setImages(photos);
         };
 

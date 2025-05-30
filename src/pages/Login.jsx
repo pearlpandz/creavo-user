@@ -18,10 +18,6 @@ const Login = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        // Handle login logic here
-        console.log('Email:', email)
-        console.log('Password:', password)
-
         try {
             const url = `${SETTINGS.DJANGO_URL}/accounts/auth/user/`;
             const res = await axios.post(url, { email, password })

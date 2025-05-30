@@ -7,7 +7,6 @@ import { Image } from "react-konva";
 // Image Component
 const CanvasImage = ({ element, isSelected, onSelect, onChange, isEditable = true }) => {
   const [image] = useImage(element.src, "anonymous");
-  console.log('element.src', image)
   const shapeRef = useRef();
 
   const handleDragMove = (e) => {
