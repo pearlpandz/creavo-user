@@ -40,8 +40,11 @@ const CanvasRectangleWithText = ({ element, isSelected, onSelect, onChange, isEd
         width={element.width}
         height={element.height}
         fill={element.bgColor}
+        strokeEnabled={element.strokeWidth > 0}
+        stroke={element.strokeColor ?? 'red'}
+        strokeWidth={element.strokeWidth}
         cornerRadius={element.radius}
-        // cornerRadius={5} // it should be parameterize
+        opacity={element.opacity / 100}
         draggable={isEditable}
         onTransformEnd={isEditable ? handleTransformEnd : null}
       />

@@ -32,13 +32,13 @@
     .picker-container {
         display: flex;
         flex-direction: column;
-        width: 250px;
+        width: 320px;
         padding: 15px;
         gap: 20px;
 
         h4 {
             font-size: 16px;
-            margin-bottom: 10px;
+            margin: 0 0 10px 0;
         }
         
         p {
@@ -56,15 +56,19 @@
     
             .frames-section {
                 margin-bottom: 20px;
-    
+                
+                .frame-scroll-view {
+                        height: calc(100vh - 160px);
+                        overflow-y: auto;
+                    }
                 .frames {
                     display: flex;
                     gap: 10px;
                     flex-wrap: wrap;
     
                     button {
-                        width: 100px;
-                        height: 100px;
+                        width: 80px;
+                            height: 80px;
                         overflow: hidden;
                         border: 1px dashed #444;
                         padding: 10px;
@@ -97,4 +101,23 @@
             margin-top: 20px;
         }
     }
+}
+ul.frame-list {
+    margin: 0 0 20px 0;
+    padding: 0;
+}
+
+.frame-list button {
+    background: #eee;
+    border: 0;
+    color: #222;
+    padding: 5px 12px;
+    border-radius: 6px;
+    text-transform: capitalize;
+}
+
+.frame-list li.active button {
+    background: #3F51B5;
+    box-shadow: 0 0 6px 3px rgb(63 81 181 / 25%);
+    color: #fff;
 }

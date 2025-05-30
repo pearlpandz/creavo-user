@@ -1,7 +1,8 @@
 import { Image, Group } from "react-konva";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import useImage from "use-image";
 import TransformerComponent from "./TransformerComponent";
+import { getCrop } from "../utils";
 
 const CanvasClippedImage = ({ element, isSelected, onSelect, onChange, isEditable = true }) => {
     const [image] = useImage(element.src, 'anonymous');
@@ -36,6 +37,11 @@ const CanvasClippedImage = ({ element, isSelected, onSelect, onChange, isEditabl
         });
     }
 
+    const crop = useMemo(() => {
+        if (!image) return null;
+        return getCrop(image, { width: element.width, height: element.height });
+    }, [image, element.width, element.height]);
+
     return (
         <>
             <Group
@@ -52,7 +58,7 @@ const CanvasClippedImage = ({ element, isSelected, onSelect, onChange, isEditabl
                 onTransformEnd={isEditable ? handleTransformEnd : null}
                 opacity={element.opacity}
             >
-                <Image opacity={element.opacity} fill={element.color} image={image} width={element.width} height={element.height} />
+                <Image opacity={element.opacity} fill={element.color} image={image} {...crop} width={element.width} height={element.height} />
             </Group>
             <TransformerComponent shapeRef={shapeRef} isSelected={isSelected} />
         </>

@@ -9,65 +9,22 @@ function Editor(props) {
     const { selectedImg } = props;
     const queryClient = useQueryClient();
     const templates = queryClient.getQueryData(['templates']); // your query key
-    const [selectedTemplate, setSelectedTemplate] = useState(templates[0])
+    const [selectedTemplate, setSelectedTemplate] = useState(templates?.[0])
     const [selectedSidebar, setSelectedSidebar] = useState(SIDEBAR[0].key)
-    const [selectedTheme, setSelectedTheme] = useState({ color: 'white', background: 'red' })
+    const [selectedTheme, setSelectedTheme] = useState({ textColor: 'white', bgColor: 'red' })
     const businessDetails = JSON.parse(localStorage.getItem('companyDetails')) ?? {}
 
     const framesContainer = useMemo(() => {
         return (
-            <div className="frame-container">
-                <div className="frames-section">
-                    <h4>Regular Frames</h4>
-                    <div className="frames">
-                        {
-                            templates.filter(template => template.category === 'regular').length > 0 ?
-                                templates.filter(template => template.category === 'regular').map((template, index) => (
-                                    <button title={template.name} onClick={() => setSelectedTemplate(template)} key={index}>
-                                        <img src={template.image} alt={template.name} />
-                                    </button>
-                                )) :
-                                <p>No Frames found.</p>
-                        }
-                    </div>
-                </div>
-                <div className="frames-section">
-                    <h4>Product Frames</h4>
-                    <div className="frames">
-                        {
-                            templates.filter(template => template.category === 'product').length > 0 ?
-                                templates.filter(template => template.category === 'product').map((template, index) => (
-                                    <button title={template.name} onClick={() => setSelectedTemplate(template)} key={index}>
-                                        <img src={SETTINGS.api_endpoint + '/' + template.image} alt={template.name} />
-                                    </button>
-                                )) :
-                                <p>No Frames found.</p>
-                        }
-                    </div>
-                </div>
-                <div className="frames-section">
-                    <h4>Political Frames</h4>
-                    <div className="frames">
-                        {
-                            templates.filter(template => template.category === 'political').length > 0 ?
-                                templates.filter(template => template.category === 'political').map((template, index) => (
-                                    <button title={template.name} onClick={() => setSelectedTemplate(template)} key={index}>
-                                        <img src={SETTINGS.api_endpoint + '/' + template.image} alt={template.name} />
-                                    </button>
-                                )) :
-                                <p>No Frames found.</p>
-                        }
-                    </div>
-                </div>
-            </div>
+            <FramesContainer templates={templates} setSelectedTemplate={setSelectedTemplate} />
         )
     }, [setSelectedTemplate, templates])
 
     const handleColorChange = (type, color) => {
-        if (type === 'bg') {
-            setSelectedTheme(prev => ({ ...prev, background: color }))
+        if (type === 'bgColor') {
+            setSelectedTheme(prev => ({ ...prev, bgColor: color }))
         } else {
-            setSelectedTheme(prev => ({ ...prev, color }))
+            setSelectedTheme(prev => ({ ...prev, textColor: color }))
         }
     }
 
@@ -76,23 +33,11 @@ function Editor(props) {
             <>
                 <div className="bg-picker">
                     <h4>Background</h4>
-                    <ul>
-                        {
-                            ['#FF0000', '#008000', '#FFFF00'].map((color) => (
-                                <li key={color}><button onClick={() => handleColorChange('bg', color)} style={{ width: 25, height: 25, background: color }}></button></li>
-                            ))
-                        }
-                    </ul>
+                    <input type="color" onChange={(event) => handleColorChange('bgColor', event.target.value)} />
                 </div>
                 <div className="txt-picker">
                     <h4>Text</h4>
-                    <ul>
-                        {
-                            ['#000', '#fff', '#eaeaea'].map((color) => (
-                                <li key={color}><button onClick={() => handleColorChange('text', color)} style={{ width: 25, height: 25, background: color }}></button></li>
-                            ))
-                        }
-                    </ul>
+                    <input type="color" onChange={(event) => handleColorChange('text', event.target.value)} />
                 </div>
             </>
         )
@@ -139,3 +84,35 @@ function Editor(props) {
 }
 
 export default Editor;
+
+
+
+const FramesContainer = ({ templates, setSelectedTemplate }) => {
+    const types = ['regular', 'product', 'political'];
+    const [selectedType, setSelectedType] = useState(types[0])
+    return (
+        <div className="frame-container">
+            <div className="frames-section">
+                <ul className="frame-list">
+                    {types.map(type => (
+                        <li key={type} className={selectedType === type ? 'active' : ''}>
+                            <button onClick={() => setSelectedType(type)}>{type}</button>
+                        </li>))}
+                </ul>
+                <div className="frame-scroll-view">
+                    <div className="frames">
+                        {
+                            templates.filter(template => template.category === selectedType).length > 0 ?
+                                templates.filter(template => template.category === selectedType).map((template, index) => (
+                                    <button title={template.name} onClick={() => setSelectedTemplate(template)} key={index}>
+                                        <img src={template.image} alt={template.name} />
+                                    </button>
+                                )) :
+                                <p>No Frames found.</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}

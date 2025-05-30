@@ -1,4 +1,4 @@
-import { Stage, Layer, Text, Group, Rect } from "react-konva";
+import { Stage, Layer, Text, Group, Rect, Transformer } from "react-konva";
 import { useEffect, useMemo, useRef, useState } from "react";
 import CanvasText from "./CanvasText";
 import CanvasRectangleWithText from "./CanvasRectangleWithText";
@@ -6,11 +6,15 @@ import CanvasRectangle from "./CanvasRectangle";
 import CanvasCircle from "./CanvasCircle";
 import CanvasImage from "./CanvasImage";
 import CanvasClippedImage from "./CanvasClippedImage";
+import MultiPointLine from "./CanvasMultiPointLine";
+import CanvasPolygon from "./CanvasPolygon";
+import CanvasWedge from "./CanvasWedge";
 
 const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
   const [elements, setElements] = useState([]);
   const stageRef = useRef(null);
   const isEditable = false;
+  const transformerRef = useRef(null);
 
   useEffect(() => {
     const updatedElements = template?.elements?.map((el) => {
@@ -24,7 +28,7 @@ const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
         if (el?.slug === "{{frame-img}}") {
           return {
             ...el,
-            src: selectedImg?.urls?.small
+            src: selectedImg
           };
         }
         if (el?.slug === "{{product-img1}}") {
@@ -71,51 +75,42 @@ const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
         }
       }
       if (el?.type === "text-box") {
+        let obj = {
+          ...el,
+          bgColor: theme?.bgColor,
+          textColor: theme?.textColor,
+        }
         if (el?.slug === "{{companyName}}") {
-          return {
-            ...el,
-            content: businessDetails?.companyName,
-            color: theme?.background,
-            textColor: theme?.color,
-          };
+          obj['content'] = businessDetails?.companyName;   
         }
         if (el?.slug === "{{description}}") {
-          return {
-            ...el,
-            content: businessDetails?.description,
-            color: theme?.background,
-            textColor: theme?.color,
-          };
+          obj['content'] = businessDetails?.description;
         }
         if (el?.slug === "{{content}}") {
-          return {
-            ...el,
-            content: `${businessDetails?.mobileNumber1} | ${businessDetails?.mobileNumber2} | ${businessDetails?.email} | ${businessDetails?.website}`,
-            color: theme?.background,
-            textColor: theme?.color,
-          };
+          obj['content'] = `${businessDetails?.mobileNumber1} | ${businessDetails?.mobileNumber2} | ${businessDetails?.email} | ${businessDetails?.website}`;
         }
+        return obj;
       }
       if(el?.type === "text") {
         if (el?.slug === "{{leader-name}}") {
           return {
             ...el,
             content: 'Test name of leader',
-            textColor: theme?.color,
+            textColor: theme?.textColor,
           };
         }
         if (el?.slug === "{{leader-designation}}") {
           return {
             ...el,
             content: 'Ward Councillor',
-            textColor: theme?.color,
+            textColor: theme?.textColor,
           };
         }
       }
       return {
         ...el,
-        color: theme?.background,
-        textColor: theme?.color,
+        bgColor: theme?.bgColor,
+        textColor: theme?.textColor,
       };
     });
     setElements(updatedElements);
@@ -171,6 +166,17 @@ const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
               return <CanvasCircle key={el.id} element={el} isEditable={isEditable} />;
             } else if (el.type === "clip-image") {
               return <CanvasClippedImage key={el.id} element={el} isEditable={isEditable} />
+            } else if (["polygon", "triangle"].includes(el.type)) {
+              return <CanvasPolygon key={el.id} element={el} isEditable={isEditable} />
+            } else if (el.type === "wedge") {
+              return <CanvasWedge key={el.id} element={el} isEditable={isEditable} />
+            } else if (el.type === "MultiPointLine") {
+              return (
+                <>
+                  <MultiPointLine key={el.id} {...el} />
+                  <Transformer ref={transformerRef} rotateEnabled={false} />
+                </>
+              );
             }
             return null;
           })}
