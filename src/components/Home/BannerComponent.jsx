@@ -6,7 +6,7 @@ const BannerComponent = (params) => {
     return (
         <Box
             sx={theme => ({
-                background: theme.palette.mode === 'dark' ? 'linear-gradient(to left, #777, #111)' : 'linear-gradient(to right, #8B3DFF, #532599)',
+                background: theme.palette.mode === 'dark' ? 'linear-gradient(to left, #777, #111)' : 'linear-gradient(to right, #8CA2FF, #FF87C5)',
                 borderRadius: 2,
                 p: { xs: 2, sm: 4 },
                 textAlign: 'center',

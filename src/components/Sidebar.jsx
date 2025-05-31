@@ -14,7 +14,7 @@ const menu = [
     { text: 'Templates', icon: <LanIcon />, path: '/path1' },
     { text: 'Projects', icon: <FolderCopyIcon />, path: '/path2' },
     { text: 'Frames', icon: <BackupTableIcon />, path: '/path3' },
-    { text: 'Account', icon: <AccountBoxIcon />, path: '/path4' },
+    { text: 'Account', icon: <AccountBoxIcon />, path: '/account' },
 ];
 
 export default function Sidebar({ open }) {

@@ -13,6 +13,7 @@ import TanstackProvider from './tanstack-query/Provider';
 import './App.css'
 import ComingSoon from './components/ComingSoon'
 import CategoryPage from './pages/Category'
+import AccountPage from './pages/Account'
 
 function ProtectedRoute({ isAuthenticated }) {
     return isAuthenticated ? <Outlet /> : <Navigate to='/' />
@@ -91,6 +92,7 @@ function App() {
                                 <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
                                     <Route path="/" element={<Home />} />
                                     <Route path="/category/:id" element={<CategoryPage />} />
+                                    <Route path="/account" element={<AccountPage />} />
                                 </Route>
                             </Route>
                             <Route path="*" element={<ComingSoon />} />

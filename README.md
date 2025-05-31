@@ -67,3 +67,14 @@ leader-image
 political-supporter-1
 political-supporter-2
 political-supporter-3
+
+Create verticle tab view for each section to update in user profile
+Refer: https://codesandbox.io/embed/7v35xf?module=/src/Demo.js&fontsize=12
+
+Tabs
+----
+My Profile
+Company Details
+Product Info
+Political Info
+Subscription

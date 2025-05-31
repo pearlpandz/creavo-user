@@ -26,10 +26,32 @@ const LanguageQuoteContainer = ({ data, title = 'Trending', handleSelectedImg, m
                 data?.subcategories?.length > 0 && (
                     <>
                         <Box component='div' sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                            <Button variant={subCategoryId?.toLowerCase() === 'all' ? 'contained' : 'outlined'} size='small' sx={{ borderRadius: 25, textTransform: 'capitalize' }} onClick={handleSelection}>All</Button>
+                            <Button
+                                variant='contained'
+                                size='small'
+                                sx={{
+                                    textTransform: 'capitalize',
+                                    background: subCategoryId?.toLowerCase() === 'all' ? '#3C3892' : '#DEDCFF',
+                                    color: subCategoryId?.toLowerCase() === 'all' ? '#fff' : '#000',
+                                    boxShadow: 'none'
+                                }}
+                                onClick={handleSelection}
+                            >All</Button>
                             {
                                 data?.subcategories?.map((item) => (
-                                    <Button key={item.id} variant={subCategoryId === item?.id ? 'contained' : 'outlined'} size='small' sx={{ borderRadius: 25, textTransform: 'capitalize' }} onClick={handleSelection}>{item.name}</Button>
+                                    <Button
+                                        key={item.id}
+                                        variant='contained'
+                                        size='small'
+                                        sx={{
+
+                                            textTransform: 'capitalize',
+                                            background: subCategoryId === item?.id ? '#3C3892' : '#DEDCFF',
+                                            color: subCategoryId === item?.id ? '#fff' : '#000',
+                                            boxShadow: 'none'
+                                        }}
+                                        onClick={handleSelection}
+                                    >{item.name}</Button>
                                 ))
                             }
                         </Box>
