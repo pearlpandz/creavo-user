@@ -48,7 +48,7 @@ const TemplateCard = ({ item }) => {
     return (
         <Card sx={styles.card}>
             <CardContent sx={{ py: '0 !important', width: '100%' }}>
-                <CampaignIcon sx={styles.icon} />
+                <img style={{ height: 40, objectFit: 'contain' }} src={item.image} alt={item.name} />
                 <Typography sx={styles.title}>{item.name}</Typography>
                 <Typography sx={styles.count}>40 Templates</Typography>
                 <Button sx={styles.gradientButton}>Browse Templates</Button>

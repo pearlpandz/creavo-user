@@ -2,14 +2,14 @@ import { Box } from "@mui/material";
 import { useEffect, useState, useCallback } from "react";
 import Modal from "../components/Modal";
 import Editor from "../components/Editor";
-import { useCategory, useTemplates } from "../hook/usePageData";
+import { useCategory, useTemplateCategories } from "../hook/usePageData";
 import { SETTINGS } from "../constants/settings";
 import BannerComponent from "../components/Home/BannerComponent";
 import TemplateCardList from "../components/Home/TemplateCategory/List";
 import CategoryContainer from "../components/CategoryContainer";
 
 const HomePage = () => {
-    useTemplates();
+    const { data: templateCategories } = useTemplateCategories();
     const [showModal, setShowModal] = useState(false);
     const [selectedImg, setSelectedImg] = useState(null);
 
@@ -57,7 +57,7 @@ const HomePage = () => {
                 title="Create Stunning Posters in Just a Few Clicks"
                 description="Bring your ideas to life with our intuitive editor. Fast, flexible, and designer-approved."
             />
-            <TemplateCardList data={allCategories} />
+            <TemplateCardList data={templateCategories} />
 
             {allCategories.map((item) => (
                 <CategoryContainer key={item.id} item={item} handleSelectedImg={handleSelectedImg} />

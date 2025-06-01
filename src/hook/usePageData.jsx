@@ -2,8 +2,13 @@ import { useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-quer
 import { SETTINGS } from '../constants/settings';
 import axios from '../utils/axios-interceptor';
 
-const fetchTemplates = async () => {
-    const res = await axios.get(`${SETTINGS.FRAME_SERVICE_URL}/api/frame/list`);
+const fetchTemplates = async (category) => {
+    const res = await axios.get(`${SETTINGS.FRAME_SERVICE_URL}/api/frame/list/${category}`);
+    return res.data;
+};
+
+const fetchTemplateCategories = async () => {
+    const res = await axios.get(`${SETTINGS.DJANGO_URL}/frames/frametypes/`);
     return res.data;
 };
 
@@ -22,15 +27,30 @@ const fetchMedia = async ({ categoryId, limit, skip, subCategoryId = 'all' }) =>
     return res.data;
 };
 
-// useTemplates for editor
-export const useTemplates = () => {
+export const useTemplateCategories = () => {
     const queryClient = useQueryClient();
     return useQuery({
-        queryKey: ['templates'],
+        queryKey: ['template-categories'],
         queryFn: async () => {
-            const cached = queryClient.getQueryData(['templates']);
+            const cached = queryClient.getQueryData(['template-categories']);
             if (cached) return cached;
-            return await fetchTemplates()
+            return await fetchTemplateCategories()
+        },
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 10, // 10 mins
+        cacheTime: 1000 * 60 * 10, // 10 mins
+    });
+};
+
+// useTemplates for editor
+export const useTemplates = (category) => {
+    const queryClient = useQueryClient();
+    return useQuery({
+        queryKey: ['templates', category],
+        queryFn: async () => {
+            const cached = queryClient.getQueryData(['templates', category]);
+            if (cached) return cached;
+            return await fetchTemplates(category)
         },
         refetchOnWindowFocus: false,
         staleTime: 1000 * 60 * 10, // 10 mins

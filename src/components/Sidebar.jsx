@@ -11,9 +11,9 @@ import { useAuth } from '../context/auth.context';
 
 const menu = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
-    { text: 'Templates', icon: <LanIcon />, path: '/path1' },
-    { text: 'Projects', icon: <FolderCopyIcon />, path: '/path2' },
-    { text: 'Frames', icon: <BackupTableIcon />, path: '/path3' },
+    // { text: 'Templates', icon: <LanIcon />, path: '/path1' },
+    // { text: 'Projects', icon: <FolderCopyIcon />, path: '/path2' },
+    { text: 'Frames', icon: <BackupTableIcon />, path: '/frames' },
     { text: 'Account', icon: <AccountBoxIcon />, path: '/account' },
 ];
 

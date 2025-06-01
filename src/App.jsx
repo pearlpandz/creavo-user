@@ -14,6 +14,7 @@ import './App.css'
 import ComingSoon from './components/ComingSoon'
 import CategoryPage from './pages/Category'
 import AccountPage from './pages/Account'
+import FramesPage from './pages/Frames'
 
 function ProtectedRoute({ isAuthenticated }) {
     return isAuthenticated ? <Outlet /> : <Navigate to='/' />
@@ -93,6 +94,7 @@ function App() {
                                     <Route path="/" element={<Home />} />
                                     <Route path="/category/:id" element={<CategoryPage />} />
                                     <Route path="/account" element={<AccountPage />} />
+                                    <Route path="/frames" element={<FramesPage />} />
                                 </Route>
                             </Route>
                             <Route path="*" element={<ComingSoon />} />
