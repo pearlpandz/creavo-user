@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Typography, Button, Card, CardContent } from '@mui/material';
 import CampaignIcon from '@mui/icons-material/Campaign'; // MUI icon (use custom if needed)
+import { useNavigate } from 'react-router';
 
 const styles = {
     card: {
@@ -18,6 +19,7 @@ const styles = {
         fontSize: '16px',
         marginBottom: 0.5,
         color: (theme) => theme.palette.mode === 'dark' ? '#eee' : '#222',
+        textTransform: 'capitalize'
     },
     count: {
         fontSize: '13px',
@@ -45,13 +47,19 @@ const styles = {
 };
 
 const TemplateCard = ({ item }) => {
+    const navigate = useNavigate();
+
+    const handleRedirect = (path) => {
+        navigate(`/frames?view=${path}`)
+    }
+
     return (
         <Card sx={styles.card}>
             <CardContent sx={{ py: '0 !important', width: '100%' }}>
                 <img style={{ height: 40, objectFit: 'contain' }} src={item.image} alt={item.name} />
                 <Typography sx={styles.title}>{item.name}</Typography>
-                <Typography sx={styles.count}>40 Templates</Typography>
-                <Button sx={styles.gradientButton}>Browse Templates</Button>
+                <Typography sx={styles.count}>{item?.count ?? 0} Templates</Typography>
+                <Button sx={styles.gradientButton} onClick={() => handleRedirect(item.name)}>Browse Templates</Button>
             </CardContent>
         </Card>
     );
