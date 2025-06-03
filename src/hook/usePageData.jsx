@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useInfiniteQuery, useMutation } from '@tanstack/react-query';
 import { SETTINGS } from '../constants/settings';
 import axios from '../utils/axios-interceptor';
 
@@ -147,5 +147,46 @@ export const useEventData = (param) => {
         staleTime: 1000 * 60 * 10, // 10 mins
         cacheTime: 1000 * 60 * 10, // 10 mins
         initialData: cached, // ✅ serve cached data immediately
+    });
+};
+
+const fetchProfile = async (userId) => {
+    const res = await axios.get(`${SETTINGS.DJANGO_URL}/accounts/users/${userId}/`);
+    return res.data;
+};
+
+// useTemplateDetails for editor
+export const useProfile = () => {
+    const queryClient = useQueryClient();
+    const userId = JSON.parse(localStorage.getItem('userDetails'))?.id
+    return useQuery({
+        queryKey: ['profile'],
+        queryFn: async () => {
+            const cached = queryClient.getQueryData(['profile']);
+            if (cached) return cached;
+            return await fetchProfile(userId)
+        },
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 10, // 10 mins
+        cacheTime: 1000 * 60 * 10, // 10 mins
+    });
+};
+
+const patchUser = async (userId, data) => {
+    const response = await axios.patch(`${SETTINGS.DJANGO_URL}/accounts/users/${userId}/`, data);
+    return response.data;
+};
+
+export const usePatchUser = (onSuccessCallback) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ userId, data }) => patchUser(userId, data),
+        onSuccess: (data) => {
+            // Optional: invalidate or update cache
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+            if (onSuccessCallback) {
+                onSuccessCallback(data); // trigger state update from component
+            }
+        },
     });
 };
