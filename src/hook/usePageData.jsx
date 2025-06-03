@@ -7,6 +7,11 @@ const fetchTemplates = async (category) => {
     return res.data;
 };
 
+const fetchTemplate = async (templateId) => {
+    const res = await axios.get(`${SETTINGS.FRAME_SERVICE_URL}/api/frame/${templateId}`);
+    return res.data;
+};
+
 const fetchTemplateCategories = async () => {
     const res = await axios.get(`${SETTINGS.DJANGO_URL}/frames/frametypes/list/`);
     return res.data;
@@ -51,6 +56,23 @@ export const useTemplates = (category, options = {}) => {
             const cached = queryClient.getQueryData(['templates', category]);
             if (cached) return cached;
             return await fetchTemplates(category)
+        },
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 10, // 10 mins
+        cacheTime: 1000 * 60 * 10, // 10 mins
+        ...options,
+    });
+};
+
+// useTemplateDetails for editor
+export const useTemplateDetail = (templateId, options = {}) => {
+    const queryClient = useQueryClient();
+    return useQuery({
+        queryKey: ['template', templateId],
+        queryFn: async () => {
+            const cached = queryClient.getQueryData(['template', templateId]);
+            if (cached) return cached;
+            return await fetchTemplate(templateId)
         },
         refetchOnWindowFocus: false,
         staleTime: 1000 * 60 * 10, // 10 mins

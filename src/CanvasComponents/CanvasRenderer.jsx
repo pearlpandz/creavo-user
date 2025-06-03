@@ -77,8 +77,8 @@ const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
       if (el?.type === "text-box") {
         let obj = {
           ...el,
-          bgColor: theme?.bgColor,
-          textColor: theme?.textColor,
+          bgColor: theme?.bgColor ?? el?.bgColor,
+          textColor: theme?.textColor ?? el?.textColor,
         }
         if (el?.slug === "{{companyName}}") {
           obj['content'] = businessDetails?.companyName;   
@@ -96,21 +96,21 @@ const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
           return {
             ...el,
             content: 'Test name of leader',
-            textColor: theme?.textColor,
+            textColor: theme?.textColor ?? el?.textColor,
           };
         }
         if (el?.slug === "{{leader-designation}}") {
           return {
             ...el,
             content: 'Ward Councillor',
-            textColor: theme?.textColor,
+            textColor: theme?.textColor ?? el?.textColor,
           };
         }
       }
       return {
         ...el,
-        bgColor: theme?.bgColor,
-        textColor: theme?.textColor,
+        bgColor: theme?.bgColor ?? el?.bgColor,
+        textColor: theme?.textColor ?? el?.textColor,
       };
     });
     setElements(updatedElements);

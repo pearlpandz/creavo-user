@@ -15,6 +15,7 @@ import ComingSoon from './components/ComingSoon'
 import CategoryPage from './pages/Category'
 import AccountPage from './pages/Account'
 import FramesPage from './pages/Frames'
+import Editor from './pages/Editor'
 
 function ProtectedRoute({ isAuthenticated }) {
     return isAuthenticated ? <Outlet /> : <Navigate to='/' />
@@ -95,6 +96,7 @@ function App() {
                                     <Route path="/category/:id" element={<CategoryPage />} />
                                     <Route path="/account" element={<AccountPage />} />
                                     <Route path="/frames" element={<FramesPage />} />
+                                    <Route path="/editor" element={<Editor />} />
                                 </Route>
                             </Route>
                             <Route path="*" element={<ComingSoon />} />
