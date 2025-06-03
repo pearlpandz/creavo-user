@@ -1,17 +1,41 @@
 import { Box, Button, IconButton, Tab, Tabs } from '@mui/material'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTemplateCategories, useTemplates } from '../hook/usePageData';
+import { useSearchParams } from 'react-router';
 
 function FramesPage() {
     const { data: templateCategories } = useTemplateCategories();
+    const [selectedCategory, setSelectedCategory] = useState(null)
+    const [value, setValue] = React.useState(0);
+    const [searchParams, setSearchParams] = useSearchParams();
+    const view = searchParams.get('view')
+    // Set selectedCategory when categories are available
+    useEffect(() => {
+        if (templateCategories?.length && !selectedCategory) {
+            if (view) {
+                const index = templateCategories?.findIndex(category => category.name === view)
+                const isExist = index > -1;
+                if (isExist) {
+                    setSelectedCategory(templateCategories[index].name);
+                    setValue(index)
+                } else {
+                    setSelectedCategory(templateCategories[0].name);
+                    setValue(0)
+                }
+            } else {
+                setSelectedCategory(templateCategories[0].name);
+                setValue(0)
+            }
+        }
+    }, [templateCategories, selectedCategory, view]);
 
-    const categoryName = templateCategories?.[0]?.name;
-    const [selectedCategory, setSelectedCategory] = useState(categoryName)
-
-    const { data: templates } = useTemplates(selectedCategory, {
+    const { data: templates, isLoading, isFetching, isRefetching } = useTemplates(selectedCategory, {
         enabled: !!selectedCategory
     });
-    const [value, setValue] = React.useState(0);
+
+    const loading = !selectedCategory || isLoading || isFetching || isRefetching;
+
+
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -28,19 +52,26 @@ function FramesPage() {
             >
                 {
                     templateCategories?.map((category) => (
-                        <Tab key={category.id} label={category.name} onClick={() => setSelectedCategory(category.name)} />
+                        <Tab key={category.id} label={category.name} onClick={() => {
+                            setSelectedCategory(category.name)
+                            searchParams.set('view', category.name)
+                            setSearchParams(searchParams);
+                        }} />
                     ))
                 }
             </Tabs>
             <Box sx={{ mt: 2 }}>
                 {
-                    templates?.length > 0 ?
-                        templates?.map((template) => (
-                            <Button key={template.id} sx={{ width: 200 }}>
-                                <img src={template.image} alt={template.name} width='100%' height='100%' style={{ objectFit: 'contain' }} />
-                            </Button>
-                        )) :
-                        <p>We couldn’t find any templates. Try a different category.</p>
+                    loading ? (
+                        <div>Loading templates...</div>
+                    ) :
+                        templates?.length > 0 ?
+                            templates?.map((template) => (
+                                <Button key={template._id} sx={{ width: 200 }}>
+                                    <img src={template.image} alt={template.name} width='100%' height='100%' style={{ objectFit: 'contain' }} />
+                                </Button>
+                            )) :
+                            <p>We couldn’t find any templates. Try a different category.</p>
                 }
             </Box>
         </Box>

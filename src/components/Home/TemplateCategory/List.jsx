@@ -12,7 +12,7 @@ function TemplateCardList({ data }) {
                     fontSize: 18,
                     textTransform: 'capitalize',
                     fontWeight: 'bold',
-                    color: '#000'
+                    color: '#000',
                 })}
             >
                 Template Categories

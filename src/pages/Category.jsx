@@ -1,17 +1,13 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import { useCateogryMediaData, useTemplates } from '../hook/usePageData'
 import { useParams } from 'react-router'
 import { Box, Grid, Typography } from '@mui/material';
 import MediaCard from '../components/MediaCard';
 import BannerComponent from '../components/Home/BannerComponent';
-import Modal from '../components/Modal';
-import Editor from '../components/Editor';
 
 function CategoryPage() {
     useTemplates();
     const { id } = useParams();
-    const [showModal, setShowModal] = useState(false);
-    const [selectedImg, setSelectedImg] = useState(null);
 
     const params = {
         categoryId: id,
@@ -30,8 +26,9 @@ function CategoryPage() {
     const allMedia = data?.pages.flatMap(page => page.media) ?? [];
 
     const handleSelectedImg = (img) => {
-        setSelectedImg(img);
-        setShowModal(true);
+        // update this image to redux, so that page can access it
+        // dispatch(updatedFrameImage(img));
+        console.log(img)
     };
 
     // Scroll handler: only triggers near bottom
@@ -79,10 +76,6 @@ function CategoryPage() {
                     </Grid>
                 </Box>
             </Box>
-
-            <Modal show={showModal} onClose={() => setShowModal(false)}>
-                <Editor selectedImg={selectedImg} />
-            </Modal>
         </Box>
     )
 }

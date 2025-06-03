@@ -3,9 +3,11 @@ import { useMemo, useRef } from "react";
 import useImage from "use-image";
 import TransformerComponent from "./TransformerComponent";
 import { getCrop } from "../utils";
+import placeholder from '/assets/placeholder.webp'
 
 const CanvasClippedImage = ({ element, isSelected, onSelect, onChange, isEditable = true }) => {
-    const [image] = useImage(element.src, 'anonymous');
+    const imgSrc = element.src ?? placeholder;
+    const [image] = useImage(imgSrc, 'anonymous');
     const shapeRef = useRef();
 
     const handleDragMove = (e) => {

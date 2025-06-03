@@ -2,6 +2,7 @@ import { Box, Tab, Tabs, Typography } from '@mui/material'
 import React from 'react';
 import PropTypes from 'prop-types';
 import MyProfile from '../components/Account/MyProfile';
+import { useProfile } from '../hook/usePageData';
 
 const SECTIONS = [
     "My Profile",
@@ -48,7 +49,9 @@ TabPanel.propTypes = {
 };
 
 function AccountPage() {
+    const { data: profile, isLoading, isFetching, isRefetching } = useProfile();
     const [value, setValue] = React.useState(0);
+    const loading = isLoading || isFetching || isRefetching;
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -73,7 +76,11 @@ function AccountPage() {
                     }
                 </Tabs>
                 <TabPanel value={value} index={0}>
-                    <MyProfile />
+                    {
+                        loading ?
+                            <Typography>Loading...</Typography> :
+                            <MyProfile userDetail={profile} />
+                    }
                 </TabPanel>
                 <TabPanel value={value} index={1}>
                     {SECTIONS[1]}

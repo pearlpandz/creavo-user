@@ -3,10 +3,12 @@ import TransformerComponent from "./TransformerComponent";
 import { useRef } from "react";
 import { updateImageUrl } from "../utils";
 import { Image } from "react-konva";
+import placeholder from '/assets/placeholder.webp'
 
 // Image Component
 const CanvasImage = ({ element, isSelected, onSelect, onChange, isEditable = true }) => {
-  const [image] = useImage(element.src, "anonymous");
+  const imgSrc = element.src ?? placeholder;
+  const [image] = useImage(imgSrc, "anonymous");
   console.log('element.src', image)
   const shapeRef = useRef();
 

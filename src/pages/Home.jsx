@@ -1,17 +1,12 @@
 import { Box } from "@mui/material";
-import { useEffect, useState, useCallback } from "react";
-import Modal from "../components/Modal";
-import Editor from "../components/Editor";
+import { useEffect, useCallback } from "react";
 import { useCategory, useTemplateCategories } from "../hook/usePageData";
-import { SETTINGS } from "../constants/settings";
 import BannerComponent from "../components/Home/BannerComponent";
 import TemplateCardList from "../components/Home/TemplateCategory/List";
 import CategoryContainer from "../components/CategoryContainer";
 
 const HomePage = () => {
     const { data: templateCategories } = useTemplateCategories();
-    const [showModal, setShowModal] = useState(false);
-    const [selectedImg, setSelectedImg] = useState(null);
 
     const limit = 5;
     const {
@@ -25,8 +20,9 @@ const HomePage = () => {
     const allCategories = data?.pages.flatMap(page => page.categories) ?? [];
 
     const handleSelectedImg = (img) => {
-        setSelectedImg(img);
-        setShowModal(true);
+        // update this image to redux, so that page can access it
+        // dispatch(updatedFrameImage(img));
+        console.log(img)
     };
 
     // Scroll handler: only triggers near bottom
@@ -64,10 +60,6 @@ const HomePage = () => {
             ))}
 
             {isFetchingNextPage && <Box sx={{ textAlign: 'center', mt: 2 }}>Loading more...</Box>}
-
-            <Modal show={showModal} onClose={() => setShowModal(false)}>
-                <Editor selectedImg={selectedImg} />
-            </Modal>
         </Box>
     );
 };
