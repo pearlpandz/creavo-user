@@ -3,6 +3,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import MyProfile from '../components/Account/MyProfile';
 import { useProfile } from '../hook/usePageData';
+import ChangePassword from '../components/Account/ChangePassword';
+import CompanyDetails from '../components/Account/CompanyDetails';
 
 const SECTIONS = [
     "My Profile",
@@ -35,7 +37,7 @@ function TabPanel(props) {
         >
             {value === index && (
                 <Box sx={{ p: 3 }}>
-                    <Typography>{children}</Typography>
+                    {children}
                 </Box>
             )}
         </Box>
@@ -83,10 +85,10 @@ function AccountPage() {
                     }
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                    {SECTIONS[1]}
+                    <ChangePassword />
                 </TabPanel>
                 <TabPanel value={value} index={2}>
-                    {SECTIONS[2]}
+                    <CompanyDetails detail={profile?.company_details} />
                 </TabPanel>
                 <TabPanel value={value} index={3}>
                     {SECTIONS[3]}

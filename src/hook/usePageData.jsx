@@ -150,21 +150,20 @@ export const useEventData = (param) => {
     });
 };
 
-const fetchProfile = async (userId) => {
-    const res = await axios.get(`${SETTINGS.DJANGO_URL}/accounts/users/${userId}/`);
+const fetchProfile = async () => {
+    const res = await axios.get(`${SETTINGS.DJANGO_URL}/accounts/users/profile/`);
     return res.data;
 };
 
 // useTemplateDetails for editor
 export const useProfile = () => {
     const queryClient = useQueryClient();
-    const userId = JSON.parse(localStorage.getItem('userDetails'))?.id
     return useQuery({
         queryKey: ['profile'],
         queryFn: async () => {
             const cached = queryClient.getQueryData(['profile']);
             if (cached) return cached;
-            return await fetchProfile(userId)
+            return await fetchProfile()
         },
         refetchOnWindowFocus: false,
         staleTime: 1000 * 60 * 10, // 10 mins
@@ -181,6 +180,44 @@ export const usePatchUser = (onSuccessCallback) => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ userId, data }) => patchUser(userId, data),
+        onSuccess: (data) => {
+            // Optional: invalidate or update cache
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+            if (onSuccessCallback) {
+                onSuccessCallback(data); // trigger state update from component
+            }
+        },
+    });
+};
+
+const changePassword = async (userId, data) => {
+    const response = await axios.post(`${SETTINGS.DJANGO_URL}/accounts/users/${userId}/changepassword/`, data);
+    return response.data;
+};
+
+export const useChangePassword = (onSuccessCallback) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ userId, data }) => changePassword(userId, data),
+        onSuccess: (data) => {
+            // Optional: invalidate or update cache
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+            if (onSuccessCallback) {
+                onSuccessCallback(data); // trigger state update from component
+            }
+        },
+    });
+};
+
+const patchCompanyDetails = async (id, data) => {
+    const response = await axios.patch(`${SETTINGS.DJANGO_URL}/accounts/companydetails/${id}/`, data);
+    return response.data;
+};
+
+export const usePatchCompanyDetails = (onSuccessCallback) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, data }) => patchCompanyDetails(id, data),
         onSuccess: (data) => {
             // Optional: invalidate or update cache
             queryClient.invalidateQueries({ queryKey: ['user'] });

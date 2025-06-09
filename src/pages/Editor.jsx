@@ -5,19 +5,19 @@ import './Editor.css';
 import { useTemplateCategories, useTemplateDetail, useTemplates } from "../hook/usePageData";
 
 function Editor() {
-    const { data: templateCategories } = useTemplateCategories();
+    const { data: templateCategories, isLoading, isFetching, isRefetching } = useTemplateCategories();
     const [selectedCategory, setSelectedCategory] = useState(null)
     const [selectedTemplate, setSelectedTemplate] = useState(null)
 
     useEffect(() => {
-        if (templateCategories?.length && !selectedCategory) {
+        if (templateCategories?.length && !selectedCategory?.name) {
             const category = templateCategories?.[0];
-            setSelectedCategory(category.name);
+            setSelectedCategory(category);
         }
     }, [selectedCategory, templateCategories])
 
-    const { data: templates } = useTemplates(selectedCategory, {
-        enabled: !!selectedCategory
+    const { data: templates = [], isLoading1, isFetching1, isRefetching1 } = useTemplates(selectedCategory?.name, {
+        enabled: !!selectedCategory?.name
     });
 
     useEffect(() => {
@@ -36,16 +36,24 @@ function Editor() {
     const [selectedTheme, setSelectedTheme] = useState(null)
     const businessDetails = JSON.parse(localStorage.getItem('companyDetails')) ?? {}
 
+    const loading = isLoading || isFetching || isRefetching || isLoading1 || isFetching1 || isRefetching1
+
     const framesContainer = useMemo(() => {
         return (
             <FramesContainer
+                isLoading={loading}
+
                 templateCategories={templateCategories}
                 templates={templates}
+
                 selectedTemplate={selectedTemplateDetail}
                 setSelectedTemplate={setSelectedTemplate}
+
+                setSelectedCategory={setSelectedCategory}
+                selectedCategory={selectedCategory}
             />
         )
-    }, [templateCategories, templates, selectedTemplateDetail, setSelectedTemplate])
+    }, [templateCategories, templates, selectedTemplateDetail, selectedCategory, loading])
 
     const handleColorChange = (type, color) => {
         if (type === 'bgColor') {
@@ -105,14 +113,12 @@ export default Editor;
 
 
 
-const FramesContainer = ({ templates, setSelectedTemplate, templateCategories }) => {
-    const [selectedCategory, setSelectedCategory] = useState(null)
-
-    useEffect(() => {
-        if (templateCategories?.length > 0) {
-            setSelectedCategory(templateCategories?.[0])
-        }
-    }, [templateCategories])
+const FramesContainer = ({ templates, selectedTemplate, setSelectedTemplate, selectedCategory, setSelectedCategory, templateCategories, loading }) => {
+    if (loading) {
+        <div className="frame-container">
+            <p>Loading...</p>
+        </div>
+    }
 
     return (
         <div className="frame-container">
@@ -128,7 +134,7 @@ const FramesContainer = ({ templates, setSelectedTemplate, templateCategories })
                         {
                             templates?.filter(template => template.category === selectedCategory?.name).length > 0 ?
                                 templates?.filter(template => template.category === selectedCategory?.name).map((template, index) => (
-                                    <button title={template.name} onClick={() => setSelectedTemplate(template)} key={index}>
+                                    <button title={template.name} style={{ border: selectedTemplate?.id === template.id ? `1px solid #000` : 'none' }} onClick={() => setSelectedTemplate(template)} key={index}>
                                         <img src={template.image} alt={template.name} />
                                     </button>
                                 )) :
