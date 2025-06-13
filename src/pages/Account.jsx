@@ -6,6 +6,7 @@ import { useProfile } from '../hook/usePageData';
 import ChangePassword from '../components/Account/ChangePassword';
 import CompanyDetails from '../components/Account/CompanyDetails';
 import ProductInfo from '../components/Account/ProductInfo';
+import PoliticalDetails from '../components/Account/Political';
 
 const SECTIONS = [
     "My Profile",
@@ -95,7 +96,7 @@ function AccountPage() {
                     <ProductInfo productList={profile?.products} />
                 </TabPanel>
                 <TabPanel value={value} index={4}>
-                    {SECTIONS[4]}
+                    <PoliticalDetails detail={profile?.political} />
                 </TabPanel>
                 <TabPanel value={value} index={5}>
                     {SECTIONS[5]}
