@@ -51,33 +51,24 @@ const MyProfile = ({ userDetail }) => {
     };
 
     return (
-        <Box sx={{ mt: 4, p: 2 }}>
-            {/* Profile Card */}
-            {/* <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 3, border: '1px solid #f0f0f0' }}>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Box display="flex" alignItems="center">
-                    <Avatar sx={{ width: 56, height: 56, mr: 2 }}>{profile.first_name[0]}{profile.last_name[0]}</Avatar>
-                    <Box>
-                        <Typography fontWeight={600}>{profile.name}</Typography>
-                        <Typography variant="body2" color="text.secondary">{profile.first_name} {profile.last_name}</Typography>
-                        <Typography variant="body2" color="text.secondary">{profile.license}</Typography>
-                    </Box>
+        <Box sx={{ p: 2 }}>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                <Box>
+                    <Typography variant="h4" fontWeight={700} mb={1}>Personal Information</Typography>
+                    <Typography variant="body2" color="text.secondary" mb={3}>
+                        Manage your profile
+                    </Typography>
                 </Box>
-                <Button variant="outlined" size="small">✎ Edit</Button>
+                {
+                    mode === 'view' ?
+                        <Button variant="outlined" size="small" onClick={() => setMode('edit')}><ModeEditOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} /> Edit</Button> :
+                        <Button variant="contained" size="small" onClick={handleSave}><SaveOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} />{isPending ? 'Saving...' : 'Save'}</Button>
+                }
             </Box>
-        </Paper> */}
+
 
             {/* Personal Information */}
             <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #f0f0f0' }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                    <Typography fontWeight={600}>Personal Information</Typography>
-                    {
-                        mode === 'view' ?
-                            <Button variant="outlined" size="small" onClick={() => setMode('edit')}><ModeEditOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} /> Edit</Button> :
-                            <Button variant="contained" size="small" onClick={handleSave}><SaveOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} />{isPending ? 'Saving...' : 'Save'}</Button>
-                    }
-                </Box>
-                <Divider sx={{ mb: 2 }} />
                 <Grid container spacing={2}>
                     <Grid size={{ xs: 12, sm: 6, md: 6 }}>
                         <Typography sx={{ display: 'block', mb: 1 }} variant="caption" color="text.secondary">First Name</Typography>

@@ -172,18 +172,22 @@ const PoliticalDetails = ({ detail }) => {
     }
 
     return (
-        <Box sx={{ mt: 4, p: 2 }}>
-            {/* Personal Information */}
-            <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #f0f0f0' }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                    <Typography fontWeight={600}>Political Details</Typography>
-                    {
-                        mode === 'view' ?
-                            <Button variant="outlined" size="small" onClick={() => setMode('edit')}><ModeEditOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} /> Edit</Button> :
-                            <Button variant="contained" size="small" onClick={handleSave}><SaveOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} />Save</Button>
-                    }
+        <Box sx={{ p: 2 }}>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                <Box>
+                    <Typography variant="h4" fontWeight={700} mb={1}>Political Details</Typography>
+                    <Typography variant="body2" color="text.secondary" mb={3}>
+                        Manage your profile
+                    </Typography>
                 </Box>
-                <Divider sx={{ mb: 2 }} />
+                {
+                    mode === 'view' ?
+                        <Button variant="outlined" size="small" onClick={() => setMode('edit')}><ModeEditOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} /> Edit</Button> :
+                        <Button variant="contained" size="small" onClick={handleSave}><SaveOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} />Save</Button>
+                }
+            </Box>
+
+            <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 3, border: '1px solid #f0f0f0' }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                     <Typography fontWeight={600}>Leader Details</Typography>
                 </Box>
@@ -202,8 +206,9 @@ const PoliticalDetails = ({ detail }) => {
                         <ReadOnlyText name="leader_designation" readOnly={mode === 'view'} value={leader.leader_designation} onChange={handleLeaderChange} />
                     </Grid>
                 </Grid>
+            </Paper>
 
-                <Divider sx={{ my: 2 }} />
+            <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 3, border: '1px solid #f0f0f0' }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                     <Typography fontWeight={600}>Party Details</Typography>
                 </Box>
@@ -218,8 +223,9 @@ const PoliticalDetails = ({ detail }) => {
                         <ReadOnlyText name="party_name" readOnly={mode === 'view'} value={party.party_name} onChange={handlePartyChange} />
                     </Grid>
                 </Grid>
+            </Paper>
 
-                <Divider sx={{ my: 2 }} />
+            <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #f0f0f0' }}>
                 <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                     <Typography fontWeight={600}>Supporters</Typography>
                 </Box>

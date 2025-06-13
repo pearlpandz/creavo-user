@@ -75,18 +75,23 @@ const CompanyDetails = ({ detail }) => {
     }
 
     return (
-        <Box sx={{ mt: 4, p: 2 }}>
+        <Box sx={{ p: 2 }}>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                <Box>
+                    <Typography variant="h4" fontWeight={700} mb={1}>Company Details</Typography>
+                    <Typography variant="body2" color="text.secondary" mb={3}>
+                        Manage your profile
+                    </Typography>
+                </Box>
+                {
+                    mode === 'view' ?
+                        <Button variant="outlined" size="small" onClick={() => setMode('edit')}><ModeEditOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} /> Edit</Button> :
+                        <Button variant="contained" size="small" onClick={handleSave}><SaveOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} />{isPending ? 'Saving...' : 'Save'}</Button>
+                }
+            </Box>
+
             {/* Personal Information */}
             <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #f0f0f0' }}>
-                <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                    <Typography fontWeight={600}>Company Details</Typography>
-                    {
-                        mode === 'view' ?
-                            <Button variant="outlined" size="small" onClick={() => setMode('edit')}><ModeEditOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} /> Edit</Button> :
-                            <Button variant="contained" size="small" onClick={handleSave}><SaveOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} />{isPending ? 'Saving...' : 'Save'}</Button>
-                    }
-                </Box>
-                <Divider sx={{ mb: 2 }} />
                 <Grid container spacing={2}>
                     <Grid size={{ xs: 12 }}>
                         <Typography sx={styles} variant="caption" color="text.secondary">logo</Typography>

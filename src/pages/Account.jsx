@@ -7,6 +7,7 @@ import ChangePassword from '../components/Account/ChangePassword';
 import CompanyDetails from '../components/Account/CompanyDetails';
 import ProductInfo from '../components/Account/ProductInfo';
 import PoliticalDetails from '../components/Account/Political';
+import Subscription from '../components/Account/Subscription';
 
 const SECTIONS = [
     "My Profile",
@@ -99,7 +100,7 @@ function AccountPage() {
                     <PoliticalDetails detail={profile?.political} />
                 </TabPanel>
                 <TabPanel value={value} index={5}>
-                    {SECTIONS[5]}
+                    <Subscription detail={profile?.license_details} />
                 </TabPanel>
             </Box>
         </Box>
