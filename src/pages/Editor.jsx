@@ -1,24 +1,59 @@
-import { useMemo, useState } from "react";
-import './Editor.css';
+import { useEffect, useMemo, useState } from "react";
 import CanvasRenderer from "../CanvasComponents/CanvasRenderer";
 import { SIDEBAR } from "../constants";
-import { SETTINGS } from "../constants/settings";
-import { useQueryClient } from "@tanstack/react-query";
+import './Editor.css';
+import { useTemplateCategories, useTemplateDetail, useTemplates } from "../hook/usePageData";
 
-function Editor(props) {
-    const { selectedImg } = props;
-    const queryClient = useQueryClient();
-    const templates = queryClient.getQueryData(['templates']); // your query key
-    const [selectedTemplate, setSelectedTemplate] = useState(templates?.[0])
+function Editor() {
+    const { data: templateCategories, isLoading, isFetching, isRefetching } = useTemplateCategories();
+    const [selectedCategory, setSelectedCategory] = useState(null)
+    const [selectedTemplate, setSelectedTemplate] = useState(null)
+
+    useEffect(() => {
+        if (templateCategories?.length && !selectedCategory?.name) {
+            const category = templateCategories?.[0];
+            setSelectedCategory(category);
+        }
+    }, [selectedCategory, templateCategories])
+
+    const { data: templates = [], isLoading1, isFetching1, isRefetching1 } = useTemplates(selectedCategory?.name, {
+        enabled: !!selectedCategory?.name
+    });
+
+    useEffect(() => {
+        if (templates?.length > 0) {
+            setSelectedTemplate(templates[0])
+        }
+    }, [templates])
+
+    const { data: selectedTemplateDetail } = useTemplateDetail(selectedTemplate?._id, {
+        enabled: !!selectedTemplate?._id
+    })
+
+    const selectedImg = null;
+
     const [selectedSidebar, setSelectedSidebar] = useState(SIDEBAR[0].key)
-    const [selectedTheme, setSelectedTheme] = useState({ textColor: 'white', bgColor: 'red' })
+    const [selectedTheme, setSelectedTheme] = useState(null)
     const businessDetails = JSON.parse(localStorage.getItem('companyDetails')) ?? {}
+
+    const loading = isLoading || isFetching || isRefetching || isLoading1 || isFetching1 || isRefetching1
 
     const framesContainer = useMemo(() => {
         return (
-            <FramesContainer templates={templates} setSelectedTemplate={setSelectedTemplate} />
+            <FramesContainer
+                isLoading={loading}
+
+                templateCategories={templateCategories}
+                templates={templates}
+
+                selectedTemplate={selectedTemplateDetail}
+                setSelectedTemplate={setSelectedTemplate}
+
+                setSelectedCategory={setSelectedCategory}
+                selectedCategory={selectedCategory}
+            />
         )
-    }, [setSelectedTemplate, templates])
+    }, [templateCategories, templates, selectedTemplateDetail, selectedCategory, loading])
 
     const handleColorChange = (type, color) => {
         if (type === 'bgColor') {
@@ -67,7 +102,7 @@ function Editor(props) {
                 </div>
 
                 {selectedTemplate && <div className="canvas-container">
-                    <CanvasRenderer theme={selectedTheme} selectedImg={selectedImg} template={selectedTemplate} businessDetails={businessDetails} />
+                    <CanvasRenderer theme={selectedTheme} selectedImg={selectedImg} template={selectedTemplateDetail} businessDetails={businessDetails} />
                 </div>}
             </div>
         </>
@@ -78,24 +113,28 @@ export default Editor;
 
 
 
-const FramesContainer = ({ templates, setSelectedTemplate }) => {
-    const types = ['regular', 'product', 'political'];
-    const [selectedType, setSelectedType] = useState(types[0])
+const FramesContainer = ({ templates, selectedTemplate, setSelectedTemplate, selectedCategory, setSelectedCategory, templateCategories, loading }) => {
+    if (loading) {
+        <div className="frame-container">
+            <p>Loading...</p>
+        </div>
+    }
+
     return (
         <div className="frame-container">
             <div className="frames-section">
                 <ul className="frame-list">
-                    {types.map(type => (
-                        <li key={type} className={selectedType === type ? 'active' : ''}>
-                            <button onClick={() => setSelectedType(type)}>{type}</button>
+                    {templateCategories?.map(category => (
+                        <li key={category.id} className={selectedCategory?.name === category.name ? 'active' : ''}>
+                            <button onClick={() => setSelectedCategory(category)}>{category.name}</button>
                         </li>))}
                 </ul>
                 <div className="frame-scroll-view">
                     <div className="frames">
                         {
-                            templates.filter(template => template.category === selectedType).length > 0 ?
-                                templates.filter(template => template.category === selectedType).map((template, index) => (
-                                    <button title={template.name} onClick={() => setSelectedTemplate(template)} key={index}>
+                            templates?.filter(template => template.category === selectedCategory?.name).length > 0 ?
+                                templates?.filter(template => template.category === selectedCategory?.name).map((template, index) => (
+                                    <button title={template.name} style={{ border: selectedTemplate?.id === template.id ? `1px solid #000` : 'none' }} onClick={() => setSelectedTemplate(template)} key={index}>
                                         <img src={template.image} alt={template.name} />
                                     </button>
                                 )) :
@@ -125,7 +164,7 @@ const ThemesContainer = ({ handleColorChange, selectedTheme }) => {
                 </ul>
                 <div className="frame-scroll-view">
                     <div className="frames">
-                        <input type="color" value={selectedTheme[selectedType.value]} onChange={(event) => handleColorChange(selectedType.value, event.target.value)} />
+                        <input type="color" value={selectedTheme?.[selectedType?.value]} onChange={(event) => handleColorChange(selectedType.value, event.target.value)} />
                     </div>
                 </div>
             </div>

@@ -1,63 +1,106 @@
-import { Box, Typography, Avatar, Button, Grid, Paper, Divider } from '@mui/material';
+import { Box, Typography, Avatar, Button, Grid, Paper, Divider, Input, TextField, Snackbar, Alert } from '@mui/material';
+import { useState } from 'react';
+import ModeEditOutlinedIcon from '@mui/icons-material/ModeEditOutlined';
+import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
+import { usePatchUser } from '../../hook/usePageData';
 
-const profile = {
-    name: 'Jack Adams',
-    role: 'Product Designer',
-    location: 'Los Angeles, California, USA',
-    email: 'jackadams@gmail.com',
-    phone: '(209) 555-0324',
-    bio: 'Product Designer',
-    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-};
+function ReadOnlyText({ value, readOnly, onChange, name }) {
+    return readOnly ? (
+        <Typography variant="body1">{value}</Typography>
+    ) : (
+        <TextField name={name} size='small' value={value} onChange={onChange} />
+    );
+}
 
-const MyProfile = () => (
-    <Box sx={{ mt: 4, p: 2 }}>
-        {/* Profile Card */}
-        <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 3, border: '1px solid #f0f0f0' }}>
-            <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Box display="flex" alignItems="center">
-                    <Avatar src={profile.avatar} sx={{ width: 56, height: 56, mr: 2 }} />
-                    <Box>
-                        <Typography fontWeight={600}>{profile.name}</Typography>
-                        <Typography variant="body2" color="text.secondary">{profile.role}</Typography>
-                        <Typography variant="body2" color="text.secondary">{profile.location}</Typography>
-                    </Box>
-                </Box>
-                <Button variant="outlined" size="small">✎ Edit</Button>
-            </Box>
-        </Paper>
+const MyProfile = ({ userDetail }) => {
+    const [mode, setMode] = useState('view')
+    const [open, setOpen] = useState(false)
+    const initialValue = Object.keys(userDetail)?.length > 0 ? {
+        first_name: userDetail.first_name,
+        last_name: userDetail.last_name,
+        mobile_number: userDetail.mobile_number,
+        email: userDetail.email
+    } : {};
+    const [profile, setProfile] = useState(initialValue ?? {})
+    const { mutate, isPending } = usePatchUser((updatedUser) => {
+        console.log(updatedUser);
+        setOpen(true);
+        setMode('view')
+    });
 
-        {/* Personal Information */}
-        <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #f0f0f0' }}>
+    const handleChange = (event) => {
+        setProfile((prev) => ({
+            ...prev,
+            [event.target.name]: event.target.value
+        }))
+    }
+
+    const handleSave = () => {
+        const userId = JSON.parse(localStorage.getItem('userDetails'))?.id;
+        if (userId) {
+            mutate({ userId, data: profile });
+        }
+    }
+
+    const handleClose = (event, reason) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+
+        setOpen(false);
+    };
+
+    return (
+        <Box sx={{ p: 2 }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                <Typography fontWeight={600}>Personal Information</Typography>
-                <Button variant="outlined" size="small">✎ Edit</Button>
+                <Box>
+                    <Typography variant="h4" fontWeight={700} mb={1}>Personal Information</Typography>
+                    <Typography variant="body2" color="text.secondary" mb={3}>
+                        Manage your profile
+                    </Typography>
+                </Box>
+                {
+                    mode === 'view' ?
+                        <Button variant="outlined" size="small" onClick={() => setMode('edit')}><ModeEditOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} /> Edit</Button> :
+                        <Button variant="contained" size="small" onClick={handleSave}><SaveOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} />{isPending ? 'Saving...' : 'Save'}</Button>
+                }
             </Box>
-            <Divider sx={{ mb: 2 }} />
-            <Grid container spacing={2}>
-                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                    <Typography variant="caption" color="text.secondary">First Name</Typography>
-                    <Typography>{profile.name.split(' ')[0]}</Typography>
+
+
+            {/* Personal Information */}
+            <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #f0f0f0' }}>
+                <Grid container spacing={2}>
+                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                        <Typography sx={{ display: 'block', mb: 1 }} variant="caption" color="text.secondary">First Name</Typography>
+                        <ReadOnlyText name="first_name" readOnly={mode === 'view'} value={profile.first_name} onChange={handleChange} />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                        <Typography sx={{ display: 'block', mb: 1 }} variant="caption" color="text.secondary">Last Name</Typography>
+                        <ReadOnlyText name="last_name" readOnly={mode === 'view'} value={profile.last_name} onChange={handleChange} />
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6, md: 6 }}>
+                        <Typography sx={{ display: 'block', mb: 1 }} variant="caption" color="text.secondary">Email address</Typography>
+                        <ReadOnlyText name="email" readOnly={mode === 'view'} value={profile.email} onChange={handleChange} />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <Typography sx={{ display: 'block', mb: 1 }} variant="caption" color="text.secondary">Phone</Typography>
+                        <ReadOnlyText name="mobile_number" readOnly={mode === 'view'} value={profile.mobile_number} onChange={handleChange} />
+                    </Grid>
                 </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                    <Typography variant="caption" color="text.secondary">Last Name</Typography>
-                    <Typography>{profile.name.split(' ')[1]}</Typography>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 6, md: 6 }}>
-                    <Typography variant="caption" color="text.secondary">Email address</Typography>
-                    <Typography>{profile.email}</Typography>
-                </Grid>
-                <Grid item xs={12} sm={6} md={6}>
-                    <Typography variant="caption" color="text.secondary">Phone</Typography>
-                    <Typography>{profile.phone}</Typography>
-                </Grid>
-                <Grid item xs={12} md={12}>
-                    <Typography variant="caption" color="text.secondary">Bio</Typography>
-                    <Typography>{profile.bio}</Typography>
-                </Grid>
-            </Grid>
-        </Paper>
-    </Box>
-);
+            </Paper>
+
+            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
+                <Alert
+                    onClose={handleClose}
+                    severity="success"
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    Profile Successfully Updated!
+                </Alert>
+            </Snackbar>
+        </Box>
+    )
+};
 
 export default MyProfile;

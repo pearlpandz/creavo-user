@@ -46,27 +46,27 @@ canvas size
 
 Company Details
 ---------------
-companyName
-description
-email
-contact number 1
-contact number 2
 logo
+company_name
+email
+primary_contact
+secondary_contact
+description
 
 Product
 ---------
-product-img1
-product-img2
-product-img3
+product_img_1
+product_img_2
+product_img_3
 
 Political
 ---------
-leader-name
-leader-designation
-leader-image
-political-supporter-1
-political-supporter-2
-political-supporter-3
+leader_name
+leader_designation
+leader_image
+political_supporter_1
+political_supporter_2
+political_supporter_3
 
 Create verticle tab view for each section to update in user profile
 Refer: https://codesandbox.io/embed/7v35xf?module=/src/Demo.js&fontsize=12

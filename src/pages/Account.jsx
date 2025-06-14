@@ -2,6 +2,12 @@ import { Box, Tab, Tabs, Typography } from '@mui/material'
 import React from 'react';
 import PropTypes from 'prop-types';
 import MyProfile from '../components/Account/MyProfile';
+import { useProfile } from '../hook/usePageData';
+import ChangePassword from '../components/Account/ChangePassword';
+import CompanyDetails from '../components/Account/CompanyDetails';
+import ProductInfo from '../components/Account/ProductInfo';
+import PoliticalDetails from '../components/Account/Political';
+import Subscription from '../components/Account/Subscription';
 
 const SECTIONS = [
     "My Profile",
@@ -34,7 +40,7 @@ function TabPanel(props) {
         >
             {value === index && (
                 <Box sx={{ p: 3 }}>
-                    <Typography>{children}</Typography>
+                    {children}
                 </Box>
             )}
         </Box>
@@ -48,7 +54,9 @@ TabPanel.propTypes = {
 };
 
 function AccountPage() {
+    const { data: profile, isLoading, isFetching, isRefetching } = useProfile();
     const [value, setValue] = React.useState(0);
+    const loading = isLoading || isFetching || isRefetching;
 
     const handleChange = (event, newValue) => {
         setValue(newValue);
@@ -73,22 +81,26 @@ function AccountPage() {
                     }
                 </Tabs>
                 <TabPanel value={value} index={0}>
-                    <MyProfile />
+                    {
+                        loading ?
+                            <Typography>Loading...</Typography> :
+                            <MyProfile userDetail={profile} />
+                    }
                 </TabPanel>
                 <TabPanel value={value} index={1}>
-                    {SECTIONS[1]}
+                    <ChangePassword />
                 </TabPanel>
                 <TabPanel value={value} index={2}>
-                    {SECTIONS[2]}
+                    <CompanyDetails detail={profile?.company_details} />
                 </TabPanel>
                 <TabPanel value={value} index={3}>
-                    {SECTIONS[3]}
+                    <ProductInfo productList={profile?.products} />
                 </TabPanel>
                 <TabPanel value={value} index={4}>
-                    {SECTIONS[4]}
+                    <PoliticalDetails detail={profile?.political} />
                 </TabPanel>
                 <TabPanel value={value} index={5}>
-                    {SECTIONS[5]}
+                    <Subscription detail={profile?.license_details} />
                 </TabPanel>
             </Box>
         </Box>
