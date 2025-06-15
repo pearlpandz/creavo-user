@@ -3,7 +3,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 import { Link } from 'react-router';
 
-const MediaContainer = ({ data, title = 'Trending', subCategoryId = 'all', setSelectedSubcategory, media: mediaList = [], pk }) => {
+const MediaContainer = ({ data, title = 'Trending', subCategoryId = 'all', setSelectedSubcategory, media: mediaList = [] }) => {
 
     const handleSelection = (e) => {
         const selected = e.currentTarget.innerText;
@@ -26,7 +26,7 @@ const MediaContainer = ({ data, title = 'Trending', subCategoryId = 'all', setSe
                         {data?.description || 'Explore our collection of media.'}
                     </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }} component={Link} to={`/category/${pk}`}>
+                <Box sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }} component={Link} to={`/category/${data?.id}`}>
                     <Typography sx={{ fontSize: 14, mr: 1 }}>View All</Typography>
                     <ArrowForwardIos sx={{ width: 14 }} />
                 </Box>
@@ -67,7 +67,7 @@ const MediaContainer = ({ data, title = 'Trending', subCategoryId = 'all', setSe
                     </>
                 )
             }
-            <MediaList data={mediaList} noOfCards={7} pk={pk} />
+            <MediaList data={mediaList} noOfCards={7} />
         </Box>
     )
 }

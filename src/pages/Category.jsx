@@ -1,19 +1,23 @@
 import React, { useCallback, useEffect } from 'react'
 import { useCateogryMediaData, useTemplates } from '../hook/usePageData'
-import { useParams } from 'react-router'
+import { useNavigate, useParams } from 'react-router'
 import { Box, Grid, Typography } from '@mui/material';
 import MediaCard from '../components/MediaCard';
 import BannerComponent from '../components/Home/BannerComponent';
+import { updateFrameImage } from '../redux/slices/editor.slice';
+import { useDispatch } from 'react-redux';
 
 function CategoryPage() {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     useTemplates();
-    const { id } = useParams();
+    const { id, sub = 'all' } = useParams();
 
     const params = {
         categoryId: id,
         limit: 25,
         skip: 0,
-        subCategoryId: 'all'
+        subCategoryId: sub ?? 'all'
     }
     const {
         data,
@@ -27,8 +31,8 @@ function CategoryPage() {
 
     const handleSelectedImg = (img) => {
         // update this image to redux, so that page can access it
-        // dispatch(updatedFrameImage(img));
-        console.log(img)
+        dispatch(updateFrameImage(img));
+        navigate('/editor');
     };
 
     // Scroll handler: only triggers near bottom

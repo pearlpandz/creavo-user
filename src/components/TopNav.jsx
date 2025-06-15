@@ -16,7 +16,7 @@ export default function TopNav({ onMenuClick, darkMode, onToggleTheme }) {
                     </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                    <IconButton onClick={onToggleTheme} color="inherit" sx={{ p: 1 }}>
+                    <IconButton onClick={onToggleTheme} color="inherit" sx={{ p: 1, visibility: 'hidden' }}>
                         {darkMode ? <Brightness7Icon sx={{ color: '#FFD600' }} /> : <Brightness4Icon sx={{ color: '#212121' }} />}
                     </IconButton>
                     {/* <Button color="primary" variant="outlined" size ="small">Logout</Button> */}
