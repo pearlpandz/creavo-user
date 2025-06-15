@@ -3,7 +3,7 @@ import { Box, Button, Typography } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 import { Link } from 'react-router';
 
-const MediaContainer = ({ data, title = 'Trending', handleSelectedImg, subCategoryId = 'all', setSelectedSubcategory, media: mediaList = [], pk }) => {
+const MediaContainer = ({ data, title = 'Trending', subCategoryId = 'all', setSelectedSubcategory, media: mediaList = [], pk }) => {
 
     const handleSelection = (e) => {
         const selected = e.currentTarget.innerText;
@@ -67,7 +67,7 @@ const MediaContainer = ({ data, title = 'Trending', handleSelectedImg, subCatego
                     </>
                 )
             }
-            <MediaList data={mediaList} handleSelectedImg={handleSelectedImg} noOfCards={7} pk={pk} />
+            <MediaList data={mediaList} noOfCards={7} pk={pk} />
         </Box>
     )
 }

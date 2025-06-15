@@ -20,7 +20,7 @@ function CategoryPage() {
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
-        isLoading,
+        // isLoading,
     } = useCateogryMediaData(params)
 
     const allMedia = data?.pages.flatMap(page => page.media) ?? [];
