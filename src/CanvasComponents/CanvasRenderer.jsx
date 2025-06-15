@@ -9,12 +9,16 @@ import CanvasClippedImage from "./CanvasClippedImage";
 import MultiPointLine from "./CanvasMultiPointLine";
 import CanvasPolygon from "./CanvasPolygon";
 import CanvasWedge from "./CanvasWedge";
+import placeholder from '/assets/placeholder.webp'
 
-const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
+const CanvasRenderer = ({ theme, selectedImg, template, profile }) => {
   const [elements, setElements] = useState([]);
   const stageRef = useRef(null);
   const isEditable = false;
   const transformerRef = useRef(null);
+  const businessDetails = profile?.company_details ?? null;
+  const politicalDetails = profile?.political ?? null;
+  const productsDetails = useMemo(() => profile?.products ?? [], [profile?.products]);
 
   useEffect(() => {
     const updatedElements = template?.elements?.map((el) => {
@@ -22,7 +26,7 @@ const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
         if (el?.slug === "{{logo}}") {
           return {
             ...el,
-            src: businessDetails?.logo
+            src: businessDetails?.image
           };
         }
         if (el?.slug === "{{frame-img}}") {
@@ -34,43 +38,43 @@ const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
         if (el?.slug === "{{product-img1}}") {
           return {
             ...el,
-            src: businessDetails?.products[0]
+            src: productsDetails?.[0]?.image ?? placeholder
           };
         }
         if (el?.slug === "{{product-img2}}") {
           return {
             ...el,
-            src: businessDetails?.products[1]
+            src: productsDetails?.[1]?.image ?? placeholder
           };
         }
         if (el?.slug === "{{product-img3}}") {
           return {
             ...el,
-            src: businessDetails?.products[2]
+            src: productsDetails?.[2]?.image ?? placeholder
           };
         }
         if (el?.slug === "{{political-supporter-1}}") {
           return {
             ...el,
-            src: "https://img.freepik.com/free-photo/bohemian-man-with-his-arms-crossed_1368-3542.jpg"
+            src: politicalDetails?.supporters?.[0]?.image ?? placeholder
           };
         }
         if (el?.slug === "{{political-supporter-2}}") {
           return {
             ...el,
-            src: "https://img.freepik.com/free-photo/bohemian-man-with-his-arms-crossed_1368-3542.jpg"
+            src: politicalDetails?.supporters?.[1]?.image ?? placeholder
           };
         }
         if (el?.slug === "{{political-supporter-3}}") {
           return {
             ...el,
-            src: "https://img.freepik.com/free-photo/bohemian-man-with-his-arms-crossed_1368-3542.jpg"
+            src: politicalDetails?.supporters?.[2]?.image ?? placeholder
           };
         }
         if (el?.slug === "{{leader-image}}") {
           return {
             ...el,
-            src: "https://img.freepik.com/free-photo/bohemian-man-with-his-arms-crossed_1368-3542.jpg"
+            src: politicalDetails?.image ?? placeholder
           };
         }
       }
@@ -81,28 +85,35 @@ const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
           textColor: theme?.textColor ?? el?.textColor,
         }
         if (el?.slug === "{{companyName}}") {
-          obj['content'] = businessDetails?.companyName;   
+          obj['content'] = businessDetails?.company_name;
         }
         if (el?.slug === "{{description}}") {
           obj['content'] = businessDetails?.description;
         }
         if (el?.slug === "{{content}}") {
-          obj['content'] = `${businessDetails?.mobileNumber1} | ${businessDetails?.mobileNumber2} | ${businessDetails?.email} | ${businessDetails?.website}`;
+          const concatWithPipe = (...values) => values.filter(Boolean).join(' | ');
+          obj['content'] = concatWithPipe(
+            businessDetails?.email,
+            businessDetails?.primary_contact,
+            businessDetails?.secondary_contact,
+            businessDetails?.website,
+            businessDetails?.address
+          );
         }
         return obj;
       }
-      if(el?.type === "text") {
+      if (el?.type === "text") {
         if (el?.slug === "{{leader-name}}") {
           return {
             ...el,
-            content: 'Test name of leader',
+            content: politicalDetails?.leader_name,
             textColor: theme?.textColor ?? el?.textColor,
           };
         }
         if (el?.slug === "{{leader-designation}}") {
           return {
             ...el,
-            content: 'Ward Councillor',
+            content: politicalDetails?.leader_designation,
             textColor: theme?.textColor ?? el?.textColor,
           };
         }
@@ -114,7 +125,7 @@ const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
       };
     });
     setElements(updatedElements);
-  }, [theme, template, businessDetails, selectedImg]);
+  }, [theme, template, businessDetails, selectedImg, productsDetails, politicalDetails]);
 
   const downloadCanvas = () => {
     const dataURL = stageRef.current.toDataURL();
@@ -126,14 +137,14 @@ const CanvasRenderer = ({ theme, selectedImg, template, businessDetails }) => {
     document.body.removeChild(link);
   }
 
-  const {width, height} = useMemo(() => {
-    if(template?.category === 'product') {
-      return {width: 500, height: 700}
+  const { width, height } = useMemo(() => {
+    if (template?.category === 'product') {
+      return { width: 500, height: 700 }
     } else {
-      return {width: 600, height: 600}
+      return { width: 600, height: 600 }
 
     }
-  }, [template]); 
+  }, [template]);
 
   return (
     <>

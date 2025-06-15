@@ -14,16 +14,10 @@ const HomePage = () => {
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
-        isLoading,
+        // isLoading,
     } = useCategory(limit);
 
     const allCategories = data?.pages.flatMap(page => page.categories) ?? [];
-
-    const handleSelectedImg = (img) => {
-        // update this image to redux, so that page can access it
-        // dispatch(updatedFrameImage(img));
-        console.log(img)
-    };
 
     // Scroll handler: only triggers near bottom
     const handleScroll = useCallback(() => {
@@ -56,7 +50,7 @@ const HomePage = () => {
             <TemplateCardList data={templateCategories} />
 
             {allCategories.map((item) => (
-                <CategoryContainer key={item.id} item={item} handleSelectedImg={handleSelectedImg} />
+                <CategoryContainer key={item.id} item={item} />
             ))}
 
             {isFetchingNextPage && <Box sx={{ textAlign: 'center', mt: 2 }}>Loading more...</Box>}

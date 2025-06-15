@@ -3,8 +3,13 @@ import { useKeenSlider } from "keen-slider/react";
 import { Box, IconButton } from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 import "keen-slider/keen-slider.min.css";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
+import { updateFrameImage } from "../redux/slices/editor.slice";
 
-const MediaListSquareItems = ({ data, handleSelectedImg, pk }) => {
+const MediaListSquareItems = ({ data }) => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const [sliderInstanceRef, slider] = useKeenSlider({
         loop: false,
         mode: "snap",
@@ -49,6 +54,11 @@ const MediaListSquareItems = ({ data, handleSelectedImg, pk }) => {
             slider.current.update(); // Refresh the instance
         }
     }, [data, slider])
+
+    const handleSelectedImg = (item) => {
+        dispatch(updateFrameImage(item))
+        navigate('/editor')
+    }
 
     return (
         <Box sx={{ width: '100%', overflow: 'hidden', position: 'relative', mt: 2 }}>

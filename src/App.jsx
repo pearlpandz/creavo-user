@@ -94,6 +94,7 @@ function App() {
                                 <Route element={<ProtectedRoute isAuthenticated={isAuthenticated} />}>
                                     <Route path="/" element={<Home />} />
                                     <Route path="/category/:id" element={<CategoryPage />} />
+                                    <Route path="/category/:id/:sub" element={<CategoryPage />} />
                                     <Route path="/account" element={<AccountPage />} />
                                     <Route path="/frames" element={<FramesPage />} />
                                     <Route path="/editor" element={<Editor />} />
