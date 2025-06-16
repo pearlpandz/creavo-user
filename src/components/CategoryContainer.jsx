@@ -5,7 +5,7 @@ import LanguageQuoteContainer from './LanguageQuoteContainer';
 import MediaContainer from './MediaContainer';
 
 function CategoryContainer(props) {
-    const { item, handleSelectedImg } = props;
+    const { item } = props;
     const limit = 15;
     const skip = 0;
     //const [skip, setSkip] = useState(0);
@@ -23,18 +23,18 @@ function CategoryContainer(props) {
 
     if (item.name.toLowerCase() === 'daily inspiration') {
         return (
-            <DailyInspirationContainer pk={item.id} title={item.name} data={item} media={data?.media} />
+            <DailyInspirationContainer title={item.name} data={item} media={data?.media} />
         )
     }
 
     if (item.name.toLowerCase() === 'language quotes') {
         return (
-            <LanguageQuoteContainer pk={item.id} title={item.name} data={item} handleSelectedImg={handleSelectedImg} media={data?.media} subCategoryId={subCategoryId} setSelectedSubcategory={setSelectedSubcategory} />
+            <LanguageQuoteContainer title={item.name} data={item} media={data?.media} subCategoryId={subCategoryId} setSelectedSubcategory={setSelectedSubcategory} />
         )
     }
 
     return (
-        <MediaContainer pk={item.id} title={item.name} data={item} handleSelectedImg={handleSelectedImg} media={data?.media} subCategoryId={subCategoryId} setSelectedSubcategory={setSelectedSubcategory} />
+        <MediaContainer title={item.name} data={item} media={data?.media} subCategoryId={subCategoryId} setSelectedSubcategory={setSelectedSubcategory} />
     )
 }
 

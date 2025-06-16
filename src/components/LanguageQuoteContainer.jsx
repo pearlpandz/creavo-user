@@ -2,7 +2,7 @@ import { Box, Button, Typography } from '@mui/material';
 import MediaListSquareItems from './MediaListSquareItems';
 
 
-const LanguageQuoteContainer = ({ data, title = 'Trending', handleSelectedImg, media: mediaList = [], subCategoryId, setSelectedSubcategory, pk }) => {
+const LanguageQuoteContainer = ({ data, title = 'Trending', media: mediaList = [], subCategoryId, setSelectedSubcategory }) => {
 
     const handleSelection = (e) => {
         const selected = e.currentTarget.innerText;
@@ -58,7 +58,7 @@ const LanguageQuoteContainer = ({ data, title = 'Trending', handleSelectedImg, m
                     </>
                 )
             }
-            <MediaListSquareItems data={mediaList} handleSelectedImg={handleSelectedImg} pk={pk} />
+            <MediaListSquareItems data={mediaList} />
         </Box>
     )
 }

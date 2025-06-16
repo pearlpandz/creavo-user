@@ -2,10 +2,13 @@ import { useState, useEffect } from "react";
 import { useKeenSlider } from "keen-slider/react";
 import { Box, IconButton, Typography } from "@mui/material";
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
-import { useNavigate } from "react-router";
 import MediaCard from "./MediaCard";
+import { updateFrameImage } from "../redux/slices/editor.slice";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
 
-const MediaList = ({ data, handleSelectedImg, shouldShow = true, noOfCards = 6, pk }) => {
+const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
+    const dispatch = useDispatch();
     const navigate = useNavigate();
     const [sliderInstanceRef, slider] = useKeenSlider({
         loop: false,
@@ -51,6 +54,11 @@ const MediaList = ({ data, handleSelectedImg, shouldShow = true, noOfCards = 6, 
             slider.current.update(); // Refresh the instance
         }
     }, [data, slider])
+
+    const handleSelectedImg = (item) => {
+        dispatch(updateFrameImage(item))
+        navigate('/editor')
+    }
 
     return (
         <Box sx={{ width: '100%', overflow: 'hidden', position: 'relative', mt: 2 }}>
@@ -109,21 +117,6 @@ const MediaList = ({ data, handleSelectedImg, shouldShow = true, noOfCards = 6, 
                                 </Box>
                             ))
                         }
-                        <Box
-                            className="keen-slider__slide"
-                            onClick={() => { navigate(`/category/${pk}`) }}
-                            sx={{ p: 1, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', }}
-                        >
-                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }} component='div'>
-                                <Box sx={{
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid #444',
-                                    width: 24,
-                                    height: 24,
-                                    borderRadius: 50
-                                }} component='div'><ArrowForwardIos sx={{ ml: 0, width: 16 }} /></Box>
-                                <Typography sx={{ fontSize: 14 }}>View All</Typography>
-                            </Box>
-                        </Box>
                     </>
                 ) : (
                     <Typography>No Media Found!</Typography>

@@ -7,7 +7,8 @@ import placeholder from '/assets/placeholder.webp'
 
 // Image Component
 const CanvasImage = ({ element, isSelected, onSelect, onChange, isEditable = true }) => {
-  const imgSrc = element.src ?? placeholder;
+  let imgSrc = element.src ?? placeholder;
+  imgSrc = imgSrc.replace('http://', 'https://')
   const [image] = useImage(imgSrc, "anonymous");
   console.log('element.src', image)
   const shapeRef = useRef();
@@ -46,7 +47,7 @@ const CanvasImage = ({ element, isSelected, onSelect, onChange, isEditable = tru
     <>
       <Image
         ref={shapeRef}
-        scale={{ x: element.scaleX/2, y: element.scaleY/2 }}
+        scale={{ x: element.scaleX / 2, y: element.scaleY / 2 }}
         fill={element.color}
         image={image}
         x={element.x}

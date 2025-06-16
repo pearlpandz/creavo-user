@@ -2,10 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import CanvasRenderer from "../CanvasComponents/CanvasRenderer";
 import { SIDEBAR } from "../constants";
 import './Editor.css';
-import { useTemplateCategories, useTemplateDetail, useTemplates } from "../hook/usePageData";
+import { useProfile, useTemplateCategories, useTemplateDetail, useTemplates } from "../hook/usePageData";
+import { useEditor } from "../redux/slices/editor.slice";
 
-function Editor() {
+export default function Editor() {
     const { data: templateCategories, isLoading, isFetching, isRefetching } = useTemplateCategories();
+    const { frameImg } = useEditor();
+    const { data: profile } = useProfile();
     const [selectedCategory, setSelectedCategory] = useState(null)
     const [selectedTemplate, setSelectedTemplate] = useState(null)
 
@@ -30,11 +33,8 @@ function Editor() {
         enabled: !!selectedTemplate?._id
     })
 
-    const selectedImg = null;
-
     const [selectedSidebar, setSelectedSidebar] = useState(SIDEBAR[0].key)
     const [selectedTheme, setSelectedTheme] = useState(null)
-    const businessDetails = JSON.parse(localStorage.getItem('companyDetails')) ?? {}
 
     const loading = isLoading || isFetching || isRefetching || isLoading1 || isFetching1 || isRefetching1
 
@@ -102,16 +102,12 @@ function Editor() {
                 </div>
 
                 {selectedTemplate && <div className="canvas-container">
-                    <CanvasRenderer theme={selectedTheme} selectedImg={selectedImg} template={selectedTemplateDetail} businessDetails={businessDetails} />
+                    <CanvasRenderer theme={selectedTheme} selectedImg={frameImg} template={selectedTemplateDetail} profile={profile} />
                 </div>}
             </div>
         </>
     )
 }
-
-export default Editor;
-
-
 
 const FramesContainer = ({ templates, selectedTemplate, setSelectedTemplate, selectedCategory, setSelectedCategory, templateCategories, loading }) => {
     if (loading) {
