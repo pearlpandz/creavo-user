@@ -3,11 +3,13 @@ import CanvasRenderer from "../CanvasComponents/CanvasRenderer";
 import { SIDEBAR } from "../constants";
 import './Editor.css';
 import { useProfile, useTemplateCategories, useTemplateDetail, useTemplates } from "../hook/usePageData";
-import { useEditor } from "../redux/slices/editor.slice";
+import { updateSelectedTemplate, useEditor } from "../redux/slices/editor.slice";
+import { useDispatch } from "react-redux";
 
 export default function Editor() {
+    const dispatch = useDispatch();
     const { data: templateCategories, isLoading, isFetching, isRefetching } = useTemplateCategories();
-    const { frameImg } = useEditor();
+    const { frameImg, selectedTemp } = useEditor();
     const { data: profile } = useProfile();
     const [selectedCategory, setSelectedCategory] = useState(null)
     const [selectedTemplate, setSelectedTemplate] = useState(null)
@@ -24,10 +26,15 @@ export default function Editor() {
     });
 
     useEffect(() => {
-        if (templates?.length > 0) {
-            setSelectedTemplate(templates[0])
+        if (selectedTemp) {
+            setSelectedTemplate(selectedTemp)
         }
-    }, [templates])
+        else if (templates?.length > 0) {
+            setSelectedTemplate(templates[0])
+        } else {
+            setSelectedTemplate(null)
+        }
+    }, [selectedTemp, templates])
 
     const { data: selectedTemplateDetail } = useTemplateDetail(selectedTemplate?._id, {
         enabled: !!selectedTemplate?._id
@@ -82,6 +89,11 @@ export default function Editor() {
         }
     }, [selectedSidebar, framesContainer, themesContainer])
 
+    useEffect(() => {
+        return () => {
+            dispatch(updateSelectedTemplate(null))
+        }
+    }, [])
 
     return (
         <>
@@ -116,6 +128,8 @@ const FramesContainer = ({ templates, selectedTemplate, setSelectedTemplate, sel
         </div>
     }
 
+    const selectedCateogoryItems = templates?.filter(template => template.category === selectedCategory?.name);
+
     return (
         <div className="frame-container">
             <div className="frames-section">
@@ -128,9 +142,9 @@ const FramesContainer = ({ templates, selectedTemplate, setSelectedTemplate, sel
                 <div className="frame-scroll-view">
                     <div className="frames">
                         {
-                            templates?.filter(template => template.category === selectedCategory?.name).length > 0 ?
-                                templates?.filter(template => template.category === selectedCategory?.name).map((template, index) => (
-                                    <button title={template.name} style={{ border: selectedTemplate?.id === template.id ? `1px solid #000` : 'none' }} onClick={() => setSelectedTemplate(template)} key={index}>
+                            selectedCateogoryItems.length > 0 ?
+                                selectedCateogoryItems.map((template, index) => (
+                                    <button title={template.name} style={{ borderStyle: selectedTemplate?._id === template._id ? 'solid' : 'dotted' }} onClick={() => setSelectedTemplate(template)} key={index}>
                                         <img src={template.image} alt={template.name} />
                                     </button>
                                 )) :

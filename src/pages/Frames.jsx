@@ -1,9 +1,13 @@
 import { Box, Button, IconButton, Tab, Tabs } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useTemplateCategories, useTemplates } from '../hook/usePageData';
-import { useSearchParams } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
+import { useDispatch } from 'react-redux';
+import { updateSelectedTemplate } from '../redux/slices/editor.slice';
 
 function FramesPage() {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { data: templateCategories } = useTemplateCategories();
     const [selectedCategory, setSelectedCategory] = useState(null)
     const [value, setValue] = React.useState(0);
@@ -41,6 +45,11 @@ function FramesPage() {
         setValue(newValue);
     };
 
+    const handleSelect = (template) => {
+        dispatch(updateSelectedTemplate(template))
+        navigate('/editor')
+    }
+
     return (
         <Box sx={{ p: 2, width: '100%' }}>
             <Tabs
@@ -67,7 +76,7 @@ function FramesPage() {
                     ) :
                         templates?.length > 0 ?
                             templates?.map((template) => (
-                                <Button key={template._id} sx={{ width: 200 }}>
+                                <Button key={template._id} sx={{ width: 200 }} onClick={() => handleSelect(template)}>
                                     <img src={template.image} alt={template.name} width='100%' height='100%' style={{ objectFit: 'contain' }} />
                                 </Button>
                             )) :
