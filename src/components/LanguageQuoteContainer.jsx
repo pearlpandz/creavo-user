@@ -4,9 +4,8 @@ import MediaListSquareItems from './MediaListSquareItems';
 
 const LanguageQuoteContainer = ({ data, title = 'Trending', media: mediaList = [], subCategoryId, setSelectedSubcategory }) => {
 
-    const handleSelection = (e) => {
-        const selected = e.currentTarget.innerText;
-        setSelectedSubcategory(selected);
+    const handleSelection = (id) => {
+        setSelectedSubcategory(id);
     }
 
     return (
@@ -31,11 +30,11 @@ const LanguageQuoteContainer = ({ data, title = 'Trending', media: mediaList = [
                                 size='small'
                                 sx={{
                                     textTransform: 'capitalize',
-                                    background: subCategoryId?.toLowerCase() === 'all' ? '#3C3892' : '#DEDCFF',
-                                    color: subCategoryId?.toLowerCase() === 'all' ? '#fff' : '#000',
+                                    background: subCategoryId === 'all' ? '#3C3892' : '#DEDCFF',
+                                    color: subCategoryId === 'all' ? '#fff' : '#000',
                                     boxShadow: 'none'
                                 }}
-                                onClick={handleSelection}
+                                onClick={() => handleSelection('all')}
                             >All</Button>
                             {
                                 data?.subcategories?.map((item) => (
@@ -50,7 +49,7 @@ const LanguageQuoteContainer = ({ data, title = 'Trending', media: mediaList = [
                                             color: subCategoryId === item?.id ? '#fff' : '#000',
                                             boxShadow: 'none'
                                         }}
-                                        onClick={handleSelection}
+                                        onClick={() => handleSelection(item.id)}
                                     >{item.name}</Button>
                                 ))
                             }

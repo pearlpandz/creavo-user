@@ -14,7 +14,7 @@ function CategoryContainer(props) {
         categoryId: item.id,
         limit,
         skip,
-        subCategoryId: 'all'
+        subCategoryId
     });
 
     if (!item || !item.name) {

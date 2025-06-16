@@ -101,7 +101,9 @@ const MediaListSquareItems = ({ data }) => {
             )}
 
             {/* Slider */}
-            <Box ref={sliderInstanceRef} className="keen-slider" sx={{ width: '100%' }}>
+            <Box key={data.map(item => item.id).join('-')} ref={sliderInstanceRef} className="keen-slider"
+                sx={{ width: '100%' }}
+            >
                 {data.map((item, index) => (
                     <Box
                         key={item.id}
