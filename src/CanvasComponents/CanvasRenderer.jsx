@@ -10,6 +10,7 @@ import MultiPointLine from "./CanvasMultiPointLine";
 import CanvasPolygon from "./CanvasPolygon";
 import CanvasWedge from "./CanvasWedge";
 import placeholder from '/assets/placeholder.webp'
+import Watermark from "./WaterMark";
 
 const CanvasRenderer = ({ theme, selectedImg, template, profile }) => {
   const [elements, setElements] = useState([]);
@@ -19,6 +20,10 @@ const CanvasRenderer = ({ theme, selectedImg, template, profile }) => {
   const businessDetails = profile?.company_details ?? null;
   const politicalDetails = profile?.political ?? null;
   const productsDetails = useMemo(() => profile?.products ?? [], [profile?.products]);
+
+  const showWatermark = useMemo(() => {
+    return !profile?.license || profile?.day_downloads >= 3 || !profile?.is_verified;
+  }, [profile?.license, profile?.day_downloads, profile?.is_verified]);
 
   useEffect(() => {
     const updatedElements = template?.elements?.map((el) => {
@@ -191,6 +196,16 @@ const CanvasRenderer = ({ theme, selectedImg, template, profile }) => {
             }
             return null;
           })}
+
+          {showWatermark && <Watermark
+            text="creavo.in"
+            width={width}
+            height={height}
+            opacity={0.2}
+            fontSize={32}
+            rotation={0}
+            gap={180}
+          />}
         </Layer>
       </Stage>
 

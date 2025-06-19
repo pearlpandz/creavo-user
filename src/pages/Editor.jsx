@@ -3,12 +3,12 @@ import CanvasRenderer from "../CanvasComponents/CanvasRenderer";
 import { SIDEBAR } from "../constants";
 import './Editor.css';
 import { useProfile, useTemplateCategories, useTemplateDetail, useTemplates } from "../hook/usePageData";
-import { updateFrameImage, updateSelectedTemplate, useEditor } from "../redux/slices/editor.slice";
+import { resetEditor, updateFrameImage, useEditor } from "../redux/slices/editor.slice";
 import { useDispatch } from "react-redux";
 import CompanyDetails from "../components/Account/CompanyDetails";
 import ProductInfo from "../components/Account/ProductInfo";
 import PoliticalDetails from "../components/Account/Political";
-import { Box, Typography, ToggleButtonGroup, ToggleButton, TextField, InputLabel, Stack, Button } from "@mui/material";
+import { Box, Typography, TextField, InputLabel, Stack, Button } from "@mui/material";
 
 export default function Editor() {
     const dispatch = useDispatch();
@@ -122,7 +122,7 @@ export default function Editor() {
 
     useEffect(() => {
         return () => {
-            dispatch(updateSelectedTemplate(null))
+            dispatch(resetEditor())
         }
     }, [dispatch])
 
