@@ -2,8 +2,14 @@ import { AppBar, Toolbar, Typography, Box, Avatar, IconButton, Button } from '@m
 import MenuIcon from '@mui/icons-material/Menu';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { useNavigate } from 'react-router';
 
 export default function TopNav({ onMenuClick, darkMode, onToggleTheme }) {
+    const navigate = useNavigate();
+    const handleRedirect = () => {
+        navigate('/');
+    }
+
     return (
         <AppBar position="static" color="inherit" elevation={0} sx={{ borderBottom: 1, borderColor: 'divider' }}>
             <Toolbar sx={{ justifyContent: 'space-between' }}>
@@ -11,7 +17,7 @@ export default function TopNav({ onMenuClick, darkMode, onToggleTheme }) {
                     <IconButton onClick={onMenuClick} sx={{ mr: 2 }}>
                         <MenuIcon />
                     </IconButton>
-                    <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                    <Typography variant="h6" sx={{ fontWeight: 700, cursor: 'pointer' }} onClick={handleRedirect}>
                         Creavo
                     </Typography>
                 </Box>

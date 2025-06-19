@@ -124,7 +124,7 @@ export default function Editor() {
         return () => {
             dispatch(resetEditor())
         }
-    }, [dispatch])
+    }, [])
 
     return (
         <>
