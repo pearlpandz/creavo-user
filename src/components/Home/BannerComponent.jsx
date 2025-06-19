@@ -1,8 +1,15 @@
 import { Box, Typography, Button, Stack } from '@mui/material';
 import React from 'react';
+import { useNavigate } from 'react-router';
 
 const BannerComponent = (params) => {
+    const navigate = useNavigate()
     const { title, description } = params;
+
+    const handleRedirection = () => {
+        navigate('/editor')
+    }
+
     return (
         <Box
             sx={theme => ({
@@ -50,6 +57,7 @@ const BannerComponent = (params) => {
                             color: '#444'
                         },
                     })}
+                    onClick={handleRedirection}
                 >
                     Start Designing
                 </Button>
@@ -66,6 +74,7 @@ const BannerComponent = (params) => {
                             color: '#444'
                         },
                     })}
+                    onClick={handleRedirection}
                 >
                     Create New
                 </Button>
