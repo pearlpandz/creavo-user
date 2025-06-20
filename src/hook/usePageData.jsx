@@ -224,3 +224,26 @@ export const usePatchCompanyDetails = (onSuccessCallback) => {
         },
     });
 };
+
+const fetchCateogryDetail = async ({ categoryId }) => {
+    const res = await axios.get(`${SETTINGS.DJANGO_URL}/api/categories/${categoryId}/`);
+    return res.data;
+};
+
+export const useCateogryDetail = (categoryId) => {
+    const queryClient = useQueryClient();
+    const queryKey = ['category', categoryId];
+
+    return useQuery({
+        queryKey,
+        queryFn: async () => {
+            const cached = queryClient.getQueryData(queryKey);
+            if (cached) return cached;
+            return await fetchCateogryDetail({ categoryId });
+        },
+        enabled: !!categoryId, // Only run if categoryId is truthy
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 10, // 10 mins
+        cacheTime: 1000 * 60 * 10, // 10 mins
+    });
+};

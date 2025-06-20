@@ -22,7 +22,7 @@ const MediaContainer = ({ data, title = 'Trending', subCategoryId = 'all', setSe
                         {title}
                     </Typography>
                     <Typography component='p' sx={{ fontSize: 13 }}>
-                        {data?.description || 'Explore our collection of media.'}
+                        {data?.short_description || 'Explore our collection of media.'}
                     </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }} component={Link} to={`/category/${data?.id}`}>

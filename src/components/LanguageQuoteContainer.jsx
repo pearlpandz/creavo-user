@@ -19,7 +19,7 @@ const LanguageQuoteContainer = ({ data, title = 'Trending', media: mediaList = [
                 {title}
             </Typography>
             <Typography component='p' sx={{ fontSize: 13 }}>
-                {data?.description || 'Explore our collection of media.'}
+                {data?.short_description || 'Explore our collection of media.'}
             </Typography>
             {
                 data?.subcategories?.length > 0 && (
