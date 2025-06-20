@@ -75,3 +75,12 @@ export function getCrop(image, size, clipPosition = "center-middle") {
     cropHeight: newHeight,
   };
 }
+
+// Responsive: show max 40 chars for description on mobile
+export const getShortDescription = (short_description, limit = 40) => {
+  const desc = short_description || "Explore our collection of media.";
+  if (window.innerWidth <= 600 && desc.length > limit) {
+    return desc.slice(0, limit) + "...";
+  }
+  return desc;
+};

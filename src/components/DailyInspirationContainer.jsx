@@ -1,5 +1,6 @@
 import { Box, Grid, Typography } from '@mui/material';
 import { useNavigate } from 'react-router';
+import { getShortDescription } from '../utils';
 
 const DailyInspirationContainer = ({ data, title = 'Trending', media }) => {
     const navigate = useNavigate();
@@ -23,7 +24,7 @@ const DailyInspirationContainer = ({ data, title = 'Trending', media }) => {
                 {title}
             </Typography>
             <Typography component='p' sx={{ fontSize: 13 }}>
-                {data?.short_description || 'Explore our collection of media.'}
+                {getShortDescription(data?.short_description)}
             </Typography>
             {
                 data?.subcategories?.length > 0 && (

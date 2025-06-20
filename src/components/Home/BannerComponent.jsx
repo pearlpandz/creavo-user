@@ -47,7 +47,12 @@ const BannerComponent = ({ detail = {} }) => {
             >
                 {description}
             </Typography>
-            <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
+            <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={2}
+                justifyContent="center"
+                flexWrap="wrap"
+            >
                 <Button
                     variant="contained"
                     sx={() => ({

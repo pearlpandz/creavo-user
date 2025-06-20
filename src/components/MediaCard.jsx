@@ -12,13 +12,35 @@ function MediaCard({ item, shouldShow = true, width, height }) {
                 boxShadow: "1px 3px 6px 3px rgb(0 0 0 / 30%)",
             },
         }} component='div'>
-            <Box sx={{ width: '100%', height: height, overflow: 'hidden' }}>
+            <Box sx={{ width: '100%', height: height, overflow: 'hidden', position: 'relative' }}>
                 <img
                     src={item.image}
                     alt={item.id}
                     width="100%"
                     height="100%"
-                    style={{ objectFit: 'cover' }}
+                    style={{
+                        objectFit: 'cover',
+                        position: 'relative',
+                        zIndex: 1
+                    }}
+                    loading="lazy"
+                />
+                <img
+                    src={item.image}
+                    alt={item.id}
+                    width="100%"
+                    height="100%"
+                    style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        filter: 'blur(20px)',
+                        transform: 'scale(1.1)',
+                        left: 0,
+                        top: 0,
+                        zIndex: 0
+                    }}
                     loading="lazy"
                 />
             </Box>
