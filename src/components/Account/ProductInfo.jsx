@@ -101,10 +101,35 @@ const ProductInfo = ({ productList, isEditorView = false }) => {
         <Box sx={{ p: isEditorView ? 0 : 2 }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Box>
-                    <Typography variant="h4" fontWeight={700} mb={isEditorView ? '0 !important' : 1}>Product Details</Typography>
-                    {!isEditorView && <Typography variant="body2" color="text.secondary" mb={3}>
-                        Manage your profile
-                    </Typography>}
+                    <Typography
+                        variant="h4"
+                        fontWeight={700}
+                        mb={isEditorView ? '0 !important' : 1}
+                        sx={{
+                            fontSize: {
+                                xs: '1.5rem', // mobile
+                                sm: '2rem',   // tablet
+                                md: '2.125rem', // desktop (default h4)
+                            }
+                        }}
+                    >
+                        Product Details
+                    </Typography>
+                    {!isEditorView && (
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            mb={3}
+                            sx={{
+                                fontSize: {
+                                    xs: '0.9rem',
+                                    sm: '1rem',
+                                }
+                            }}
+                        >
+                            Manage your profile
+                        </Typography>
+                    )}
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
                     {ActionButtons}
@@ -117,7 +142,20 @@ const ProductInfo = ({ productList, isEditorView = false }) => {
                     {
                         products?.map((product, index) => (
                             <Grid size={isEditorView ? { xs: 12 } : { xs: 12, sm: 6, md: 4, lg: 3 }} key={product.id}>
-                                <Typography sx={styles} variant="caption" color="text.secondary">product {index + 1}</Typography>
+                                <Typography
+                                    sx={{
+                                        ...styles,
+                                        fontSize: {
+                                            xs: '0.8rem',
+                                            sm: '0.9rem',
+                                            md: '0.95rem'
+                                        }
+                                    }}
+                                    variant="caption"
+                                    color="text.secondary"
+                                >
+                                    product {index + 1}
+                                </Typography>
                                 <img src={product.image} width="100px" height="100px" style={{ objectFit: 'contain', display: 'block', border: '1px solid #d0d0d0', marginBottom: 10 }} />
                                 {mode !== 'view' && <input type="file" onChange={handleFileChange} name={`image-${product.id}`} id={`image-${product.id}`} />}
                             </Grid>

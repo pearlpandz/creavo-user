@@ -1,5 +1,5 @@
 import { Box, Typography, Avatar, Button, Grid, Paper, Divider, Input, TextField, Snackbar, Alert, TextareaAutosize, IconButton } from '@mui/material';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import ModeEditOutlinedIcon from '@mui/icons-material/ModeEditOutlined';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import { SETTINGS } from '../../constants/settings';
@@ -42,7 +42,7 @@ const PoliticalDetails = ({ detail, isEditorView = false }) => {
     const { mutateAsync } = useMutation({ mutationFn: MutationFn });
 
 
-    const handleSave = async () => {
+    const handleSave = useCallback(async () => {
         const promises = [];
 
         // Leader
@@ -90,7 +90,7 @@ const PoliticalDetails = ({ detail, isEditorView = false }) => {
         } else {
             console.log(allFulfilled)
         }
-    }
+    }, [detail.id, leader, mutateAsync, party, queryClient, supporters])
 
     const handleClose = (event, reason) => {
         if (reason === 'clickaway') {
@@ -191,33 +191,63 @@ const PoliticalDetails = ({ detail, isEditorView = false }) => {
         <Box sx={{ p: isEditorView ? 0 : 2 }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Box>
-                    <Typography variant="h4" fontWeight={700} mb={isEditorView ? '0 !important' : 1}>Political Details</Typography>
-                    {!isEditorView && <Typography variant="body2" color="text.secondary" mb={3}>
-                        Manage your profile
-                    </Typography>}
+                    <Typography
+                        variant="h4"
+                        fontWeight={700}
+                        mb={isEditorView ? '0 !important' : 1}
+                        sx={{
+                            fontSize: { xs: '1.3rem', sm: '2.125rem' } // Responsive font size
+                        }}
+                    >
+                        Political Details
+                    </Typography>
+                    {!isEditorView && (
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            mb={3}
+                            sx={{
+                                fontSize: { xs: '0.9rem', sm: '1rem' }
+                            }}
+                        >
+                            Manage your profile
+                        </Typography>
+                    )}
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
                     {ActionButtons}
-                    {!isEditorView && <Button variant="outlined" size="small" onClick={() => setMode('view')}>Cancel</Button>}
+                    {!isEditorView && (
+                        <Button variant="outlined" size="small" onClick={() => setMode('view')}>
+                            Cancel
+                        </Button>
+                    )}
                 </Box>
             </Box>
 
             <Paper elevation={0} sx={isEditorView ? editorPaerStyle : paperStyle}>
                 <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                    <Typography fontWeight={600}>Leader Details</Typography>
+                    <Typography fontWeight={600} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+                        Leader Details
+                    </Typography>
                 </Box>
                 <Grid container spacing={2}>
                     <Grid size={{ xs: 12 }}>
-                        <Typography sx={styles} variant="caption" color="text.secondary">leader image</Typography>
+                        <Typography sx={{ ...styles, fontSize: { xs: '0.8rem', sm: '0.875rem' } }} variant="caption" color="text.secondary">
+                            leader image
+                        </Typography>
                         <img src={leader.image} width="100px" height="100px" style={{ objectFit: 'contain', display: 'block', border: '1px solid #d0d0d0', marginBottom: 10 }} />
                         {mode !== 'view' && <input type="file" onChange={handleLeaderFileChange} name="image" id="image" />}
                     </Grid>
                     <Grid size={{ xs: 12, md: isEditorView ? 12 : 6 }}>
-                        <Typography sx={styles} variant="caption" color="text.secondary">leader name</Typography>
+                        <Typography sx={{ ...styles, fontSize: { xs: '0.8rem', sm: '0.875rem' } }} variant="caption" color="text.secondary">
+                            leader name
+                        </Typography>
                         <ReadOnlyText name="leader_name" readOnly={mode === 'view'} value={leader.leader_name} onChange={handleLeaderChange} />
                     </Grid>
                     <Grid size={{ xs: 12, md: isEditorView ? 12 : 6 }}>
-                        <Typography sx={styles} variant="caption" color="text.secondary">leader designation</Typography>
+                        <Typography sx={{ ...styles, fontSize: { xs: '0.8rem', sm: '0.875rem' } }} variant="caption" color="text.secondary">
+                            leader designation
+                        </Typography>
                         <ReadOnlyText name="leader_designation" readOnly={mode === 'view'} value={leader.leader_designation} onChange={handleLeaderChange} />
                     </Grid>
                 </Grid>
@@ -225,16 +255,22 @@ const PoliticalDetails = ({ detail, isEditorView = false }) => {
 
             <Paper elevation={0} sx={isEditorView ? editorPaerStyle : paperStyle}>
                 <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                    <Typography fontWeight={600}>Party Details</Typography>
+                    <Typography fontWeight={600} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+                        Party Details
+                    </Typography>
                 </Box>
                 <Grid container spacing={2}>
                     <Grid size={{ xs: 12 }}>
-                        <Typography sx={styles} variant="caption" color="text.secondary">Party Logo</Typography>
+                        <Typography sx={{ ...styles, fontSize: { xs: '0.8rem', sm: '0.875rem' } }} variant="caption" color="text.secondary">
+                            Party Logo
+                        </Typography>
                         <img src={party.image} width="100px" height="100px" style={{ objectFit: 'contain', display: 'block', border: '1px solid #d0d0d0', marginBottom: 10 }} />
                         {mode !== 'view' && <input type="file" onChange={handlePartyFileChange} name="image" id="image" />}
                     </Grid>
                     <Grid size={{ xs: 12, md: isEditorView ? 12 : 6 }}>
-                        <Typography sx={styles} variant="caption" color="text.secondary">party name</Typography>
+                        <Typography sx={{ ...styles, fontSize: { xs: '0.8rem', sm: '0.875rem' } }} variant="caption" color="text.secondary">
+                            party name
+                        </Typography>
                         <ReadOnlyText name="party_name" readOnly={mode === 'view'} value={party.party_name} onChange={handlePartyChange} />
                     </Grid>
                 </Grid>
@@ -242,33 +278,44 @@ const PoliticalDetails = ({ detail, isEditorView = false }) => {
 
             <Paper elevation={0} sx={isEditorView ? editorPaerStyle : paperStyle}>
                 <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-                    <Typography fontWeight={600}>Supporters</Typography>
+                    <Typography fontWeight={600} sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+                        Supporters
+                    </Typography>
                 </Box>
                 <Grid container spacing={2}>
-                    {
-                        supporters?.map((supporter) => (
-                            <Grid size={{ xs: 12, md: isEditorView ? 12 : 4 }} key={supporter.id}>
-                                <Grid container spacing={2}>
-                                    <Grid size={{ xs: 12 }} key={supporter.id}>
-                                        <Typography sx={styles} variant="caption" color="text.secondary">Supporter Image</Typography>
-                                        <img src={supporter.image} width="100px" height="100px" style={{ objectFit: 'contain', display: 'block', border: '1px solid #d0d0d0', marginBottom: 10 }} />
-                                        {mode !== 'view' && <input type="file" onChange={handleSupporterFileChange} name={`image-${supporter.id}`} id={`image-${supporter.id}`} />}
-                                    </Grid>
-                                    <Grid size={{ xs: 12 }}>
-                                        <Typography sx={styles} variant="caption" color="text.secondary">supporter name</Typography>
-                                        <ReadOnlyText name={`supporter_name-${supporter.id}`} readOnly={mode === 'view'} value={supporter.supporter_name} onChange={handleSupporterChange} />
-                                    </Grid>
+                    {supporters?.map((supporter) => (
+                        <Grid size={{ xs: 12, md: isEditorView ? 12 : 4 }} key={supporter.id}>
+                            <Grid container spacing={2}>
+                                <Grid size={{ xs: 12 }} key={supporter.id}>
+                                    <Typography sx={{ ...styles, fontSize: { xs: '0.8rem', sm: '0.875rem' } }} variant="caption" color="text.secondary">
+                                        Supporter Image
+                                    </Typography>
+                                    <img src={supporter.image} width="100px" height="100px" style={{ objectFit: 'contain', display: 'block', border: '1px solid #d0d0d0', marginBottom: 10 }} />
+                                    {mode !== 'view' && (
+                                        <input type="file" onChange={handleSupporterFileChange} name={`image-${supporter.id}`} id={`image-${supporter.id}`} />
+                                    )}
+                                </Grid>
+                                <Grid size={{ xs: 12 }}>
+                                    <Typography sx={{ ...styles, fontSize: { xs: '0.8rem', sm: '0.875rem' } }} variant="caption" color="text.secondary">
+                                        supporter name
+                                    </Typography>
+                                    <ReadOnlyText name={`supporter_name-${supporter.id}`} readOnly={mode === 'view'} value={supporter.supporter_name} onChange={handleSupporterChange} />
                                 </Grid>
                             </Grid>
-                        ))
-                    }
+                        </Grid>
+                    ))}
                 </Grid>
             </Paper>
 
             {isEditorView && mode !== 'view' && (
                 <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
-                    <Button fullWidth variant="outlined" size="small" onClick={() => setMode('view')}>Cancel</Button>
-                    <Button fullWidth variant="contained" size="small" onClick={handleSave}><SaveOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} />Save</Button>
+                    <Button fullWidth variant="outlined" size="small" onClick={() => setMode('view')}>
+                        Cancel
+                    </Button>
+                    <Button fullWidth variant="contained" size="small" onClick={handleSave}>
+                        <SaveOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} />
+                        Save
+                    </Button>
                 </Box>
             )}
 

@@ -92,14 +92,36 @@ const CompanyDetails = ({ detail, isEditorView = false }) => {
         <Box sx={{ p: isEditorView ? 0 : 2 }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
                 <Box>
-                    <Typography variant="h4" fontWeight={700} mb={isEditorView ? '0 !important' : 1}>Company Details</Typography>
-                    {!isEditorView && <Typography variant="body2" color="text.secondary" mb={3}>
-                        Manage your profile
-                    </Typography>}
+                    <Typography
+                        variant="h4"
+                        fontWeight={700}
+                        mb={isEditorView ? '0 !important' : 1}
+                        sx={{
+                            fontSize: { xs: '1.5rem', sm: '2.125rem' } // Responsive font size
+                        }}
+                    >
+                        Company Details
+                    </Typography>
+                    {!isEditorView && (
+                        <Typography
+                            variant="body2"
+                            color="text.secondary"
+                            mb={3}
+                            sx={{
+                                fontSize: { xs: '0.9rem', sm: '1rem' }
+                            }}
+                        >
+                            Manage your profile
+                        </Typography>
+                    )}
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
                     {ActionButtons}
-                    {!isEditorView && <Button variant="outlined" size="small" onClick={() => setMode('view')}>Cancel</Button>}
+                    {!isEditorView && (
+                        <Button variant="outlined" size="small" onClick={() => setMode('view')}>
+                            Cancel
+                        </Button>
+                    )}
                 </Box>
             </Box>
 
@@ -107,51 +129,162 @@ const CompanyDetails = ({ detail, isEditorView = false }) => {
             <Paper elevation={0} sx={isEditorView ? editorPaerStyle : paperStyle}>
                 <Grid container spacing={2}>
                     <Grid size={{ xs: 12 }}>
-                        <Typography sx={styles} variant="caption" color="text.secondary">logo</Typography>
-                        <img src={profile.image} width="100px" height="100px" style={{ objectFit: 'contain', display: 'block', border: '1px solid #d0d0d0', marginBottom: 10 }} />
-                        {mode !== 'view' && <input type="file" onChange={handleFileChange} name="image" id="image" />}
+                        <Typography
+                            sx={{
+                                ...styles,
+                                fontSize: { xs: '0.85rem', sm: '0.95rem' }
+                            }}
+                            variant="caption"
+                            color="text.secondary"
+                        >
+                            logo
+                        </Typography>
+                        <img
+                            src={profile.image}
+                            width="100px"
+                            height="100px"
+                            style={{
+                                objectFit: 'contain',
+                                display: 'block',
+                                border: '1px solid #d0d0d0',
+                                marginBottom: 10
+                            }}
+                        />
+                        {mode !== 'view' && (
+                            <input type="file" onChange={handleFileChange} name="image" id="image" />
+                        )}
                     </Grid>
                     <Grid size={{ xs: 12, sm: isEditorView ? 12 : 6, md: isEditorView ? 12 : 6 }}>
-                        <Typography sx={styles} variant="caption" color="text.secondary">company name</Typography>
-                        <ReadOnlyText name="company_name" readOnly={mode === 'view'} value={profile.company_name} onChange={handleChange} />
+                        <Typography
+                            sx={{
+                                ...styles,
+                                fontSize: { xs: '0.85rem', sm: '0.95rem' }
+                            }}
+                            variant="caption"
+                            color="text.secondary"
+                        >
+                            company name
+                        </Typography>
+                        <ReadOnlyText
+                            name="company_name"
+                            readOnly={mode === 'view'}
+                            value={profile.company_name}
+                            onChange={handleChange}
+                        />
                     </Grid>
                     <Grid size={{ xs: 12, sm: isEditorView ? 12 : 6, md: isEditorView ? 12 : 6 }}>
-                        <Typography sx={styles} variant="caption" color="text.secondary">email</Typography>
-                        <ReadOnlyText name="email" readOnly={mode === 'view'} value={profile.email} onChange={handleChange} />
+                        <Typography
+                            sx={{
+                                ...styles,
+                                fontSize: { xs: '0.85rem', sm: '0.95rem' }
+                            }}
+                            variant="caption"
+                            color="text.secondary"
+                        >
+                            email
+                        </Typography>
+                        <ReadOnlyText
+                            name="email"
+                            readOnly={mode === 'view'}
+                            value={profile.email}
+                            onChange={handleChange}
+                        />
                     </Grid>
                     <Grid size={{ xs: 12, sm: isEditorView ? 12 : 6, md: isEditorView ? 12 : 6 }}>
-                        <Typography sx={styles} variant="caption" color="text.secondary">primary contact number</Typography>
-                        <ReadOnlyText name="primary_contact" readOnly={mode === 'view'} value={profile.primary_contact} onChange={handleChange} />
+                        <Typography
+                            sx={{
+                                ...styles,
+                                fontSize: { xs: '0.85rem', sm: '0.95rem' }
+                            }}
+                            variant="caption"
+                            color="text.secondary"
+                        >
+                            primary contact number
+                        </Typography>
+                        <ReadOnlyText
+                            name="primary_contact"
+                            readOnly={mode === 'view'}
+                            value={profile.primary_contact}
+                            onChange={handleChange}
+                        />
                     </Grid>
                     <Grid size={{ xs: 12, sm: isEditorView ? 12 : 6, md: isEditorView ? 12 : 6 }}>
-                        <Typography sx={styles} variant="caption" color="text.secondary">secondary contact</Typography>
-                        <ReadOnlyText name="secondary_contact" readOnly={mode === 'view'} value={profile.secondary_contact} onChange={handleChange} />
+                        <Typography
+                            sx={{
+                                ...styles,
+                                fontSize: { xs: '0.85rem', sm: '0.95rem' }
+                            }}
+                            variant="caption"
+                            color="text.secondary"
+                        >
+                            secondary contact
+                        </Typography>
+                        <ReadOnlyText
+                            name="secondary_contact"
+                            readOnly={mode === 'view'}
+                            value={profile.secondary_contact}
+                            onChange={handleChange}
+                        />
                     </Grid>
                     <Grid size={{ xs: 12, sm: isEditorView ? 12 : 6, md: isEditorView ? 12 : 6 }}>
-                        <Typography sx={styles} variant="caption" color="text.secondary">description</Typography>
-                        {
-                            mode === 'view' ?
-                                <Typography>{profile.description}</Typography> :
-                                <TextareaAutosize style={{ maxWidth: 300, width: '100%', resize: 'none', padding: '8.5px 14px', background: 'transparent', fontSize: 16 }} minRows={3} name="description" readOnly={mode === 'view'} value={profile.description} onChange={handleChange} />
-                        }
+                        <Typography
+                            sx={{
+                                ...styles,
+                                fontSize: { xs: '0.85rem', sm: '0.95rem' }
+                            }}
+                            variant="caption"
+                            color="text.secondary"
+                        >
+                            description
+                        </Typography>
+                        {mode === 'view' ? (
+                            <Typography
+                                sx={{
+                                    fontSize: { xs: '1rem', sm: '1.1rem' }
+                                }}
+                            >
+                                {profile.description}
+                            </Typography>
+                        ) : (
+                            <TextareaAutosize
+                                style={{
+                                    maxWidth: 300,
+                                    width: '100%',
+                                    resize: 'none',
+                                    padding: '8.5px 14px',
+                                    background: 'transparent',
+                                    fontSize: '1rem'
+                                }}
+                                minRows={3}
+                                name="description"
+                                readOnly={mode === 'view'}
+                                value={profile.description}
+                                onChange={handleChange}
+                            />
+                        )}
                     </Grid>
                 </Grid>
             </Paper>
 
             {isEditorView && mode !== 'view' && (
                 <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 1 }}>
-                    <Button fullWidth variant="outlined" size="small" onClick={() => setMode('view')}>Cancel</Button>
-                    <Button fullWidth variant="contained" size="small" onClick={handleSave}><SaveOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} />{isPending ? 'Saving...' : 'Save'}</Button>
+                    <Button fullWidth variant="outlined" size="small" onClick={() => setMode('view')}>
+                        Cancel
+                    </Button>
+                    <Button fullWidth variant="contained" size="small" onClick={handleSave}>
+                        <SaveOutlinedIcon sx={{ fontSize: 16, mr: 1, verticalAlign: 'top', mt: '-2px' }} />
+                        {isPending ? 'Saving...' : 'Save'}
+                    </Button>
                 </Box>
             )}
 
-            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-                <Alert
-                    onClose={handleClose}
-                    severity="success"
-                    variant="filled"
-                    sx={{ width: '100%' }}
-                >
+            <Snackbar
+                open={open}
+                autoHideDuration={6000}
+                onClose={handleClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert onClose={handleClose} severity="success" variant="filled" sx={{ width: '100%' }}>
                     Company Details Successfully Updated!
                 </Alert>
             </Snackbar>
