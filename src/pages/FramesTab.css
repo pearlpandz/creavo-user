@@ -1,0 +1,21 @@
+.custom-tab {
+    background: #DEDCFF !important;
+    color: #000 !important;
+    border-radius: 8px !important;
+    min-width: 100px !important;
+    min-height: 30px !important;
+    font-weight: 500 !important;
+    font-size: 12px !important;
+    margin-right: 12px !important;
+    transition: background 0.2s, color 0.2s !important;
+    padding: 10px 12px !important;
+}
+
+.custom-tab.Mui-selected {
+    background: #3C3892 !important;
+    color: #fff !important;
+}
+
+.custom-tab:last-child {
+    margin-right: 0;
+}

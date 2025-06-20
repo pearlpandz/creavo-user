@@ -9,6 +9,7 @@ import CompanyDetails from "../components/Account/CompanyDetails";
 import ProductInfo from "../components/Account/ProductInfo";
 import PoliticalDetails from "../components/Account/Political";
 import { Box, Typography, TextField, InputLabel, Stack, Button } from "@mui/material";
+import EditorMobileMessage from './EditorMobileMessage';
 
 export default function Editor() {
     const dispatch = useDispatch();
@@ -125,6 +126,19 @@ export default function Editor() {
             dispatch(resetEditor())
         }
     }, [])
+
+    // Mobile view detection
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 600);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    if (isMobile) {
+        return <EditorMobileMessage />;
+    }
 
     return (
         <>

@@ -74,7 +74,7 @@ function CategoryPage() {
                 {
                     detail?.subcategories?.length > 0 && (
                         <>
-                            <Box component='div' sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                            <Box component='div' className='horizontal-scroll' sx={{ mt: 2, display: 'flex', flexWrap: 'nowrap', gap: 1 }}>
                                 <Button
                                     variant='contained'
                                     size='small'
@@ -82,7 +82,9 @@ function CategoryPage() {
                                         textTransform: 'capitalize',
                                         background: subCategoryId === 'all' ? '#3C3892' : '#DEDCFF',
                                         color: subCategoryId === 'all' ? '#fff' : '#000',
-                                        boxShadow: 'none'
+                                        boxShadow: 'none',
+                                        whiteSpace: 'nowrap',
+                                        flex: '0 0 auto',
                                     }}
                                     onClick={() => handleSelection('all')}
                                 >All</Button>
@@ -97,7 +99,9 @@ function CategoryPage() {
                                                 textTransform: 'capitalize',
                                                 background: subCategoryId === item?.id ? '#3C3892' : '#DEDCFF',
                                                 color: subCategoryId === item?.id ? '#fff' : '#000',
-                                                boxShadow: 'none'
+                                                boxShadow: 'none',
+                                                whiteSpace: 'nowrap',
+                                                flex: '0 0 auto',
                                             }}
                                             onClick={() => handleSelection(item.id)}
                                         >{item.name}</Button>

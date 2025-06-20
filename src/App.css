@@ -13,3 +13,6 @@
     display: none;
     /* Chrome, Safari, Opera */
 }
+.MuiTabs-indicator {
+    display: none;
+}
