@@ -10,7 +10,7 @@ import MultiPointLine from "./CanvasMultiPointLine";
 import CanvasPolygon from "./CanvasPolygon";
 import CanvasWedge from "./CanvasWedge";
 import placeholder from '/assets/placeholder.webp'
-import Watermark from "./WaterMark";
+import Watermark from "./Watermark";
 
 const CanvasRenderer = ({ theme, selectedImg, template, profile }) => {
   const [elements, setElements] = useState([]);
