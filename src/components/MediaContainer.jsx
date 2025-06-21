@@ -2,12 +2,12 @@ import MediaList from './MediaList';
 import { Box, Button, Typography } from '@mui/material';
 import { ArrowBackIos, ArrowForwardIos } from "@mui/icons-material";
 import { Link } from 'react-router';
+import { getShortDescription } from '../utils';
 
 const MediaContainer = ({ data, title = 'Trending', subCategoryId = 'all', setSelectedSubcategory, media: mediaList = [] }) => {
 
-    const handleSelection = (e) => {
-        const selected = e.currentTarget.innerText;
-        setSelectedSubcategory(selected);
+    const handleSelection = (id) => {
+        setSelectedSubcategory(id);
     }
 
     return (
@@ -23,7 +23,7 @@ const MediaContainer = ({ data, title = 'Trending', subCategoryId = 'all', setSe
                         {title}
                     </Typography>
                     <Typography component='p' sx={{ fontSize: 13 }}>
-                        {data?.description || 'Explore our collection of media.'}
+                        {getShortDescription(data?.short_description)}
                     </Typography>
                 </Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }} component={Link} to={`/category/${data?.id}`}>
@@ -34,17 +34,19 @@ const MediaContainer = ({ data, title = 'Trending', subCategoryId = 'all', setSe
             {
                 data?.subcategories?.length > 0 && (
                     <>
-                        <Box component='div' sx={{ mt: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        <Box component='div' className='horizontal-scroll' sx={{ mt: 2, gap: 1, flexWrap: 'nowrap', alignItems: 'center' }}>
                             <Button
                                 variant='contained'
                                 size='small'
                                 sx={{
                                     textTransform: 'capitalize',
-                                    background: subCategoryId?.toLowerCase() === 'all' ? '#3C3892' : '#DEDCFF',
-                                    color: subCategoryId?.toLowerCase() === 'all' ? '#fff' : '#000',
-                                    boxShadow: 'none'
+                                    background: subCategoryId === 'all' ? '#3C3892' : '#DEDCFF',
+                                    color: subCategoryId === 'all' ? '#fff' : '#000',
+                                    boxShadow: 'none',
+                                    whiteSpace: 'nowrap',
+                                    flex: '0 0 auto',
                                 }}
-                                onClick={handleSelection}
+                                onClick={() => handleSelection('all')}
                             >All</Button>
                             {
                                 data?.subcategories?.map((item) => (
@@ -53,13 +55,14 @@ const MediaContainer = ({ data, title = 'Trending', subCategoryId = 'all', setSe
                                         variant='contained'
                                         size='small'
                                         sx={{
-
                                             textTransform: 'capitalize',
                                             background: subCategoryId === item?.id ? '#3C3892' : '#DEDCFF',
                                             color: subCategoryId === item?.id ? '#fff' : '#000',
-                                            boxShadow: 'none'
+                                            boxShadow: 'none',
+                                            whiteSpace: 'nowrap',
+                                            flex: '0 0 auto',
                                         }}
-                                        onClick={handleSelection}
+                                        onClick={() => handleSelection(item.id)}
                                     >{item.name}</Button>
                                 ))
                             }

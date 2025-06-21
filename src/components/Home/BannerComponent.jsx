@@ -1,12 +1,23 @@
 import { Box, Typography, Button, Stack } from '@mui/material';
 import React from 'react';
+import { useNavigate } from 'react-router';
 
-const BannerComponent = (params) => {
-    const { title, description } = params;
+const BannerComponent = ({ detail = {} }) => {
+    const navigate = useNavigate()
+    const {
+        name = "Create Stunning Posters in Just a Few Clicks",
+        description = "Bring your ideas to life with our intuitive editor. Fast, flexible, and designer-approved.",
+        bg_color = 'linear-gradient(to right, #8CA2FF, #FF87C5)'
+    } = detail;
+
+    const handleRedirection = () => {
+        navigate('/editor')
+    }
+
     return (
         <Box
             sx={theme => ({
-                background: theme.palette.mode === 'dark' ? 'linear-gradient(to left, #777, #111)' : 'linear-gradient(to right, #8CA2FF, #FF87C5)',
+                background: theme.palette.mode === 'dark' ? 'linear-gradient(to left, #777, #111)' : bg_color,
                 borderRadius: 2,
                 p: { xs: 2, sm: 4 },
                 textAlign: 'center',
@@ -25,7 +36,7 @@ const BannerComponent = (params) => {
                     color: theme.palette.mode === 'dark' ? theme.palette.grey[100] : '#fff',
                 })}
             >
-                {title}
+                {name}
             </Typography>
             <Typography
                 variant="body1"
@@ -36,7 +47,12 @@ const BannerComponent = (params) => {
             >
                 {description}
             </Typography>
-            <Stack direction="row" spacing={2} justifyContent="center" flexWrap="wrap">
+            <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={2}
+                justifyContent="center"
+                flexWrap="wrap"
+            >
                 <Button
                     variant="contained"
                     sx={() => ({
@@ -50,6 +66,7 @@ const BannerComponent = (params) => {
                             color: '#444'
                         },
                     })}
+                    onClick={handleRedirection}
                 >
                     Start Designing
                 </Button>
@@ -66,6 +83,7 @@ const BannerComponent = (params) => {
                             color: '#444'
                         },
                     })}
+                    onClick={handleRedirection}
                 >
                     Create New
                 </Button>

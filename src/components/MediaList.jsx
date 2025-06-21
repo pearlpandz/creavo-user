@@ -15,17 +15,17 @@ const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
         mode: "snap",
         slides: {
             perView: noOfCards,
-            spacing: 3,
+            spacing: 0,
         },
         breakpoints: {
             "(max-width: 1200px)": {
-                slides: { perView: 3, spacing: 16 },
+                slides: { perView: 3, spacing: 0 },
             },
             "(max-width: 900px)": {
-                slides: { perView: 2, spacing: 16 },
+                slides: { perView: 2, spacing: 0 },
             },
             "(max-width: 600px)": {
-                slides: { perView: 1, spacing: 16 },
+                slides: { perView: 1, spacing: 0 },
             },
         },
     });
@@ -48,6 +48,17 @@ const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
     const hideRight = slider.current ? (currentSlide >= slider?.current?.track?.details?.maxIdx) : false;
     const hideBoth = data.length <= perView;
 
+    // Hide arrows on mobile view
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 600);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    const shouldHideArrows = hideBoth || isMobile;
+
     useEffect(() => {
         // Re-initialize the slider when slides are ready
         if (data.length > 0 && slider.current) {
@@ -63,7 +74,7 @@ const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
     return (
         <Box sx={{ width: '100%', overflow: 'hidden', position: 'relative', mt: 2 }}>
             {/* Left Arrow */}
-            {!hideBoth && !hideLeft && (
+            {!shouldHideArrows && !hideLeft && (
                 <IconButton
                     onClick={() => slider.current?.prev()}
                     sx={{
@@ -82,7 +93,7 @@ const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
             )}
 
             {/* Right Arrow */}
-            {!hideBoth && !hideRight && (
+            {!shouldHideArrows && !hideRight && (
                 <IconButton
                     onClick={() => slider.current?.next()}
                     sx={{
@@ -101,8 +112,7 @@ const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
             )}
 
             {/* Slider */}
-
-            <Box ref={sliderInstanceRef} className="keen-slider" sx={{ width: '100%' }}>
+            <Box key={data.map(item => item.id).join('-')} ref={sliderInstanceRef} className="keen-slider" sx={{ width: '100%' }}>
                 {data?.length > 0 ? (
                     <>
                         {
@@ -113,7 +123,12 @@ const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
                                     onClick={() => handleSelectedImg(item.image)}
                                     sx={{ p: 1, cursor: 'pointer' }}
                                 >
-                                    <MediaCard item={item} height={noOfCards > 5 ? 120 : 180} width='100%' shouldShow={shouldShow} />
+                                    <MediaCard
+                                        item={item}
+                                        height={isMobile ? 180 : (noOfCards > 5 ? 120 : 180)}
+                                        width='100%'
+                                        shouldShow={shouldShow}
+                                    />
                                 </Box>
                             ))
                         }

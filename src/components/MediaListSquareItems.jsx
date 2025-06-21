@@ -48,6 +48,17 @@ const MediaListSquareItems = ({ data }) => {
     const hideRight = slider.current ? (currentSlide >= slider?.current?.track?.details?.maxIdx) : false;
     const hideBoth = data.length <= perView;
 
+    // Hide arrows on mobile view
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 600);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    const shouldHideArrows = hideBoth || isMobile;
+
     useEffect(() => {
         // Re-initialize the slider when slides are ready
         if (data.length > 0 && slider.current) {
@@ -63,7 +74,7 @@ const MediaListSquareItems = ({ data }) => {
     return (
         <Box sx={{ width: '100%', overflow: 'hidden', position: 'relative', mt: 2 }}>
             {/* Left Arrow */}
-            {!hideBoth && !hideLeft && (
+            {!shouldHideArrows && !hideLeft && (
                 <IconButton
                     onClick={() => slider.current?.prev()}
                     sx={{
@@ -82,7 +93,7 @@ const MediaListSquareItems = ({ data }) => {
             )}
 
             {/* Right Arrow */}
-            {!hideBoth && !hideRight && (
+            {!shouldHideArrows && !hideRight && (
                 <IconButton
                     onClick={() => slider.current?.next()}
                     sx={{
@@ -101,7 +112,9 @@ const MediaListSquareItems = ({ data }) => {
             )}
 
             {/* Slider */}
-            <Box ref={sliderInstanceRef} className="keen-slider" sx={{ width: '100%' }}>
+            <Box key={data.map(item => item.id).join('-')} ref={sliderInstanceRef} className="keen-slider"
+                sx={{ width: '100%' }}
+            >
                 {data.map((item, index) => (
                     <Box
                         key={item.id}

@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect } from 'react'
-import { useCateogryMediaData, useTemplates } from '../hook/usePageData'
+import React, { useCallback, useEffect, useState } from 'react'
+import { useCateogryDetail, useCateogryMediaData } from '../hook/usePageData'
 import { useNavigate, useParams } from 'react-router'
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Button, Grid, Typography } from '@mui/material';
 import MediaCard from '../components/MediaCard';
 import BannerComponent from '../components/Home/BannerComponent';
 import { updateFrameImage } from '../redux/slices/editor.slice';
@@ -10,14 +10,15 @@ import { useDispatch } from 'react-redux';
 function CategoryPage() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    useTemplates();
     const { id, sub = 'all' } = useParams();
+    const { data: detail } = useCateogryDetail(id, sub);
+    const [subCategoryId, setSelectedSubcategory] = useState(sub ?? 'all');
 
     const params = {
         categoryId: id,
         limit: 25,
         skip: 0,
-        subCategoryId: sub ?? 'all'
+        subCategoryId: subCategoryId ?? 'all'
     }
     const {
         data,
@@ -57,18 +58,63 @@ function CategoryPage() {
         };
     }, [handleScroll]);
 
+    const handleSelection = (id) => {
+        setSelectedSubcategory(id);
+    }
+
     return (
         <Box sx={{ p: 2, width: '100%' }}>
             {/* Banner */}
-            <BannerComponent
-                title="Create Stunning Posters in Just a Few Clicks"
-                description="Bring your ideas to life with our intuitive editor. Fast, flexible, and designer-approved."
-            />
+            <BannerComponent detail={detail} />
 
-            {/* List of Media */}
             <Box sx={{ mt: 4 }}>
                 <Typography component='h2' variant='h5' sx={{ fontWeight: 'bold' }}>Featured Designs</Typography>
-                <Box component='div' sx={{ px: 4, mt: 2 }}>
+
+
+                {
+                    detail?.subcategories?.length > 0 && (
+                        <>
+                            <Box component='div' className='horizontal-scroll' sx={{ mt: 2, display: 'flex', flexWrap: 'nowrap', gap: 1 }}>
+                                <Button
+                                    variant='contained'
+                                    size='small'
+                                    sx={{
+                                        textTransform: 'capitalize',
+                                        background: subCategoryId === 'all' ? '#3C3892' : '#DEDCFF',
+                                        color: subCategoryId === 'all' ? '#fff' : '#000',
+                                        boxShadow: 'none',
+                                        whiteSpace: 'nowrap',
+                                        flex: '0 0 auto',
+                                    }}
+                                    onClick={() => handleSelection('all')}
+                                >All</Button>
+                                {
+                                    detail?.subcategories?.map((item) => (
+                                        <Button
+                                            key={item.id}
+                                            variant='contained'
+                                            size='medium'
+                                            sx={{
+
+                                                textTransform: 'capitalize',
+                                                background: subCategoryId === item?.id ? '#3C3892' : '#DEDCFF',
+                                                color: subCategoryId === item?.id ? '#fff' : '#000',
+                                                boxShadow: 'none',
+                                                whiteSpace: 'nowrap',
+                                                flex: '0 0 auto',
+                                            }}
+                                            onClick={() => handleSelection(item.id)}
+                                        >{item.name}</Button>
+                                    ))
+                                }
+                            </Box>
+                        </>
+                    )
+                }
+
+                {/* List of Media */}
+
+                <Box component='div' sx={{ mt: 2 }}>
                     <Grid container spacing={2}>
                         {
                             allMedia?.map((item) => (

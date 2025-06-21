@@ -157,14 +157,9 @@ const fetchProfile = async () => {
 
 // useTemplateDetails for editor
 export const useProfile = () => {
-    const queryClient = useQueryClient();
     return useQuery({
         queryKey: ['profile'],
-        queryFn: async () => {
-            const cached = queryClient.getQueryData(['profile']);
-            if (cached) return cached;
-            return await fetchProfile()
-        },
+        queryFn: fetchProfile,
         refetchOnWindowFocus: false,
         staleTime: 1000 * 60 * 10, // 10 mins
         cacheTime: 1000 * 60 * 10, // 10 mins
@@ -182,6 +177,7 @@ export const usePatchUser = (onSuccessCallback) => {
         mutationFn: ({ userId, data }) => patchUser(userId, data),
         onSuccess: (data) => {
             // Optional: invalidate or update cache
+            queryClient.invalidateQueries({ queryKey: ['profile'] });
             queryClient.invalidateQueries({ queryKey: ['user'] });
             if (onSuccessCallback) {
                 onSuccessCallback(data); // trigger state update from component
@@ -219,11 +215,35 @@ export const usePatchCompanyDetails = (onSuccessCallback) => {
     return useMutation({
         mutationFn: ({ id, data }) => patchCompanyDetails(id, data),
         onSuccess: (data) => {
-            // Optional: invalidate or update cache
+            // Invalidate profile and user cache to fetch latest data
+            queryClient.invalidateQueries({ queryKey: ['profile'] });
             queryClient.invalidateQueries({ queryKey: ['user'] });
             if (onSuccessCallback) {
                 onSuccessCallback(data); // trigger state update from component
             }
         },
+    });
+};
+
+const fetchCateogryDetail = async ({ categoryId }) => {
+    const res = await axios.get(`${SETTINGS.DJANGO_URL}/api/categories/${categoryId}/`);
+    return res.data;
+};
+
+export const useCateogryDetail = (categoryId) => {
+    const queryClient = useQueryClient();
+    const queryKey = ['category', categoryId];
+
+    return useQuery({
+        queryKey,
+        queryFn: async () => {
+            const cached = queryClient.getQueryData(queryKey);
+            if (cached) return cached;
+            return await fetchCateogryDetail({ categoryId });
+        },
+        enabled: !!categoryId, // Only run if categoryId is truthy
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 10, // 10 mins
+        cacheTime: 1000 * 60 * 10, // 10 mins
     });
 };

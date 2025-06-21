@@ -3,11 +3,18 @@ import CanvasRenderer from "../CanvasComponents/CanvasRenderer";
 import { SIDEBAR } from "../constants";
 import './Editor.css';
 import { useProfile, useTemplateCategories, useTemplateDetail, useTemplates } from "../hook/usePageData";
-import { useEditor } from "../redux/slices/editor.slice";
+import { resetEditor, updateFrameImage, useEditor } from "../redux/slices/editor.slice";
+import { useDispatch } from "react-redux";
+import CompanyDetails from "../components/Account/CompanyDetails";
+import ProductInfo from "../components/Account/ProductInfo";
+import PoliticalDetails from "../components/Account/Political";
+import { Box, Typography, TextField, InputLabel, Stack, Button } from "@mui/material";
+import EditorMobileMessage from './EditorMobileMessage';
 
 export default function Editor() {
+    const dispatch = useDispatch();
     const { data: templateCategories, isLoading, isFetching, isRefetching } = useTemplateCategories();
-    const { frameImg } = useEditor();
+    const { frameImg, selectedTemp } = useEditor();
     const { data: profile } = useProfile();
     const [selectedCategory, setSelectedCategory] = useState(null)
     const [selectedTemplate, setSelectedTemplate] = useState(null)
@@ -24,10 +31,15 @@ export default function Editor() {
     });
 
     useEffect(() => {
-        if (templates?.length > 0) {
-            setSelectedTemplate(templates[0])
+        if (selectedTemp) {
+            setSelectedTemplate(selectedTemp)
         }
-    }, [templates])
+        else if (templates?.length > 0) {
+            setSelectedTemplate(templates[0])
+        } else {
+            setSelectedTemplate(null)
+        }
+    }, [selectedTemp, templates])
 
     const { data: selectedTemplateDetail } = useTemplateDetail(selectedTemplate?._id, {
         enabled: !!selectedTemplate?._id
@@ -69,6 +81,24 @@ export default function Editor() {
         )
     }, [selectedTheme])
 
+    const companyDetails = useMemo(() => {
+        return (
+            <CompanyDetails detail={profile?.company_details} isEditorView={true} />
+        )
+    }, [profile?.company_details])
+
+    const productDetails = useMemo(() => {
+        return (
+            <ProductInfo productList={profile?.products} isEditorView={true} />
+        )
+    }, [profile?.products])
+
+    const politicalDetails = useMemo(() => {
+        return (
+            <PoliticalDetails detail={profile?.political} isEditorView={true} />
+        )
+    }, [profile?.political])
+
     const currentSidebarElement = useMemo(() => {
         switch (selectedSidebar) {
             case 'frames':
@@ -77,11 +107,38 @@ export default function Editor() {
             case 'themes':
                 return themesContainer;
 
+            case 'companydetails':
+                return companyDetails;
+
+            case 'product':
+                return productDetails;
+
+            case 'political':
+                return politicalDetails;
+
             default:
                 return <h1>test</h1>
         }
-    }, [selectedSidebar, framesContainer, themesContainer])
+    }, [selectedSidebar, framesContainer, themesContainer, companyDetails, productDetails, politicalDetails])
 
+    useEffect(() => {
+        return () => {
+            dispatch(resetEditor())
+        }
+    }, [])
+
+    // Mobile view detection
+    const [isMobile, setIsMobile] = useState(false);
+    useEffect(() => {
+        const checkMobile = () => setIsMobile(window.innerWidth <= 600);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
+    }, []);
+
+    if (isMobile) {
+        return <EditorMobileMessage />;
+    }
 
     return (
         <>
@@ -90,7 +147,7 @@ export default function Editor() {
                     {
                         SIDEBAR.map(item => (
                             <div key={item.key} onClick={() => setSelectedSidebar(item.key)} className={selectedSidebar === item.key ? "active sidebar-item" : "sidebar-item"}>
-                                <item.icon />
+                                <item.icon fontSize={20} />
                                 <h6>{item.name}</h6>
                             </div>
                         ))
@@ -116,6 +173,8 @@ const FramesContainer = ({ templates, selectedTemplate, setSelectedTemplate, sel
         </div>
     }
 
+    const selectedCateogoryItems = templates?.filter(template => template.category === selectedCategory?.name);
+
     return (
         <div className="frame-container">
             <div className="frames-section">
@@ -128,9 +187,9 @@ const FramesContainer = ({ templates, selectedTemplate, setSelectedTemplate, sel
                 <div className="frame-scroll-view">
                     <div className="frames">
                         {
-                            templates?.filter(template => template.category === selectedCategory?.name).length > 0 ?
-                                templates?.filter(template => template.category === selectedCategory?.name).map((template, index) => (
-                                    <button title={template.name} style={{ border: selectedTemplate?.id === template.id ? `1px solid #000` : 'none' }} onClick={() => setSelectedTemplate(template)} key={index}>
+                            selectedCateogoryItems.length > 0 ?
+                                selectedCateogoryItems.map((template, index) => (
+                                    <button title={template.name} style={{ borderStyle: selectedTemplate?._id === template._id ? 'solid' : 'dotted' }} onClick={() => setSelectedTemplate(template)} key={index}>
                                         <img src={template.image} alt={template.name} />
                                     </button>
                                 )) :
@@ -144,26 +203,80 @@ const FramesContainer = ({ templates, selectedTemplate, setSelectedTemplate, sel
 }
 
 const ThemesContainer = ({ handleColorChange, selectedTheme }) => {
-    const types = [
-        { lable: 'background', value: 'bgColor' },
-        { lable: 'text', value: 'textColor' }
-    ];
-    const [selectedType, setSelectedType] = useState(types[0])
+
+    const dispatch = useDispatch();
+    const { frameImg } = useEditor();
+
     return (
-        <div className="frame-container">
-            <div className="frames-section">
-                <ul className="frame-list">
-                    {types.map(type => (
-                        <li key={type.value} className={selectedType.value === type.value ? 'active' : ''}>
-                            <button onClick={() => setSelectedType(type)}>{type.lable}</button>
-                        </li>))}
-                </ul>
-                <div className="frame-scroll-view">
-                    <div className="frames">
-                        <input type="color" value={selectedTheme?.[selectedType?.value]} onChange={(event) => handleColorChange(selectedType.value, event.target.value)} />
-                    </div>
-                </div>
-            </div>
-        </div>
+        <Box className="frame-container">
+            <Typography variant="h4" fontWeight={700} gutterBottom>
+                Frame Appearance
+            </Typography>
+            <Box sx={{ mb: 2, mt: 2 }}>
+                <InputLabel shrink htmlFor="color-picker">
+                    Background Color
+                </InputLabel>
+                <TextField
+                    id="color-picker"
+                    type="color"
+                    value={selectedTheme?.bgColor || "#000000"}
+                    onChange={event => handleColorChange('bgColor', event.target.value)}
+                    variant="outlined"
+                    sx={{ width: 60, p: 0, minWidth: 60, border: "none" }}
+                    inputProps={{ style: { padding: 0, height: 30 } }}
+                />
+            </Box>
+
+            <Box sx={{ mb: 2 }}>
+                <InputLabel shrink htmlFor="color-picker">
+                    Text Color
+                </InputLabel>
+                <TextField
+                    id="color-picker"
+                    type="color"
+                    value={selectedTheme?.textColor || "#000000"}
+                    onChange={event => handleColorChange('textColor', event.target.value)}
+                    variant="outlined"
+                    sx={{ width: 60, p: 0, minWidth: 60, border: "none" }}
+                    inputProps={{ style: { padding: 0, height: 30 } }}
+                />
+            </Box>
+
+            {/* Frame Image Section */}
+            <Box>
+                <InputLabel shrink htmlFor="frame-image-upload">
+                    Frame Image
+                </InputLabel>
+                <Stack direction="column" spacing={2}>
+                    {frameImg && (
+                        <Box
+                            component="img"
+                            src={frameImg}
+                            alt="Frame Preview"
+                            sx={{ width: 100, height: 100, objectFit: "cover", borderRadius: 1, border: "1px solid #ccc" }}
+                        />
+                    )}
+                    <Button variant="contained" component="label" size="small" sx={{ fontSize: 12, width: 150, height: 30 }}>
+                        Upload Image
+                        <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            id="frame-image-upload"
+                            onChange={e => {
+                                if (e.target.files && e.target.files[0]) {
+                                    const file = e.target.files[0];
+                                    const reader = new FileReader();
+                                    reader.onload = function (event) {
+                                        dispatch(updateFrameImage(event.target.result));
+                                    };
+                                    reader.readAsDataURL(file);
+                                }
+                            }}
+                        />
+                    </Button>
+                </Stack>
+            </Box>
+        </Box>
     )
 }

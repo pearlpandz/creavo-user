@@ -5,14 +5,23 @@ const EditorSlice = createSlice({
   name: "UserSlice",
   initialState: {
     frameImg: null,
+    selectedTemp: null,
   },
   reducers: {
     updateFrameImage: (state, action) => {
       state.frameImg = action.payload;
     },
+    updateSelectedTemplate: (state, action) => {
+      state.selectedTemp = action.payload;
+    },
+    resetEditor: (state) => {
+      state.frameImg = null;
+      state.selectedTemp = null;
+    },
   },
 });
-export const { updateFrameImage } = EditorSlice.actions;
+export const { updateFrameImage, updateSelectedTemplate, resetEditor } =
+  EditorSlice.actions;
 export default EditorSlice.reducer;
 
 export const useEditor = () => {

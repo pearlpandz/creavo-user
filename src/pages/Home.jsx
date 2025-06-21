@@ -43,10 +43,7 @@ const HomePage = () => {
 
     return (
         <Box sx={{ p: 2, width: '100%' }}>
-            <BannerComponent
-                title="Create Stunning Posters in Just a Few Clicks"
-                description="Bring your ideas to life with our intuitive editor. Fast, flexible, and designer-approved."
-            />
+            <BannerComponent />
             <TemplateCardList data={templateCategories} />
 
             {allCategories.map((item) => (
