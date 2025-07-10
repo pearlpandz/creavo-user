@@ -3,7 +3,7 @@ import {
     QueryClient,
     useMutation
 } from '@tanstack/react-query'
-import { SETTINGS } from '../constants'
+import { SETTINGS } from '../constants/settings'
 
 // Create a client
 const queryClient = new QueryClient()

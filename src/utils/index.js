@@ -84,3 +84,10 @@ export const getShortDescription = (short_description, limit = 40) => {
   }
   return desc;
 };
+
+export const formatArrayWithPipe = (arr) => {
+  if (!Array.isArray(arr)) {
+    return "";
+  }
+  return arr.filter((item) => item).join(" | ");
+};

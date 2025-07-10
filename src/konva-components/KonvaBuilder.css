@@ -1,0 +1,231 @@
+.App {
+  /* display: flex;
+          flex-direction: column; */
+  height: 100vh;
+  position: relative;
+  /* Needed for absolute positioning of context menu */
+}
+
+.main-container {
+  display: flex;
+  height: calc(100vh - 40px);
+  ;
+}
+
+.toolbar {
+  width: 60px;
+  /* Reverted to smaller width for the vertical toolbar */
+  padding: 10px;
+  background: #f0f0f0;
+  border-right: 1px solid #ccc;
+  display: flex;
+  flex-direction: column;
+  /* Stack buttons vertically */
+  gap: 10px;
+}
+
+.toolbar button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5em;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.toolbar button:hover {
+  background: #e0e0e0;
+}
+
+.layers-panel {
+  width: 300px;
+  /* Increased width for the layers panel */
+  padding: 20px;
+  border-right: 1px solid #ccc;
+  background: #fff;
+  overflow-y: auto;
+}
+
+.layers-panel ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.layers-panel li {
+  padding: 5px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  align-items: center;
+}
+
+.layers-panel li:hover {
+  background: #e0e0e0;
+}
+
+.layers-panel li.selected-layer {
+  background-color: #d0e0ff;
+  /* Highlight color for selected layer */
+  font-weight: bold;
+}
+
+.layers-panel li.multi-selected-layer {
+  background-color: #ffe0b2;
+  border: 1px solid #ff9800;
+}
+
+.layer-icon {
+  margin-right: 8px;
+  font-size: 1.2em;
+}
+
+.properties-panel {
+  width: 300px;
+  /* Width remains 250px for the properties panel */
+  padding: 20px;
+  border-left: 1px solid #ccc;
+  background: #fff;
+  height: 100%;
+  /* Make it take full height of its flex container */
+  overflow-y: auto;
+}
+
+.properties-panel label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.properties-panel input[type="number"],
+.properties-panel input[type="text"],
+.properties-panel textarea {
+  width: calc(100% - 20px);
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.properties-panel textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+/* React-colorful overrides for better layout */
+.react-colorful {
+  margin-top: 5px;
+}
+
+.react-colorful__saturation {
+  padding-bottom: 50% !important;
+}
+
+.react-colorful__alpha,
+.react-colorful__hue {
+  height: 20px !important;
+}
+
+canvas {
+  background-color: #eee;
+  margin: auto;
+  /* Center the canvas horizontally and vertically */
+}
+
+.context-menu {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  padding: 5px 0;
+}
+
+.context-menu-item {
+  padding: 8px 15px;
+  cursor: pointer;
+}
+
+.context-menu-item:hover {
+  background: #f0f0f0;
+}
+
+div:has(>.konvajs-content) {
+  flex: 1;
+  background: #eaeaea;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+}
+
+.layers-list {
+  min-height: 50px;
+  /* Ensure droppable area is visible */
+}
+
+.layers-panel li.dragging {
+  background-color: #e6f7ff;
+  /* Highlight color when dragging */
+  border: 1px solid #91d5ff;
+}
+
+.drag-handle {
+  margin-right: 10px;
+  cursor: grab;
+  font-size: 1.2em;
+  color: #888;
+}
+
+.color-picker-input {
+  position: relative;
+  display: inline-block;
+}
+
+.color-swatch {
+  width: 40px;
+  height: 20px;
+  border-radius: 2px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+.color-swatch .color {
+  width: 100%;
+  height: 100%;
+  border-radius: 1px;
+}
+
+.color-picker-popover {
+  position: absolute;
+  z-index: 1001;
+  /* Increased z-index */
+}
+
+.color-picker-cover {
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+}
+
+.no-layers-message {
+  text-align: center;
+  padding: 20px;
+  color: #888;
+  font-style: italic;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.no-layers-message svg {
+  margin-bottom: 10px;
+}

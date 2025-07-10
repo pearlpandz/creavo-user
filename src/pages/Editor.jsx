@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import CanvasRenderer from "../CanvasComponents/CanvasRenderer";
 import { SIDEBAR } from "../constants";
 import './Editor.css';
 import { useProfile, useTemplateCategories, useTemplateDetail, useTemplates } from "../hook/usePageData";
@@ -10,6 +9,7 @@ import ProductInfo from "../components/Account/ProductInfo";
 import PoliticalDetails from "../components/Account/Political";
 import { Box, Typography, TextField, InputLabel, Stack, Button } from "@mui/material";
 import EditorMobileMessage from './EditorMobileMessage';
+import CanvasEditor from "../components/CanvasEditor";
 
 export default function Editor() {
     const dispatch = useDispatch();
@@ -121,12 +121,6 @@ export default function Editor() {
         }
     }, [selectedSidebar, framesContainer, themesContainer, companyDetails, productDetails, politicalDetails])
 
-    useEffect(() => {
-        return () => {
-            dispatch(resetEditor())
-        }
-    }, [])
-
     // Mobile view detection
     const [isMobile, setIsMobile] = useState(false);
     useEffect(() => {
@@ -158,8 +152,9 @@ export default function Editor() {
                     {currentSidebarElement}
                 </div>
 
-                {selectedTemplate && <div className="canvas-container">
-                    <CanvasRenderer theme={selectedTheme} selectedImg={frameImg} template={selectedTemplateDetail} profile={profile} />
+                {/* selectedTemplate && */}
+                {<div className="canvas-container">
+                    <CanvasEditor theme={selectedTheme} selectedImg={frameImg} template={selectedTemplateDetail} profile={profile} mode='view' />
                 </div>}
             </div>
         </>
