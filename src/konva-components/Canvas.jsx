@@ -128,6 +128,7 @@ const ImageBasedShape = forwardRef((props, ref) => {
       ref={ref}
       {...shapeProps}
       image={shapeProps.type === "video" ? videoRef.current : image}
+      key={shapeProps.src}
       onClick={(e) => {
         if (mode === "edit") {
           onSelect(shapeProps, e);
