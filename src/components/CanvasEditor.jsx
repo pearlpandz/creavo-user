@@ -19,21 +19,35 @@ const CanvasEditor = (props) => {
     if (template?.elements) {
       const updatedElements = template.elements.map((element) => {
         if (element.type === "image" && element.src) {
-          let src = element.src;
+          let src = null;
           if (element.slug === "{{logo}}") {
-            const logo = profile?.company_details?.image;
-            src = logo || element.src;
-          } else if (element.slug === "{{frame_img}}") {
-            src = selectedImg || element.src;
+            src = profile?.company_details?.image;
+          } else if (element.slug === "{{frame-img}}") {
+            src = selectedImg;
+          } else if (element.slug === "{{product-img1}}") {
+            src = profile?.products?.[0]?.image
+          } else if (element.slug === "{{product-img2}}") {
+            src = profile?.products?.[1]?.image
+          } else if (element.slug === "{{product-img3}}") {
+            src = profile?.products?.[2]?.image
+          } else if (element.slug === "{{political-supporter-1}}") {
+            src = profile?.political?.supporters?.[0]?.image
+          } else if (element.slug === "{{political-supporter-2}}") {
+            src = profile?.political?.supporters?.[1]?.image
+          } else if (element.slug === "{{political-supporter-3}}") {
+            src = profile?.political?.supporters?.[2]?.image
+          } else if (element.slug === "{{leader-image}}") {
+            src = profile?.political?.image
           }
+          src = src || element.src
           return {
             ...element,
             src,
           };
         } else if (element.type === "text" && element.text) {
-          let text = element.text;
-          if (element.slug === "{{company_name}}") {
-            text = profile?.company_details?.company_name || element.text;
+          let text = '';
+          if (element.slug === "{{companyName}}") {
+            text = profile?.company_details?.company_name;
           } else if (element.slug === "{{content}}") {
             text = formatArrayWithPipe([
               profile?.company_details?.primary_contact,
@@ -42,8 +56,13 @@ const CanvasEditor = (props) => {
               profile?.company_details?.website
             ]);
           } else if (element.slug === "{{description}}") {
-            text = profile?.company_details?.description || element.text;
+            text = profile?.company_details?.description;
+          } else if (element.slug === "{{leader-name}}") {
+            text = profile?.political?.leader_name;
+          } else if (element.slug === "{{leader-designation}}") {
+            text = profile?.political?.leader_designation;
           }
+          text = text || element.text
           return {
             ...element,
             text,
@@ -51,9 +70,6 @@ const CanvasEditor = (props) => {
         }
         return element;
       })
-
-
-
       setElements(updatedElements);
       setTemplateObj({
         name: template.name,
