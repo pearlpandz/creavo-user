@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { ThemeProvider, CssBaseline, Button } from '@mui/material'
+import { ThemeProvider, CssBaseline, Button, Box, AppBar, Toolbar, Typography } from '@mui/material'
 import { HashRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { lightTheme, darkTheme } from './theme'
 import Login from './pages/Login'
@@ -16,6 +16,9 @@ import CategoryPage from './pages/Category'
 import AccountPage from './pages/Account'
 import FramesPage from './pages/Frames'
 import Editor from './pages/Editor'
+import PickBusinessCategory from './pages/PickBusinessCategory'
+import PickLanguage from './pages/PickLanguage'
+import Loader from './pages/Loader'
 
 function ProtectedRoute({ isAuthenticated }) {
     return isAuthenticated ? <Outlet /> : <Navigate to='/' />
@@ -36,12 +39,36 @@ function ProtectedLayout({ isAuthenticated, sidebarOpen, setSidebarOpen, onToggl
     ) : <Navigate to="/login" replace />
 }
 
-function BasicLayout({ toggleTheme }) {
+function NoAuthLayout({ toggleTheme }) {
     return (
         <>
             <Button sx={{ position: 'absolute', top: 16, right: 16, zIndex: 999 }} onClick={toggleTheme} variant="contained">Toggle Theme</Button>
             <Outlet />
         </>
+    )
+}
+
+function BasicLayout({ toggleTheme }) {
+    return (
+        <Box sx={{ minHeight: "100vh", bgcolor: "#fff" }}>
+            <AppBar
+                position="static"
+                elevation={0}
+                sx={{
+                    bgcolor: "#fff",
+                    color: "#222",
+                    borderBottom: "1px solid #f0f0f0",
+                }}
+            >
+                <Toolbar>
+                    <Typography variant="subtitle1" fontWeight={600}>
+                        CREAVO
+                    </Typography>
+                </Toolbar>
+            </AppBar>
+            <Button sx={{ position: 'absolute', top: 16, right: 16, zIndex: 999 }} onClick={toggleTheme} variant="contained">Toggle Theme</Button>
+            <Outlet />
+        </Box>
     )
 }
 
@@ -75,10 +102,15 @@ function App() {
                     <CssBaseline />
                     <Router>
                         <Routes>
-                            <Route element={<BasicLayout toggleTheme={toggleTheme} />}>
+                            <Route element={<NoAuthLayout toggleTheme={toggleTheme} />}>
                                 <Route path="/login" element={<Login />} />
                                 <Route path="/signup" element={<Signup />} />
-                                <Route path="/forget-password" element={<ForgetPassword />} />
+                                <Route element={<BasicLayout toggleTheme={toggleTheme} />}>
+                                    <Route path="/select-category" element={<PickBusinessCategory />} />
+                                    <Route path="/select-language" element={<PickLanguage />} />
+                                    <Route path="/forget-password" element={<ForgetPassword />} />
+                                    <Route path="/loader" element={<Loader />} />
+                                </Route>
                             </Route>
                             <Route
                                 element={

@@ -35,11 +35,17 @@ const Login = () => {
     return (
         <Grid container sx={{ width: '100vw', overflowX: 'hidden' }}>
             {/* Left Image Section */}
-            <Grid size={7} sx={{ display: { xs: 'none', md: 'block' }, height: '100vh', overflow: 'hidden' }}>
-                <MasonryImageList />
+            <Grid size={6} sx={{ display: { xs: 'none', md: 'block' }, height: '100vh', overflow: 'hidden', }}>
+                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img
+                        src="assets/login.png"
+                        alt="Login Visual"
+                        style={{ objectFit: 'contain', height: '100%', maxHeight: 500 }}
+                    />
+                </Box>
             </Grid>
             {/* Right Login Form Section */}
-            <Grid size={5} sx={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Grid size={6} sx={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fafbfc' }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', backkgroundColor: 'red', maxWidth: '480px' }}>
                     <Typography component="h1" variant="h4" sx={{ fontWeight: 700, mb: 2, textTransform: 'uppercase', letterSpacing: 3 }}>
                         Creavo
