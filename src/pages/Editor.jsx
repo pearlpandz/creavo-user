@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { SIDEBAR } from "../constants";
 import './Editor.css';
 import { useProfile, useTemplateCategories, useTemplateDetail, useTemplates } from "../hook/usePageData";
-import { resetEditor, updateFrameImage, useEditor } from "../redux/slices/editor.slice";
+import { updateFrameImage, useEditor } from "../redux/slices/editor.slice";
 import { useDispatch } from "react-redux";
 import CompanyDetails from "../components/Account/CompanyDetails";
 import ProductInfo from "../components/Account/ProductInfo";
@@ -12,7 +12,6 @@ import EditorMobileMessage from './EditorMobileMessage';
 import CanvasEditor from "../components/CanvasEditor";
 
 export default function Editor() {
-    const dispatch = useDispatch();
     const { data: templateCategories, isLoading, isFetching, isRefetching } = useTemplateCategories();
     const { frameImg, selectedTemp } = useEditor();
     const { data: profile } = useProfile();

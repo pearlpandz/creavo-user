@@ -1,14 +1,17 @@
-import { Box, Button, IconButton, Tab, Tabs } from '@mui/material'
+import { Box, Button, Tab, Tabs } from '@mui/material'
 import React, { useEffect, useState } from 'react'
-import { useTemplateCategories, useTemplates } from '../hook/usePageData';
+import { useProfile, useTemplateCategories, useTemplates } from '../hook/usePageData';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useDispatch } from 'react-redux';
-import { updateSelectedTemplate } from '../redux/slices/editor.slice';
+import { updateFrameImage } from '../redux/slices/editor.slice';
 import './FramesTab.css';
+import { useExpire } from '../hook/useExpire';
 
 function FramesPage() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { data: profile } = useProfile();
+    const { expireIn } = useExpire(profile)
     const { data: templateCategories } = useTemplateCategories();
     const [selectedCategory, setSelectedCategory] = useState(null)
     const [value, setValue] = React.useState(0);
@@ -47,8 +50,14 @@ function FramesPage() {
     };
 
     const handleSelect = (template) => {
-        dispatch(updateSelectedTemplate(template))
-        navigate('/editor')
+        if (!profile?.license) {
+            navigate('/subscription')
+        } else if (expireIn === 0) {
+            navigate('/expired')
+        } else {
+            dispatch(updateFrameImage(template.image))
+            navigate('/editor')
+        }
     }
 
     return (

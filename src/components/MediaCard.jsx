@@ -47,11 +47,14 @@ function MediaCard({ item, shouldShow = true, width, height }) {
             {shouldShow && (
                 <Box sx={{ p: 1.5 }}>
                     <Typography
-                        variant="h6"
+                        variant="p"
                         sx={{
-                            fontSize: 16,
-                            textTransform: 'capitalize',
-                            fontWeight: 'bold',
+                            fontSize: 14,
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            display: 'inline-block',
+                            maxWidth: '100%',
                         }}
                     >
                         {item.title}

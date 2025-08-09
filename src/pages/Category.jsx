@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { useCateogryDetail, useCateogryMediaData } from '../hook/usePageData'
+import { useCateogryDetail, useCateogryMediaData, useProfile } from '../hook/usePageData'
+import { useExpire } from '../hook/useExpire'
 import { useNavigate, useParams } from 'react-router'
 import { Box, Button, Grid, Typography } from '@mui/material';
 import MediaCard from '../components/MediaCard';
@@ -11,6 +12,8 @@ function CategoryPage() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { id, sub = 'all' } = useParams();
+    const { data: profile } = useProfile();
+    const { expireIn } = useExpire(profile)
     const { data: detail } = useCateogryDetail(id, sub);
     const [subCategoryId, setSelectedSubcategory] = useState(sub ?? 'all');
 
@@ -31,9 +34,14 @@ function CategoryPage() {
     const allMedia = data?.pages.flatMap(page => page.media) ?? [];
 
     const handleSelectedImg = (img) => {
-        // update this image to redux, so that page can access it
-        dispatch(updateFrameImage(img));
-        navigate('/editor');
+        if (!profile?.license) {
+            navigate('/subscription')
+        } else if (expireIn === 0) {
+            navigate('/expired')
+        } else {
+            dispatch(updateFrameImage(img))
+            navigate('/editor')
+        }
     };
 
     // Scroll handler: only triggers near bottom

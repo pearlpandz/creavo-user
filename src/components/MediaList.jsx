@@ -6,10 +6,14 @@ import MediaCard from "./MediaCard";
 import { updateFrameImage } from "../redux/slices/editor.slice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
+import { useProfile } from "../hook/usePageData";
+import { useExpire } from "../hook/useExpire";
 
 const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { data: profile } = useProfile();
+    const { expireIn } = useExpire(profile)
     const [sliderInstanceRef, slider] = useKeenSlider({
         loop: false,
         mode: "snap",
@@ -67,8 +71,14 @@ const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
     }, [data, slider])
 
     const handleSelectedImg = (item) => {
-        dispatch(updateFrameImage(item))
-        navigate('/editor')
+        if (!profile?.license) {
+            navigate('/subscription')
+        } else if (expireIn === 0) {
+            navigate('/expired')
+        } else {
+            dispatch(updateFrameImage(item))
+            navigate('/editor')
+        }
     }
 
     return (
