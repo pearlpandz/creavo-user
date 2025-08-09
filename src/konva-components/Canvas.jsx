@@ -103,7 +103,8 @@ const GeneralShape = forwardRef((props, ref) => {
 
 const ImageBasedShape = forwardRef((props, ref) => {
   const { shapeProps, onSelect, onContextMenu, mode } = props;
-  const [image] = useImage(shapeProps.src, "anonymous");
+  const src = shapeProps.src?.includes('https://') ? shapeProps.src : shapeProps.src?.replace('http://', 'https://')
+  const [image] = useImage(src, "anonymous");
   const videoRef = useRef(null);
 
   useEffect(() => {

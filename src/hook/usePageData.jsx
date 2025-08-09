@@ -150,6 +150,22 @@ export const useEventData = (param) => {
     });
 };
 
+const fetchSubscriptions = async () => {
+    const res = await axios.get(`${SETTINGS.DJANGO_URL}/accounts/subscriptions/`);
+    return res.data;
+};
+
+// useTemplateDetails for editor
+export const useSubscriptions = () => {
+    return useQuery({
+        queryKey: ['subscription'],
+        queryFn: fetchSubscriptions,
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 10, // 10 mins
+        cacheTime: 1000 * 60 * 10, // 10 mins
+    });
+};
+
 const fetchProfile = async () => {
     const res = await axios.get(`${SETTINGS.DJANGO_URL}/accounts/users/profile/`);
     return res.data;
@@ -242,6 +258,29 @@ export const useCateogryDetail = (categoryId) => {
             return await fetchCateogryDetail({ categoryId });
         },
         enabled: !!categoryId, // Only run if categoryId is truthy
+        refetchOnWindowFocus: false,
+        staleTime: 1000 * 60 * 10, // 10 mins
+        cacheTime: 1000 * 60 * 10, // 10 mins
+    });
+};
+
+const fetchEventById = async ({ eventId }) => {
+    const res = await axios.get(`${SETTINGS.DJANGO_URL}/api/events/${eventId}/`);
+    return res.data;
+};
+
+export const useEventById = (eventId) => {
+    const queryClient = useQueryClient();
+    const queryKey = ['event', eventId];
+
+    return useQuery({
+        queryKey,
+        queryFn: async () => {
+            const cached = queryClient.getQueryData(queryKey);
+            if (cached) return cached;
+            return await fetchEventById({ eventId });
+        },
+        enabled: !!eventId, // Only run if categoryId is truthy
         refetchOnWindowFocus: false,
         staleTime: 1000 * 60 * 10, // 10 mins
         cacheTime: 1000 * 60 * 10, // 10 mins

@@ -1,5 +1,5 @@
 .events-container {
-    background: #f7f7f7;
+    background: #FF9800;
     border: 1px solid #dedede;
     border-radius: 15px;
     padding: 20px;
@@ -12,6 +12,11 @@
     font-size: 20px;
     color: #222222;
     margin-bottom: 25px;
+    align-items: center;
+    }
+    
+    .event-headingg h4 {
+        margin: 0;
 }
 
 .day-container {

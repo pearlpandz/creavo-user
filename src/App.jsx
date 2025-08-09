@@ -19,6 +19,9 @@ import Editor from './pages/Editor'
 import PickBusinessCategory from './pages/PickBusinessCategory'
 import PickLanguage from './pages/PickLanguage'
 import Loader from './pages/Loader'
+import TrialExpiryAnnouncement from './components/TrialExpiryAnnouncement'
+import SubscriptionPage from './pages/Subscription'
+import EventPage from './pages/Event'
 
 function ProtectedRoute({ isAuthenticated }) {
     return isAuthenticated ? <Outlet /> : <Navigate to='/' />
@@ -31,11 +34,11 @@ function ProtectedLayout({ isAuthenticated, sidebarOpen, setSidebarOpen, onToggl
             <div style={{ width: sidebarOpen ? "calc(100% - 220px)" : "100%", flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', marginLeft: sidebarOpen ? 220 : 0, transition: 'margin-left 0.3s' }}>
                 <TopNav onMenuClick={() => setSidebarOpen(!sidebarOpen)} onToggleTheme={onToggleTheme} darkMode={darkMode} />
                 <div style={{ flex: 1, overflowY: 'auto' }} id="scrollable-container">
+                    <TrialExpiryAnnouncement />
                     <Outlet />
                 </div>
             </div>
         </div>
-
     ) : <Navigate to="/login" replace />
 }
 
@@ -127,9 +130,11 @@ function App() {
                                     <Route path="/" element={<Home />} />
                                     <Route path="/category/:id" element={<CategoryPage />} />
                                     <Route path="/category/:id/:sub" element={<CategoryPage />} />
+                                    <Route path="/event/:id" element={<EventPage />} />
                                     <Route path="/account" element={<AccountPage />} />
                                     <Route path="/frames" element={<FramesPage />} />
                                     <Route path="/editor" element={<Editor />} />
+                                    <Route path="/subscription" element={<SubscriptionPage />} />
                                 </Route>
                             </Route>
                             <Route path="*" element={<ComingSoon />} />

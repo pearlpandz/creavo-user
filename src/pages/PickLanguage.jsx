@@ -84,7 +84,7 @@ export default function PickLanguage({ limit = 1 }) {
                     gutterBottom
                     sx={{ mb: 1 }}
                 >
-                    What type of business do you have?
+                    Which language would you like to pick for your daily quotes?
                 </Typography>
                 <Typography
                     variant="body2"

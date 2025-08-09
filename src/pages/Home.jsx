@@ -4,6 +4,7 @@ import { useCategory, useTemplateCategories } from "../hook/usePageData";
 import BannerComponent from "../components/Home/BannerComponent";
 import TemplateCardList from "../components/Home/TemplateCategory/List";
 import CategoryContainer from "../components/CategoryContainer";
+import EventList from "../components/EventList";
 
 const HomePage = () => {
     const { data: templateCategories } = useTemplateCategories();
@@ -45,7 +46,9 @@ const HomePage = () => {
         <Box sx={{ p: 2, width: '100%' }}>
             <BannerComponent />
             <TemplateCardList data={templateCategories} />
-
+            <Box sx={{ mt: 4 }}>
+                <EventList />
+            </Box>
             {allCategories.map((item) => (
                 <CategoryContainer key={item.id} item={item} />
             ))}

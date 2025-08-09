@@ -17,13 +17,13 @@ const BannerComponent = ({ detail = {} }) => {
     return (
         <Box
             sx={theme => ({
-                background: theme.palette.mode === 'dark' ? 'linear-gradient(to left, #777, #111)' : bg_color,
+                background: theme.palette.mode === 'dark' ? 'linear-gradient(to left, #777, #111)' : bg_color ? bg_color : "linear-gradient(to right, #8CA2FF, #FF87C5)",
                 borderRadius: 2,
                 p: { xs: 2, sm: 4 },
                 textAlign: 'center',
                 color: theme.palette.mode === 'dark' ? theme.palette.grey[100] : '#fff',
                 mx: 0,
-                my: 2,
+                mb: 2,
                 boxShadow: theme.shadows[2]
             })}
             component='div'

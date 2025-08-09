@@ -4,12 +4,14 @@ import { IoTodaySharp } from "react-icons/io5";
 import './EventList.css';
 import { useState } from "react";
 import { useEventData } from "../hook/usePageData";
+import { useNavigate } from "react-router";
 
 const EventList = () => {
     const today = new Date();
     const [selectedDay, setSelectedDay] = useState({ day: today, stringDay: today.toLocaleDateString('en-GB').split('/').join('-') });
     const { data } = useEventData(selectedDay.stringDay);
     const currentYear = new Date().getFullYear();
+    const navigate = useNavigate();
 
     const nextSevenDays = Array.from({ length: 7 }, (_, i) => {
         const date = new Date();
@@ -21,6 +23,10 @@ const EventList = () => {
         return date1.getDate() === date2.getDate() &&
             date1.getMonth() === date2.getMonth() &&
             date1.getFullYear() === date2.getFullYear();
+    }
+
+    const handleRedirection = (event) => {
+        navigate(`/event/${event.id}`)
     }
 
     return (
@@ -46,7 +52,9 @@ const EventList = () => {
                 {
                     data?.length > 0 ?
                         data?.map(event => (
-                            <EventCard key={event.id} name={event.name} date={event.date} image={event.media[0].url} />
+                            <div key={event.id} onClick={() => handleRedirection(event)}>
+                                <EventCard name={event.name} date={event.date} image={event?.media?.[0]?.url} />
+                            </div>
                         )) : (
                             <p>No Events Found!</p>
                         )
