@@ -55,7 +55,7 @@ function FramesPage() {
         } else if (expireIn === 0) {
             navigate('/expired')
         } else {
-            dispatch(updateFrameImage(template))
+            dispatch(updateFrameImage(template.image))
             navigate('/editor')
         }
     }

@@ -9,7 +9,7 @@ import "./KonvaBuilder.css";
 
 function KonvaBuilder(props) {
   const { elements, setElements, handleSave, mode = "view", stageRef, templateObj,
-    setTemplateObj } = props;
+    setTemplateObj, handleClick } = props;
   const [selectedElement, setSelectedElement] = useState(null);
   const [showLayersPanel, setShowLayersPanel] = useState(mode === "edit");
   const [canvasBackgroundColor, setCanvasBackgroundColor] = useState("#ffffff");
@@ -507,6 +507,7 @@ function KonvaBuilder(props) {
             mode={mode}
           />
         )}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
         <Canvas
           elements={elements}
           selectedElement={selectedElement}
@@ -520,6 +521,38 @@ function KonvaBuilder(props) {
           onRemovePoint={onRemovePoint}
           mode={mode}
         />
+          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+            <button
+              onClick={handleClick}
+              style={{
+                padding: '8px 16px',
+                fontWeight: 'bold',
+                background: '#1976d2',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 4,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                justifyContent: 'center'
+              }}
+            >
+              {/* Download Icon SVG */}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                height="20"
+                viewBox="0 0 24 24"
+                width="20"
+                fill="#fff"
+                style={{ display: 'inline-block', verticalAlign: 'middle' }}
+              >
+                <path d="M5 20h14v-2H5v2zm7-18c-1.1 0-2 .9-2 2v8.59l-2.29-2.3a.996.996 0 1 0-1.41 1.41l4 4c.39.39 1.02.39 1.41 0l4-4a.996.996 0 1 0-1.41-1.41L13 12.59V4c0-1.1-.9-2-2-2z" />
+              </svg>
+              Download Image
+            </button>
+          </div>
+        </div>
         {mode === "edit" && (
           <PropertiesPanel
             selectedElement={selectedElement}

@@ -155,7 +155,7 @@ canvas {
 }
 
 div:has(>.konvajs-content) {
-  flex: 1;
+  /* flex: 1; */
   background: #eaeaea;
   align-items: center;
   justify-content: center;

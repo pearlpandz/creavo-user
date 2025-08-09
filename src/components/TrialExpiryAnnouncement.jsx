@@ -5,11 +5,11 @@ import { ConstructionOutlined } from "@mui/icons-material";
 import { useExpire } from "../hook/useExpire";
 
 const TrialExpiryAnnouncement = () => {
-  const { data: profile } = useProfile();
+  const { data: profile, isLoading } = useProfile();
 
   const { expireIn, expireMsg } = useExpire(profile)
 
-  if (profile?.is_verified && expireIn > 7) {
+  if (expireIn > 7 || isLoading) {
     return <></>;
   }
 
