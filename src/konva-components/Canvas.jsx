@@ -71,14 +71,14 @@ const GeneralShape = forwardRef((props, ref) => {
       {...shapeProps}
       {...(shapeProps.type === "text"
         ? {
-            fill: shapeProps.color,
-            fontStyle:
-              `${shapeProps.fontStyle} ${shapeProps.fontWeight}`.trim(),
-            align: shapeProps.textAlign,
-            textDecoration: shapeProps.textDecoration,
-            lineHeight: shapeProps.lineHeight,
-            padding: shapeProps.padding,
-          }
+          fill: shapeProps.color,
+          fontStyle:
+            `${shapeProps.fontStyle} ${shapeProps.fontWeight}`.trim(),
+          align: shapeProps.textAlign,
+          textDecoration: shapeProps.textDecoration,
+          lineHeight: shapeProps.lineHeight,
+          padding: shapeProps.padding,
+        }
         : {})}
       {...(shapeProps.type === "pen" && props.isSelected
         ? { activatePoints: true, onPointDrag: onPointDrag }

@@ -75,8 +75,14 @@ const CanvasEditor = (props) => {
           text = text || element.text
           return {
             ...element,
+            color: theme?.textColor ?? element?.color,
             text,
           };
+        } else if (element.type !== 'group') {
+          return {
+            ...element,
+            fill: theme?.bgColor ?? element?.fill
+          }
         }
         return element;
       })
