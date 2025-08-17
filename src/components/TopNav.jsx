@@ -3,9 +3,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import { useNavigate } from 'react-router';
+import { useProfile } from '../hook/usePageData';
 
 export default function TopNav({ onMenuClick, darkMode, onToggleTheme }) {
+    const { data: profile } = useProfile();
     const navigate = useNavigate();
+
     const handleRedirect = () => {
         navigate('/');
     }
@@ -29,7 +32,7 @@ export default function TopNav({ onMenuClick, darkMode, onToggleTheme }) {
                     {/* <Box sx={{ textAlign: 'right' }}>
                         <Typography variant="body1" sx={{ fontWeight: 500 }}>Muthupandi V</Typography>
                     </Box> */}
-                    <Avatar sx={{ bgcolor: 'primary.main', fontSize: 12, width: 30, height: 30 }}>MV</Avatar>
+                    <Avatar sx={{ bgcolor: 'primary.main', fontSize: 12, width: 30, height: 30 }}>{profile?.first_name?.[0]}{profile?.last_name?.[0]}</Avatar>
                 </Box>
             </Toolbar>
         </AppBar>

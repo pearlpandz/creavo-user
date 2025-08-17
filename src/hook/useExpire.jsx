@@ -21,8 +21,9 @@ export const useExpire = (profile) => {
             const now = new Date();
             const diffTime = Math.max(joinedDate.getTime() + 7 * 24 * 60 * 60 * 1000 - now.getTime(), 0);
             const expireIn = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            console.log(expireIn, joinedDate, now)
             setExpiry(expireIn)
-            setExpireMsg(`Your trial ends in ${expireIn} days`)
+            setExpireMsg(expireIn === 0 ? 'Your trial has expired, Upgrade your plan to proceed.' : `Your trial ends in ${expireIn} days`)
         }
     }, [profile])
 
