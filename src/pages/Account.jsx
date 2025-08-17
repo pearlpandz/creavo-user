@@ -8,6 +8,7 @@ import CompanyDetails from '../components/Account/CompanyDetails';
 import ProductInfo from '../components/Account/ProductInfo';
 import PoliticalDetails from '../components/Account/Political';
 import Subscription from '../components/Account/Subscription';
+import Preference from '../components/Account/Preference';
 
 const SECTIONS = [
     "My Profile",
@@ -16,6 +17,7 @@ const SECTIONS = [
     "Product Info",
     "Political Info",
     "Subscription",
+    "Preference",
 ]
 
 function a11yProps(index) {
@@ -167,6 +169,9 @@ function AccountPage() {
                 </TabPanel>
                 <TabPanel value={value} index={5}>
                     <Subscription detail={profile?.license_details} isEditorView={isMobile} />
+                </TabPanel>
+                <TabPanel value={value} index={6}>
+                    <Preference profile={profile} />
                 </TabPanel>
             </Box>
         </Box>
