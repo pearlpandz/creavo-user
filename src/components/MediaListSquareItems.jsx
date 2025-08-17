@@ -6,10 +6,14 @@ import "keen-slider/keen-slider.min.css";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import { updateFrameImage } from "../redux/slices/editor.slice";
+import { useProfile } from "../hook/usePageData";
+import { useExpire } from "../hook/useExpire";
 
 const MediaListSquareItems = ({ data }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { data: profile } = useProfile();
+    const { expireIn } = useExpire(profile)
     const [sliderInstanceRef, slider] = useKeenSlider({
         loop: false,
         mode: "snap",
@@ -67,8 +71,17 @@ const MediaListSquareItems = ({ data }) => {
     }, [data, slider])
 
     const handleSelectedImg = (item) => {
-        dispatch(updateFrameImage(item))
-        navigate('/editor')
+        if (!profile?.license) { // if no license
+            if (expireIn === 0) { // if expired
+                navigate('/subscription')
+            } else { // if not expired
+                dispatch(updateFrameImage(item))
+                navigate('/editor')
+            }
+        } else {
+            dispatch(updateFrameImage(item))
+            navigate('/editor')
+        }
     }
 
     return (

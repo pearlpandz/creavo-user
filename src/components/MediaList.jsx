@@ -71,10 +71,13 @@ const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
     }, [data, slider])
 
     const handleSelectedImg = (item) => {
-        if (!profile?.license) {
-            navigate('/subscription')
-        } else if (expireIn === 0) {
-            navigate('/expired')
+        if (!profile?.license) { // if no license
+            if (expireIn === 0) { // if expired
+                navigate('/subscription')
+            } else { // if not expired
+                dispatch(updateFrameImage(item))
+                navigate('/editor')
+            }
         } else {
             dispatch(updateFrameImage(item))
             navigate('/editor')

@@ -34,10 +34,13 @@ function CategoryPage() {
     const allMedia = data?.pages.flatMap(page => page.media) ?? [];
 
     const handleSelectedImg = (img) => {
-        if (!profile?.license) {
-            navigate('/subscription')
-        } else if (expireIn === 0) {
-            navigate('/expired')
+        if (!profile?.license) { // if no license
+            if (expireIn === 0) { // if expired
+                navigate('/subscription')
+            } else { // if not expired
+                dispatch(updateFrameImage(img))
+                navigate('/editor')
+            }
         } else {
             dispatch(updateFrameImage(img))
             navigate('/editor')
