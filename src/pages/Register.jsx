@@ -95,7 +95,7 @@ const Register = () => {
                             required
                             fullWidth
                             id="mobile_number"
-                            label="mobile_number Number"
+                            label="Mobile Number"
                             name="mobile_number"
                             autoComplete="tel"
                             value={form.mobile_number}

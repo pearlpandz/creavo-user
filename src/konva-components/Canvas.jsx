@@ -16,6 +16,9 @@ import Star from "./Star";
 import Arc from "./Arc";
 import Ellipse from "./Ellipse";
 import Pen from "./Pen";
+import Watermark from "./Watermark";
+import { useProfile } from "../hook/usePageData";
+import { useExpire } from "../hook/useExpire";
 
 const GeneralShape = forwardRef((props, ref) => {
   const { shapeProps, onSelect, onContextMenu, onPointDrag, mode } = props;
@@ -68,14 +71,14 @@ const GeneralShape = forwardRef((props, ref) => {
       {...shapeProps}
       {...(shapeProps.type === "text"
         ? {
-            fill: shapeProps.color,
-            fontStyle:
-              `${shapeProps.fontStyle} ${shapeProps.fontWeight}`.trim(),
-            align: shapeProps.textAlign,
-            textDecoration: shapeProps.textDecoration,
-            lineHeight: shapeProps.lineHeight,
-            padding: shapeProps.padding,
-          }
+          fill: shapeProps.color,
+          fontStyle:
+            `${shapeProps.fontStyle} ${shapeProps.fontWeight}`.trim(),
+          align: shapeProps.textAlign,
+          textDecoration: shapeProps.textDecoration,
+          lineHeight: shapeProps.lineHeight,
+          padding: shapeProps.padding,
+        }
         : {})}
       {...(shapeProps.type === "pen" && props.isSelected
         ? { activatePoints: true, onPointDrag: onPointDrag }
@@ -103,7 +106,8 @@ const GeneralShape = forwardRef((props, ref) => {
 
 const ImageBasedShape = forwardRef((props, ref) => {
   const { shapeProps, onSelect, onContextMenu, mode } = props;
-  const src = shapeProps.src?.includes('https://') ? shapeProps.src : shapeProps.src?.replace('http://', 'https://')
+  // const src = shapeProps.src?.includes('https://') ? shapeProps.src : shapeProps.src?.replace('http://', 'https://')
+  const src = shapeProps.src;
   const [image] = useImage(src, "anonymous");
   const videoRef = useRef(null);
 
@@ -474,6 +478,9 @@ const Canvas = ({
   onRemovePoint,
   mode,
 }) => {
+  const { data: profile } = useProfile();
+  const { expireIn } = useExpire(profile);
+
   const handleStageClick = (e) => {
     if (mode === "edit") {
       if (
@@ -491,6 +498,8 @@ const Canvas = ({
   };
 
   const topLevelElements = elements.filter((el) => !el.groupId);
+
+  const showWaterMark = (expireIn > 0 && !profile?.license) || expireIn === 0 || profile?.license_details?.subscription?.daily_download_limit <= profile?.day_downloads;
 
   return (
     <Stage
@@ -535,6 +544,7 @@ const Canvas = ({
           />
         ))}
       </Layer>
+      {showWaterMark && <Watermark width={600} height={600} />}
     </Stage>
   );
 };

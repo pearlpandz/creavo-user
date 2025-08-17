@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useUndoRedo } from "../hook/useUndoRedo";
 import { dataURLtoFile, formatArrayWithPipe } from "../utils";
 import { useCreateTemplate, usePatchTemplate } from "../hook/useTemplate";
 import KonvaBuilder from "../konva-components/KonvaBuilder";
 import { Box } from "@mui/material";
 import { usePatchUser } from "../hook/usePageData";
+import WarningDialog from "./WarningDialog";
 
 // Canvas Editor
 const CanvasEditor = (props) => {
@@ -18,6 +20,9 @@ const CanvasEditor = (props) => {
   const { mutate: mutateUser } = usePatchUser((updatedUser) => {
     console.log(updatedUser);
   });
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Load initial elements from template prop
@@ -70,8 +75,14 @@ const CanvasEditor = (props) => {
           text = text || element.text
           return {
             ...element,
+            color: theme?.textColor ?? element?.color,
             text,
           };
+        } else if (element.type !== 'group') {
+          return {
+            ...element,
+            fill: theme?.bgColor ?? element?.fill
+          }
         }
         return element;
       })
@@ -86,6 +97,14 @@ const CanvasEditor = (props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [template, theme, selectedImg, profile,]);
+
+  const handleCloseDialog = () => {
+    setIsDialogOpen(false);
+  };
+
+  const handleUpgrade = () => {
+    navigate('/subscription');
+  };
 
   // eslint-disable-next-line no-unused-vars
   const saveTemplate = async () => {
@@ -146,21 +165,36 @@ const CanvasEditor = (props) => {
   }
 
   const handleClick = () => {
-    // add condition for day limit exceed accordingly disable the download button
-    handleDownload();
-    handleCountUpdate()
+    if (profile?.license) {
+      handleDownload();
+      handleCountUpdate()
+    } else {
+      if (profile?.day_downloads === 3) {
+        setIsDialogOpen(true);
+      } else {
+        handleDownload();
+        handleCountUpdate()
+      }
+    }
   }
 
   return (
-    <KonvaBuilder
-      elements={elements}
-      setElements={setElements}
-      templateObj={templateObj}
-      setTemplateObj={setTemplateObj}
-      mode="view"
-      stageRef={stageRef}
-      handleClick={handleClick}
-    />
+    <>
+      <KonvaBuilder
+        elements={elements}
+        setElements={setElements}
+        templateObj={templateObj}
+        setTemplateObj={setTemplateObj}
+        mode="view"
+        stageRef={stageRef}
+        handleClick={handleClick}
+      />
+      <WarningDialog
+        isOpen={isDialogOpen}
+        onClose={handleCloseDialog}
+        onUpgrade={handleUpgrade}
+      />
+    </>
   );
 };
 
