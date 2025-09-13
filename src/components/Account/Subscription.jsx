@@ -156,7 +156,7 @@ const Subscription = ({ detail }) => {
                         Contact Required
                     </Typography>
                     <Typography variant="body2" mb={2} sx={{ fontSize: { xs: '0.95rem', sm: '1rem' } }}>
-                        Please contact your distributor or admin (<Link href="mailto:sales@creavo.in">sales@creavo.in</Link>) to upgrade your subscription.
+                        Please contact your distributor or admin (<Link href="callto:+918750749299">8750749299</Link>) to upgrade your subscription.
                     </Typography>
                     <Button
                         variant="contained"

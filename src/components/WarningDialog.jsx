@@ -9,7 +9,7 @@ const WarningDialog = ({ isOpen, onClose, onUpgrade }) => {
   return (
     <div className="dialog-overlay">
       <div className="dialog-content">
-        <p>Your daily download limit has been used up. Upgrade to unlock more downloads.</p>
+        <p>You have reached your usage limit. Please upgrade to continue</p>
         <div className="dialog-actions">
           <button onClick={onClose}>Close</button>
           <button onClick={onUpgrade}>Upgrade</button>

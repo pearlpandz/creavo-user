@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useProfile, useTemplateCategories, useTemplates } from '../hook/usePageData';
 import { useNavigate, useSearchParams } from 'react-router';
 import { useDispatch } from 'react-redux';
-import { updateFrameImage } from '../redux/slices/editor.slice';
+import { updateSelectedTemplate } from '../redux/slices/editor.slice';
 import './FramesTab.css';
 import { useExpire } from '../hook/useExpire';
 
@@ -54,11 +54,11 @@ function FramesPage() {
             if (expireIn === 0) { // if expired
                 navigate('/subscription')
             } else { // if not expired
-                dispatch(updateFrameImage(template.image))
+                dispatch(updateSelectedTemplate(template))
                 navigate('/editor')
             }
         } else {
-            dispatch(updateFrameImage(template.image))
+            dispatch(updateSelectedTemplate(template))
             navigate('/editor')
         }
     }

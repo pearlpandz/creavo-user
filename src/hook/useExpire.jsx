@@ -6,6 +6,8 @@ export const useExpire = (profile) => {
     const [expireMsg, setExpireMsg] = useState('');
 
     useEffect(() => {
+        if (!profile) return;
+
         if (profile?.license) {
             console.log(profile?.license_details)
             const purchasedDate = profile?.license_details?.purchased_at;
@@ -20,10 +22,10 @@ export const useExpire = (profile) => {
             const joinedDate = new Date(profile?.date_joined);
             const now = new Date();
             const diffTime = Math.max(joinedDate.getTime() + 7 * 24 * 60 * 60 * 1000 - now.getTime(), 0);
-            const expireIn = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            console.log(expireIn, joinedDate, now)
-            setExpiry(expireIn)
-            setExpireMsg(expireIn === 0 ? 'Your trial has expired, Upgrade your plan to proceed.' : `Your trial ends in ${expireIn} days`)
+            const _expireIn = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            console.log(_expireIn, joinedDate, now)
+            setExpiry(_expireIn)
+            setExpireMsg(_expireIn === 0 ? 'Your trial has expired, Upgrade your plan to proceed.' : `Your trial ends in ${_expireIn} days`)
         }
     }, [profile])
 

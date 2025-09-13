@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, forwardRef } from "react";
+import React, { useRef, useEffect, forwardRef, useMemo } from "react";
 import {
   Stage,
   Layer,
@@ -499,7 +499,27 @@ const Canvas = ({
 
   const topLevelElements = elements.filter((el) => !el.groupId);
 
-  const showWaterMark = (expireIn > 0 && !profile?.license) || expireIn === 0 || profile?.license_details?.subscription?.daily_download_limit <= profile?.day_downloads;
+  const showWaterMark = useMemo(() => {
+    let bool = false;
+    if (profile?.license) {
+      if (profile?.license_details?.subscription?.daily_download_limit <= profile?.day_downloads) {
+        bool = false;
+      } else {
+        bool = true
+      }
+    } else {
+      if (expireIn > 0) {
+        if (profile?.day_downloads >= 2) {
+          bool = true;
+        } else {
+          bool = false;
+        }
+      } else {
+        bool = true
+      }
+    }
+    return bool;
+  }, [expireIn, profile])
 
   return (
     <Stage

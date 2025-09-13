@@ -169,11 +169,20 @@ const CanvasEditor = (props) => {
       handleDownload();
       handleCountUpdate()
     } else {
-      if (profile?.day_downloads === 3) {
-        setIsDialogOpen(true);
-      } else {
-        handleDownload();
-        handleCountUpdate()
+      if (profile?.license_details) { // licensed user
+        if (profile?.license_details?.subscription?.daily_download_limit === profile?.day_downloads) {
+          setIsDialogOpen(true);
+        } else {
+          handleDownload();
+          handleCountUpdate()
+        }
+      } else { // trial period
+        if (profile?.day_downloads === 2) {
+          setIsDialogOpen(true);
+        } else {
+          handleDownload();
+          handleCountUpdate()
+        }
       }
     }
   }
