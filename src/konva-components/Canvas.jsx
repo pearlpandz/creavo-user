@@ -502,7 +502,7 @@ const Canvas = ({
   const showWaterMark = useMemo(() => {
     let bool = false;
     if (profile?.license) {
-      if (profile?.license_details?.subscription?.daily_download_limit <= profile?.day_downloads) {
+      if (profile?.license_details?.subscription?.daily_download_limit >= profile?.day_downloads) {
         bool = false;
       } else {
         bool = true
