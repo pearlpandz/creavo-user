@@ -143,7 +143,7 @@ const Register = () => {
                             Sign Up
                         </Button>
                         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1 }}>
-                            <Typography variant="body2">Already have an account?</Typography>
+                            <Typography variant="body2" sx={{ lineHeight: "30px" }}>Already have an account?</Typography>
                             <Button size="small" onClick={() => navigate('/login')}>Login</Button>
                         </Box>
                     </Box>

@@ -10,6 +10,7 @@ import PoliticalDetails from "../components/Account/Political";
 import { Box, Typography, TextField, InputLabel, Stack, Button } from "@mui/material";
 import EditorMobileMessage from './EditorMobileMessage';
 import CanvasEditor from "../components/CanvasEditor";
+import CircleColorPicker from "../components/CircleColorPicker";
 
 export default function Editor() {
     const { data: templateCategories, isLoading, isFetching, isRefetching } = useTemplateCategories();
@@ -200,7 +201,8 @@ const ThemesContainer = ({ handleColorChange, selectedTheme }) => {
 
     const dispatch = useDispatch();
     const { frameImg } = useEditor();
-
+    const backgroundColors = ["#FF0000", "#42a242ff", "#50509eff", "#dada2fff"];
+    const textColors = ["#000000", "#FFFFFF", "#333333", "#FFD700"];
     return (
         <Box className="frame-container">
             <Typography variant="h4" fontWeight={700} gutterBottom>
@@ -210,30 +212,58 @@ const ThemesContainer = ({ handleColorChange, selectedTheme }) => {
                 <InputLabel shrink htmlFor="color-picker">
                     Background Color
                 </InputLabel>
-                <TextField
-                    id="color-picker"
-                    type="color"
-                    value={selectedTheme?.bgColor || "#000000"}
-                    onChange={event => handleColorChange('bgColor', event.target.value)}
-                    variant="outlined"
-                    sx={{ width: 60, p: 0, minWidth: 60, border: "none" }}
-                    inputProps={{ style: { padding: 0, height: 30 } }}
-                />
+                <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                    {backgroundColors.map((color) => (
+                        <Box
+                            key={color}
+                            sx={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: "50%",
+                                background: color,
+                                border: selectedTheme?.bgColor === color ? "2px solid #333" : "2px solid #ccc",
+                                cursor: "pointer",
+                                boxShadow: selectedTheme?.bgColor === color ? "0 0 4px #333" : "none"
+                            }}
+                            onClick={() => handleColorChange('bgColor', color)}
+                        />
+                    ))}
+                    <CircleColorPicker
+                        size={'32px'}
+                        defaultColor={selectedTheme?.bgColor || "#000000"}
+                        onChange={(color) => handleColorChange('bgColor', color)}
+                        tooltip="Choose your background color"
+                    />
+                </Stack>
             </Box>
 
             <Box sx={{ mb: 2 }}>
-                <InputLabel shrink htmlFor="color-picker">
+                <InputLabel shrink htmlFor="text-color-picker">
                     Text Color
                 </InputLabel>
-                <TextField
-                    id="color-picker"
-                    type="color"
-                    value={selectedTheme?.textColor || "#000000"}
-                    onChange={event => handleColorChange('textColor', event.target.value)}
-                    variant="outlined"
-                    sx={{ width: 60, p: 0, minWidth: 60, border: "none" }}
-                    inputProps={{ style: { padding: 0, height: 30 } }}
-                />
+                <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+                    {textColors.map((color) => (
+                        <Box
+                            key={color}
+                            sx={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: "50%",
+                                background: color,
+                                border: selectedTheme?.textColor === color ? "2px solid #333" : "2px solid #ccc",
+                                cursor: "pointer",
+                                boxShadow: selectedTheme?.textColor === color ? "0 0 4px #333" : "none"
+                            }}
+                            onClick={() => handleColorChange('textColor', color)}
+                        />
+                    ))}
+                    <CircleColorPicker
+                        size={'32px'}
+                        defaultColor={selectedTheme?.textColor || "#000000"}
+                        onChange={(color) => handleColorChange('textColor', color)}
+                        tooltip="Choose your text color"
+                    />
+                </Stack>
             </Box>
 
             {/* Frame Image Section */}

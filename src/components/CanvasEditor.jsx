@@ -146,7 +146,7 @@ const CanvasEditor = (props) => {
   // Download canvas as high quality image
   const handleDownload = () => {
     if (!stageRef.current) return;
-    const dataURL = stageRef.current.toDataURL({ pixelRatio: 2 }); // High quality
+    const dataURL = stageRef.current.toDataURL(); // High quality
     const link = document.createElement('a');
     link.href = dataURL;
     link.download = `${templateObj.name || 'canvas'}.png`;

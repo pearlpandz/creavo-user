@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom'
 import axios from '../utils/axios-interceptor'
 import { useAuth } from '../context/auth.context'
 import { SETTINGS } from '../constants/settings'
+import { useEffect } from 'react'
+import ErrorDialog from './ErrorDialog'
 
 const Login = () => {
     const { login } = useAuth()
@@ -13,6 +15,21 @@ const Login = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const navigate = useNavigate();
+    const [error, setError] = useState('')
+    const [dialogError, setDialogError] = useState(null)
+
+    useEffect(() => {
+        setDialogError(error)
+    }, [error])
+
+    useEffect(() => {
+        setError(null)
+    }, [])
+
+    const handleDialogClose = () => {
+        setDialogError(null)
+        setError(null)
+    }
 
     const handleTogglePassword = () => setShowPassword((show) => !show)
 
@@ -25,93 +42,96 @@ const Login = () => {
                 login(res.data.user)
                 navigate('/')
             } else {
-                console.error('Login failed:', res.data)
+                setError(res.data)
             }
         } catch (error) {
-            console.error('Login error:', error)
+            setError(error)
         }
     }
 
     return (
-        <Grid container sx={{ width: '100vw', overflowX: 'hidden' }}>
-            {/* Left Image Section */}
-            <Grid size={6} sx={{ display: { xs: 'none', md: 'block' }, height: '100vh', overflow: 'hidden', }}>
-                <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <img
-                        src="assets/login.png"
-                        alt="Login Visual"
-                        style={{ objectFit: 'contain', height: '100%', maxHeight: 500 }}
-                    />
-                </Box>
-            </Grid>
-            {/* Right Login Form Section */}
-            <Grid size={6} sx={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fafbfc' }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', backkgroundColor: 'red', maxWidth: '480px' }}>
-                    <Typography component="h1" variant="h4" sx={{ fontWeight: 700, mb: 2, textTransform: 'uppercase', letterSpacing: 3 }}>
-                        Creavo
-                    </Typography>
-                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-                        <IconButton color="primary" size="large">
-                            <Google />
-                        </IconButton>
-                        <IconButton color="primary" size="large">
-                            <Facebook />
-                        </IconButton>
-                    </Box>
-                    <Divider sx={{ width: '100%', mb: 2 }}>or</Divider>
-                    <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%', maxWidth: 400 }}>
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            id="email"
-                            label="Email"
-                            name="email"
-                            autoComplete="tel"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
+        <>
+            <Grid container sx={{ width: '100vw', overflowX: 'hidden' }}>
+                {/* Left Image Section */}
+                <Grid size={6} sx={{ display: { xs: 'none', md: 'block' }, height: '100vh', overflow: 'hidden', }}>
+                    <Box sx={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <img
+                            src="assets/login.png"
+                            alt="Login Visual"
+                            style={{ objectFit: 'contain', height: '100%', maxHeight: 500 }}
                         />
-                        <TextField
-                            margin="normal"
-                            required
-                            fullWidth
-                            name="password"
-                            label="Password"
-                            type={showPassword ? 'text' : 'password'}
-                            id="password"
-                            autoComplete="current-password"
-                            value={password}
-                            onChange={e => setPassword(e.target.value)}
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
-                                        <IconButton onClick={handleTogglePassword} edge="end">
-                                            {showPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-                            <Button size="small" onClick={() => navigate('/forget-password')}>Forgot password?</Button>
+                    </Box>
+                </Grid>
+                {/* Right Login Form Section */}
+                <Grid size={6} sx={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#fafbfc' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', backkgroundColor: 'red', maxWidth: '480px' }}>
+                        <Typography component="h1" variant="h4" sx={{ fontWeight: 700, mb: 2, textTransform: 'uppercase', letterSpacing: 3 }}>
+                            Creavo
+                        </Typography>
+                        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                            <IconButton color="primary" size="large">
+                                <Google />
+                            </IconButton>
+                            <IconButton color="primary" size="large">
+                                <Facebook />
+                            </IconButton>
                         </Box>
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                            sx={{ mt: 3, mb: 2 }}
-                        >
-                            Login
-                        </Button>
-                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
-                            <Typography variant="body2">Don't have an account?</Typography>
-                            <Button size="small" onClick={() => navigate('/signup')} variant='text'>Sign Up</Button>
+                        <Divider sx={{ width: '100%', mb: 2 }}>or</Divider>
+                        <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%', maxWidth: 400 }}>
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                id="email"
+                                label="Email"
+                                name="email"
+                                autoComplete="tel"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                            />
+                            <TextField
+                                margin="normal"
+                                required
+                                fullWidth
+                                name="password"
+                                label="Password"
+                                type={showPassword ? 'text' : 'password'}
+                                id="password"
+                                autoComplete="current-password"
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            <IconButton onClick={handleTogglePassword} edge="end">
+                                                {showPassword ? <VisibilityOff /> : <Visibility />}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                                <Button size="small" onClick={() => navigate('/forget-password')}>Forgot password?</Button>
+                            </Box>
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                color="primary"
+                                sx={{ mt: 3, mb: 2 }}
+                            >
+                                Login
+                            </Button>
+                            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 1 }}>
+                                <Typography variant="body2">Don't have an account?</Typography>
+                                <Button size="small" onClick={() => navigate('/signup')} variant='text'>Sign Up</Button>
+                            </Box>
                         </Box>
                     </Box>
-                </Box>
+                </Grid>
             </Grid>
-        </Grid>
+            <ErrorDialog error={dialogError} onClose={handleDialogClose} />
+        </>
     )
 }
 
