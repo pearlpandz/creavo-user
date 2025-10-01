@@ -33,14 +33,11 @@ function CategoryContainer(props) {
         )
     }
 
-    if (!data?.media || data.media.length === 0) {
-        return null;
-    }
     return (
         <MediaContainer
             title={item.name}
             data={item}
-            media={data.media}
+            media={data?.media ?? []}
             subCategoryId={subCategoryId}
             setSelectedSubcategory={setSelectedSubcategory}
         />
