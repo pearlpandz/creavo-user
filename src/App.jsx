@@ -22,6 +22,8 @@ import Loader from './pages/Loader'
 import TrialExpiryAnnouncement from './components/TrialExpiryAnnouncement'
 import SubscriptionPage from './pages/Subscription'
 import EventPage from './pages/Event'
+import { Brightness4, Brightness7 } from '@mui/icons-material'
+
 
 function ProtectedRoute({ isAuthenticated }) {
     return isAuthenticated ? <Outlet /> : <Navigate to='/' />
@@ -43,9 +45,16 @@ function ProtectedLayout({ isAuthenticated, sidebarOpen, setSidebarOpen, onToggl
 }
 
 function NoAuthLayout({ toggleTheme }) {
+    const [isDark, setIsDark] = useState(false)
+    const handleToggle = () => {
+    toggleTheme()
+    setIsDark(!isDark)
+  }
     return (
         <>
-            <Button sx={{ position: 'absolute', top: 16, right: 16, zIndex: 999 }} onClick={toggleTheme} variant="contained">Toggle Theme</Button>
+            <Button sx={{ position: 'absolute', top: 16, right: 16, zIndex: 999 }} onClick={handleToggle} variant="contained">
+                {isDark ? <Brightness7 /> : <Brightness4 />}
+            </Button>
             <Outlet />
         </>
     )
