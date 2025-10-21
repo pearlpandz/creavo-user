@@ -9,6 +9,7 @@ import {
     Toolbar,
     Card,
     Stack,
+    Autocomplete, TextField
 } from "@mui/material";
 import { ArrowForward } from "@mui/icons-material";
 import { SETTINGS } from "../constants/settings";
@@ -94,7 +95,7 @@ export default function PickBusinessCategory({ limit = 1 }) {
                 >
                     This will help us tailor your experience
                 </Typography>
-                <Stack
+                {/* <Stack
                     direction="row"
                     flexWrap="wrap"
                     justifyContent="center"
@@ -123,7 +124,25 @@ export default function PickBusinessCategory({ limit = 1 }) {
                             }}
                         />
                     ))}
-                </Stack>
+                </Stack> */}
+                <Autocomplete
+    options={categories}
+    getOptionLabel={(option) => option.name}
+    value={selectedCategory[0] || null}
+    onChange={(event, newValue) => {
+        if (limit == 1) {
+            setSelectedCategory(newValue ? [newValue] : []);
+        } else {
+            setSelectedCategory(newValue);
+        }
+    }}
+    renderInput={(params) => (
+        <TextField {...params} label="Search your business type" variant="outlined" />
+    )}
+    sx={{ width: '100%', maxWidth: 500, mb: 4 }}
+    disableClearable={false}
+    multiple={limit > 1}
+/>
                 <Button
                     variant="contained"
                     sx={{

@@ -55,12 +55,12 @@ const Register = () => {
                 </Box>
             </Grid>
             {/* Right Signup Form Section */}
-            <Grid size={6} sx={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Grid item xs={12} md={6} sx={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh'    }}>
                 <Box sx={{ my: 8, mx: 6, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <Typography component="h1" variant="h4" sx={{ fontWeight: 700, mb: 2, textTransform: 'uppercase', letterSpacing: 3 }}>
+                    <Typography component="h1" variant="h4" sx={{ fontWeight: 700, mt:4, textTransform: 'uppercase', letterSpacing: 3 }}>
                         creavo
                     </Typography>
-                    <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                    <Box sx={{ display: 'flex', gap: 2 }}>
                         <IconButton color="primary" size="large">
                             <Google />
                         </IconButton>
@@ -68,7 +68,7 @@ const Register = () => {
                             <Facebook />
                         </IconButton>
                     </Box>
-                    <Divider sx={{ width: '100%', mb: 2 }}>or</Divider>
+                    <Divider sx={{ width: '100%' }}>or</Divider>
                     <Box component="form" onSubmit={handleSubmit} sx={{ width: '100%', maxWidth: 400 }}>
                         <TextField
                             margin="normal"
@@ -138,7 +138,7 @@ const Register = () => {
                             fullWidth
                             variant="contained"
                             color="primary"
-                            sx={{ mt: 3, mb: 2 }}
+                            sx={{ mt: 2, mb: 1 }}
                         >
                             Sign Up
                         </Button>
