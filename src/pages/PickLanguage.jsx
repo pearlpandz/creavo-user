@@ -9,6 +9,7 @@ import {
     Toolbar,
     Card,
     Stack,
+    Autocomplete, TextField
 } from "@mui/material";
 import { ArrowForward } from "@mui/icons-material";
 import { SETTINGS } from "../constants/settings";
@@ -94,7 +95,7 @@ export default function PickLanguage({ limit = 1 }) {
                 >
                     This will help us tailor your experience
                 </Typography>
-                <Stack
+                {/* <Stack
                     direction="row"
                     flexWrap="wrap"
                     justifyContent="center"
@@ -123,7 +124,31 @@ export default function PickLanguage({ limit = 1 }) {
                             }}
                         />
                     ))}
-                </Stack>
+                </Stack> */}
+                <Autocomplete
+  options={categories}
+  getOptionLabel={(option) => option.name}
+  value={limit === 1 ? selectedCategory[0] || null : selectedCategory}
+  onChange={(event, value) => {
+    if (limit === 1) {
+      setSelectedCategory(value ? [value] : []);
+    } else {
+      setSelectedCategory(value);
+    }
+  }}
+  multiple={limit > 1}
+  renderInput={(params) => (
+    <TextField
+      {...params}
+      label="Search or select language"
+      variant="outlined"
+      sx={{ mb: 4, width: '100%', maxWidth: 500 }}
+    />
+  )}
+  sx={{ width: '100%', maxWidth: 500, mb: 4 }}
+  disableClearable={false}
+/>
+
                 <Button
                     variant="contained"
                     sx={{
