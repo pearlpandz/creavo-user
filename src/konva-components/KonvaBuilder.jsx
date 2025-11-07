@@ -6,10 +6,11 @@ import PropertiesPanel from "./PropertiesPanel";
 import LayersPanel from "./LayersPanel";
 import ContextMenu from "./ContextMenu";
 import "./KonvaBuilder.css";
+import { saveAs } from "file-saver";
 
 function KonvaBuilder(props) {
   const { elements, setElements, handleSave, mode = "view", stageRef, templateObj,
-    setTemplateObj, handleClick } = props;
+    setTemplateObj } = props;
   const [selectedElement, setSelectedElement] = useState(null);
   const [showLayersPanel, setShowLayersPanel] = useState(mode === "edit");
   const [canvasBackgroundColor, setCanvasBackgroundColor] = useState("#ffffff");
@@ -17,6 +18,10 @@ function KonvaBuilder(props) {
   const [contextMenu, setContextMenu] = useState(null);
   const [selectedElementsForClipping, setSelectedElementsForClipping] =
     useState([]);
+    const [isExporting, setIsExporting] = useState(false);
+    const [progress, setProgress] = useState(0);
+
+
 
   const addElement = (type) => {
     if (mode === "view") return;
@@ -61,26 +66,35 @@ function KonvaBuilder(props) {
         textAlign: "left",
       };
     } else if (type === "image") {
-      newElement = {
-        ...baseProps,
-        src: "https://frame-service.creavo.in/uploads/placeholder-image.jpg",
-        width: 150,
-        height: 150,
-      };
-    } else if (type === "gif") {
-      newElement = {
-        ...baseProps,
-        src: "https://media.giphy.com/media/3o7bu3hilQ0Q0Q0Q0/giphy.gif",
-        width: 150,
-        height: 150,
-      };
-    } else if (type === "video") {
+  newElement = {
+    ...baseProps,
+    src: props.selectedImg || "https://frame-service.creavo.in/uploads/placeholder-image.jpg",
+    width: 600,
+    height: 600,
+    x: 0,
+    y: 0,
+    mediaType: props.mediaType || "image", // ← THIS IS THE KEY
+    type: "image",
+    name: "frame-image",
+    draggable: false,
+    listening: false,
+  };
+} else if (type === "gif") {
+  newElement = {
+    ...baseProps,
+    src: "https://media.giphy.com/media/3o7bu3hilQ0Q0Q0Q0/giphy.gif",
+    width: 150,
+    height: 150,
+    mediaType: "gif", // ← ADD THIS
+  };
+} else if (type === "video") {
       newElement = {
         ...baseProps,
         src: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
         width: 320,
         height: 180,
         isPlaying: false,
+        mediaType: "video",
       };
     } else if (type === "line") {
       newElement = {
@@ -452,17 +466,24 @@ function KonvaBuilder(props) {
 
     setElements(currentElements);
   };
+  
 
-  const exportCanvas = () => {
-    const uri = stageRef.current.toDataURL();
+const exportCanvas = () => {
+  const hasVideo = elements.some(el => el.type === "video");
+
+  if (hasVideo) {
+    downloadAsVideo(); // Use the same video exporter
+  } else {
+    // Old PNG export
+    const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
     const link = document.createElement("a");
-    link.download = "poster.png";
+    link.download = `creavo-design-${Date.now()}.png`;
     link.href = uri;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
-
+  }
+};
   const saveTemplate = () => {
     handleSave(elements);
   };
@@ -481,6 +502,143 @@ function KonvaBuilder(props) {
   const toggleLayersPanel = () => {
     setShowLayersPanel(!showLayersPanel);
   };
+
+const downloadAsVideo = async () => {
+  if (!stageRef.current) return;
+
+  setIsExporting(true);
+  setProgress(0);
+
+  const stage = stageRef.current;
+  const originalWidth = stage.width();
+
+  // Scale for better resolution
+  const WIDTH = 1080;
+  const HEIGHT = 1080;
+  const scale = WIDTH / originalWidth;
+
+  const clonedStage = stage.clone();
+  clonedStage.width(WIDTH);
+  clonedStage.height(HEIGHT);
+  clonedStage.scale({ x: scale, y: scale });
+
+  const layer = clonedStage.findOne("Layer");
+  if (!layer) {
+    alert("No layer found!");
+    setIsExporting(false);
+    return;
+  }
+
+  // Clone video elements separately
+  const videoNodes = [];
+  stage.find("Image").forEach((origNode) => {
+    const img = origNode.image();
+    if (img && img.tagName === "VIDEO") {
+      const cloneVideo = document.createElement("video");
+      cloneVideo.src = img.currentSrc || img.src;
+      cloneVideo.crossOrigin = "anonymous";
+      cloneVideo.muted = true;
+      cloneVideo.playsInline = true;
+
+      const cloneImage = clonedStage.findOne(`#${origNode.id()}`);
+      if (cloneImage) cloneImage.image(cloneVideo);
+      videoNodes.push({ video: cloneVideo });
+    }
+  });
+
+  if (videoNodes.length === 0) {
+    alert("No video found!");
+    setIsExporting(false);
+    return;
+  }
+
+  // Get max duration
+  let maxDuration = 0;
+  for (const { video } of videoNodes) {
+    await new Promise((resolve) => {
+      video.onloadedmetadata = resolve;
+    });
+    if (video.duration > maxDuration) maxDuration = video.duration;
+  }
+
+  if (maxDuration === 0 || !isFinite(maxDuration)) {
+    maxDuration = 5; // fallback
+  }
+
+  const offscreen = document.createElement("canvas");
+  offscreen.width = WIDTH;
+  offscreen.height = HEIGHT;
+  const ctx = offscreen.getContext("2d");
+
+  const stream = offscreen.captureStream(30);
+  let recorder;
+  try {
+    recorder = new MediaRecorder(stream, {
+      mimeType: "video/mp4;codecs=avc1.42E01E",
+    });
+  } catch {
+    recorder = new MediaRecorder(stream, {
+      mimeType: "video/webm;codecs=vp9",
+    });
+  }
+
+  const chunks = [];
+  recorder.ondataavailable = (e) => chunks.push(e.data);
+  recorder.onstop = () => {
+    const type = recorder.mimeType.includes("mp4")
+      ? "video/mp4"
+      : "video/webm";
+    const extension = recorder.mimeType.includes("mp4") ? "mp4" : "webm";
+    const blob = new Blob(chunks, { type });
+    saveAs(blob, `creavo-video-${Date.now()}.${extension}`);
+
+    // Cleanup
+    clonedStage.destroy();
+    videoNodes.forEach(({ video }) => {
+      video.pause();
+      video.src = "";
+    });
+    setIsExporting(false);
+  };
+
+  recorder.start();
+  console.log("🎬 Recording started for", maxDuration, "seconds");
+
+  // Play all videos in sync
+  videoNodes.forEach(({ video }) => {
+    video.currentTime = 0;
+    video.play().catch(() => {});
+  });
+
+  const startTime = performance.now();
+
+  const render = (timestamp) => {
+    const elapsed = (timestamp - startTime) / 1000;
+
+    if (elapsed >= maxDuration) {
+  setProgress(100);
+  recorder.stop();
+  return;
+} else {
+  setProgress(Math.min((elapsed / maxDuration) * 100, 100));
+}
+
+
+    // Background
+    ctx.fillStyle = canvasBackgroundColor;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    clonedStage.draw();
+    const stageCanvas = clonedStage.toCanvas({ pixelRatio: 1 });
+    ctx.drawImage(stageCanvas, 0, 0, WIDTH, HEIGHT);
+
+    requestAnimationFrame(render);
+  };
+
+  requestAnimationFrame(render);
+};
+
+
 
   return (
     <div className="konva-builder">
@@ -523,34 +681,59 @@ function KonvaBuilder(props) {
         />
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <button
-              onClick={handleClick}
-              style={{
-                padding: '8px 16px',
-                fontWeight: 'bold',
-                background: '#1976d2',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                justifyContent: 'center'
-              }}
-            >
-              {/* Download Icon SVG */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                height="20"
-                viewBox="0 0 24 24"
-                width="20"
-                fill="#fff"
-                style={{ display: 'inline-block', verticalAlign: 'middle' }}
-              >
-                <path d="M5 20h14v-2H5v2zm7-18c-1.1 0-2 .9-2 2v8.59l-2.29-2.3a.996.996 0 1 0-1.41 1.41l4 4c.39.39 1.02.39 1.41 0l4-4a.996.996 0 1 0-1.41-1.41L13 12.59V4c0-1.1-.9-2-2-2z" />
-              </svg>
-              Download Image
-            </button>
+  onClick={() => {
+  console.log("ELEMENTS:", elements);
+  console.log("HAS VIDEO?", elements.some(el => el.type === "video"));
+  console.log("HAS mediaType video?", elements.some(el => el.mediaType === "video"));
+  
+  const hasVideo = elements.some(el => el.type === "video" || el.mediaType === "video");
+  console.log("FINAL HAS VIDEO:", hasVideo);
+
+  if (hasVideo) {
+    downloadAsVideo();
+  } else {
+    // PNG fallback
+    const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
+    const link = document.createElement("a");
+    link.download = `creavo-design-${Date.now()}.png`;
+    link.href = uri;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+}}
+  style={{
+    padding: '16px 32px',
+    fontWeight: 'bold',
+    fontSize: '18px',
+    background: elements.some(el => el.type === "video") ? '#d32f2f' : '#1976d2',
+    color: '#fff',
+    border: 'none',
+    borderRadius: 12,
+    cursor: 'pointer',
+    boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
+    transition: 'all 0.3s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    margin: '0 auto',
+    minWidth: '280px',
+    justifyContent: 'center'
+  }}
+>
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    height="28" 
+    viewBox="0 0 24 24" 
+    width="28" 
+    fill="#fff"
+  >
+    <path d="M5 20h14v-2H5v2zm7-18c-1.1 0-2 .9-2 2v8.59l-2.29-2.3a.996.996 0 1 0-1.41 1.41l4 4c.39.39 1.02.39 1.41 0l4-4a.996.996 0 1 0-1.41-1.41L13 12.59V4c0-1.1-.9-2-2-2z" />
+  </svg>
+  {elements.some(el => el.type === "video" || el.mediaType === "video") 
+  ? "Download MP4 Video" 
+  : "Download PNG Image"}
+</button>
           </div>
         </div>
         {mode === "edit" && (
@@ -584,6 +767,49 @@ function KonvaBuilder(props) {
           mode={mode}
         />
       )}
+
+      {isExporting && (
+  <div
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      background: "rgba(0,0,0,0.7)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      flexDirection: "column",
+      zIndex: 9999,
+      color: "#fff",
+      fontSize: "20px",
+      fontWeight: 600,
+    }}
+  >
+    <p style={{ marginBottom: 20 }}>Exporting Video... {Math.round(progress)}%</p>
+
+    <div
+      style={{
+        width: "60%",
+        maxWidth: 500,
+        height: 20,
+        background: "rgba(255,255,255,0.2)",
+        borderRadius: 10,
+        overflow: "hidden",
+      }}
+    >
+      <div
+        style={{
+          width: `${progress}%`,
+          height: "100%",
+          background: `linear-gradient(90deg, #8CA2FF, #FF87C5)`,
+          transition: "width 0.2s ease-out",
+        }}
+      />
+    </div>
+  </div>
+)}
     </div>
   );
 }

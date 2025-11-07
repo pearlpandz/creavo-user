@@ -20,6 +20,8 @@
     "@react-spring/web": "^10.0.0",
     "@tanstack/react-query": "^5.74.4",
     "axios": "^1.9.0",
+    "file-saver": "^2.0.5",
+    "gifler": "^0.1.0",
     "keen-slider": "^6.8.6",
     "konva": "^9.3.20",
     "moment": "^2.30.1",
