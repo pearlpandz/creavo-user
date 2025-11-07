@@ -66,6 +66,7 @@ const BannerComponent = ({ detail = {} }) => {
                 flexWrap="wrap"
             >
                 <Button
+                    className="tour-start-designing"
                     variant="contained"
                     sx={() => ({
                         backgroundColor: '#eee',
@@ -83,6 +84,7 @@ const BannerComponent = ({ detail = {} }) => {
                     Start Designing
                 </Button>
                 <Button
+                    className="tour-create-new"
                     variant="contained"
                     sx={() => ({
                         backgroundColor: '#eee',
