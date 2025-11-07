@@ -7,11 +7,16 @@ import KonvaBuilder from "../konva-components/KonvaBuilder";
 import { Box } from "@mui/material";
 import { usePatchUser } from "../hook/usePageData";
 import WarningDialog from "./WarningDialog";
+import { useEditor } from "../redux/slices/editor.slice";
+
 
 // Canvas Editor
 const CanvasEditor = (props) => {
-  const { template, theme, selectedImg, profile, mode = "edit" } = props;
+  const { template, theme, selectedImg,mediaType: propMediaType, profile, mode = "edit" } = props;
   const stageRef = useRef();
+  const { mediaType: reduxMediaType } = useEditor();
+console.log("REDUX mediaType:", reduxMediaType); // ← ADD THIS DEBUG
+  const mediaType = propMediaType || reduxMediaType || "image"; // ← SAFE
   const [elements, setElements] = useUndoRedo([]);
   const [templateObj, setTemplateObj] = useState({});
   const { mutate: patchMutate } = usePatchTemplate();
@@ -24,68 +29,93 @@ const CanvasEditor = (props) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Load initial elements from template prop
+useEffect(() => {
     if (template?.elements) {
       const updatedElements = template.elements.map((element) => {
+        // Handle Images (including frame-img with video support)
         if (element.type === "image" && element.src) {
-          let src = null;
+          let src = element.src;
+          let currentMediaType = "image"; // default
+
           if (element.slug === "{{logo}}") {
-            src = profile?.company_details?.image;
-          } else if (element.slug === "{{frame-img}}") {
+            src = profile?.company_details?.image || src;
+          } 
+          else if (element.slug === "{{frame-img}}") {
             src = selectedImg;
-          } else if (element.slug === "{{product-img1}}") {
-            src = profile?.products?.[0]?.image
-          } else if (element.slug === "{{product-img2}}") {
-            src = profile?.products?.[1]?.image
-          } else if (element.slug === "{{product-img3}}") {
-            src = profile?.products?.[2]?.image
-          } else if (element.slug === "{{political-supporter-1}}") {
-            src = profile?.political?.supporters?.[0]?.image
-          } else if (element.slug === "{{political-supporter-2}}") {
-            src = profile?.political?.supporters?.[1]?.image
-          } else if (element.slug === "{{political-supporter-3}}") {
-            src = profile?.political?.supporters?.[2]?.image
-          } else if (element.slug === "{{leader-image}}") {
-            src = profile?.political?.image
+            currentMediaType = mediaType; // ← FIXED: Use Redux value!
+          } 
+          else if (element.slug === "{{product-img1}}") {
+            src = profile?.products?.[0]?.image || src;
+          } 
+          else if (element.slug === "{{product-img2}}") {
+            src = profile?.products?.[1]?.image || src;
+          } 
+          else if (element.slug === "{{product-img3}}") {
+            src = profile?.products?.[2]?.image || src;
+          } 
+          else if (element.slug === "{{political-supporter-1}}") {
+            src = profile?.political?.supporters?.[0]?.image || src;
+          } 
+          else if (element.slug === "{{political-supporter-2}}") {
+            src = profile?.political?.supporters?.[1]?.image || src;
+          } 
+          else if (element.slug === "{{political-supporter-3}}") {
+            src = profile?.political?.supporters?.[2]?.image || src;
+          } 
+          else if (element.slug === "{{leader-image}}") {
+            src = profile?.political?.image || src;
           }
-          src = src || element.src
+
           return {
             ...element,
             src,
+            mediaType: currentMediaType, // ← Now it's correct!
           };
-        } else if (element.type === "text" && element.text) {
-          let text = '';
+        }
+
+        // Handle Text
+        else if (element.type === "text" && element.text) {
+          let text = element.text;
+
           if (element.slug === "{{companyName}}") {
-            text = profile?.company_details?.company_name;
-          } else if (element.slug === "{{content}}") {
+            text = profile?.company_details?.company_name || text;
+          } 
+          else if (element.slug === "{{content}}") {
             text = formatArrayWithPipe([
               profile?.company_details?.primary_contact,
               profile?.company_details?.secondary_contact,
               profile?.company_details?.email,
               profile?.company_details?.website
-            ]);
-          } else if (element.slug === "{{description}}") {
-            text = profile?.company_details?.description;
-          } else if (element.slug === "{{leader-name}}") {
-            text = profile?.political?.leader_name;
-          } else if (element.slug === "{{leader-designation}}") {
-            text = profile?.political?.leader_designation;
+            ]) || text;
+          } 
+          else if (element.slug === "{{description}}") {
+            text = profile?.company_details?.description || text;
+          } 
+          else if (element.slug === "{{leader-name}}") {
+            text = profile?.political?.leader_name || text;
+          } 
+          else if (element.slug === "{{leader-designation}}") {
+            text = profile?.political?.leader_designation || text;
           }
-          text = text || element.text
+
           return {
             ...element,
-            color: theme?.textColor ?? element?.color,
             text,
+            color: theme?.textColor ?? element.color,
           };
-        } else if (element.type !== 'group') {
+        }
+
+        // Handle background fills
+        else if (element.type !== "group") {
           return {
             ...element,
-            fill: theme?.bgColor ?? element?.fill
-          }
+            fill: theme?.bgColor ?? element.fill,
+          };
         }
+
         return element;
-      })
+      });
+
       setElements(updatedElements);
       setTemplateObj({
         name: template.name,
@@ -95,8 +125,7 @@ const CanvasEditor = (props) => {
     } else {
       setElements([]);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [template, theme, selectedImg, profile,]);
+  }, [template, theme, selectedImg, profile, mediaType]); 
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
@@ -190,6 +219,8 @@ const CanvasEditor = (props) => {
   return (
     <>
       <KonvaBuilder
+      selectedImg={selectedImg}
+      mediaType={mediaType}
         elements={elements}
         setElements={setElements}
         templateObj={templateObj}

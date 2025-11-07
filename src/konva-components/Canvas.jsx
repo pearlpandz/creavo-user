@@ -19,6 +19,9 @@ import Pen from "./Pen";
 import Watermark from "./Watermark";
 import { useProfile } from "../hook/usePageData";
 import { useExpire } from "../hook/useExpire";
+import Konva from "konva";
+
+
 
 const GeneralShape = forwardRef((props, ref) => {
   const { shapeProps, onSelect, onContextMenu, onPointDrag, mode } = props;
@@ -106,52 +109,135 @@ const GeneralShape = forwardRef((props, ref) => {
 
 const ImageBasedShape = forwardRef((props, ref) => {
   const { shapeProps, onSelect, onContextMenu, mode } = props;
-  // const src = shapeProps.src?.includes('https://') ? shapeProps.src : shapeProps.src?.replace('http://', 'https://')
-  const src = shapeProps.src;
+
+  const isGif =
+    shapeProps.mediaType === "gif" ||
+    shapeProps.type === "gif" ||
+    (shapeProps.src && (
+      shapeProps.src.startsWith("data:image/gif") ||
+      shapeProps.src.includes("image/gif") ||
+      shapeProps.src.includes(".gif")
+    ));
+
+  const isVideo = shapeProps.mediaType === "video" || shapeProps.type === "video";
+  const isAnimated = isGif || isVideo;
+
+  // const src = shapeProps.src?.includes('https://')
+  //   ? shapeProps.src
+  //   : shapeProps.src?.replace('http://', 'https://');
+
+    const src = shapeProps.src;
+
+  // console.log("MEDIA RENDER", {
+  //   id: shapeProps.id,
+  //   type: shapeProps.type,
+  //   mediaType: shapeProps.mediaType,
+  //   isGif,
+  //   isVideo,
+  //   isAnimated
+  // });
+
   const [image] = useImage(src, "anonymous");
-  const videoRef = useRef(null);
+  const internalRef = useRef(null);
 
   useEffect(() => {
-    if (shapeProps.type === "video") {
-      const video = document.createElement("video");
-      video.src = shapeProps.src;
-      video.loop = true;
-      video.muted = true;
-      video.autoplay = true;
-      video.crossOrigin = "anonymous";
-      video.addEventListener("timeupdate", () => {
-        if (ref && ref.current) {
-          ref.current.getLayer().batchDraw();
-        }
-      });
-      videoRef.current = video;
+    if (ref) {
+      if (typeof ref === "function") ref(internalRef.current);
+      else ref.current = internalRef.current;
     }
-  }, [shapeProps.src, shapeProps.type, ref]);
+  }, [ref]);
+
+  useEffect(() => {
+    if (!isAnimated || !internalRef.current) return;
+
+    const node = internalRef.current;
+    const layer = node.getLayer();
+    if (!layer) return;
+
+    let mediaElement;
+
+    if (isGif) {
+      // GIF: Use <img> + force redraw
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      // FOR DATA URLS: DON'T ADD CACHE BUSTER
+// FOR HTTP URLs: ADD CACHE BUSTER
+if (src.startsWith('data:')) {
+  img.src = src;
+} else {
+  img.src = src + (src.includes('?') ? '&' : '?') + Date.now();
+}
+
+     img.onload = () => {
+  console.log("GIF LOADED & ANIMATING!");
+
+  // FORCE NEW IMAGE EVERY FRAME TO BYPASS KONVA CACHE
+  const animateGif = () => {
+    const newImg = new Image();
+    newImg.crossOrigin = "anonymous";
+    newImg.src = src + (src.startsWith('data:') ? '' : '?t=' + Date.now());
+
+    newImg.onload = () => {
+      node.image(newImg);
+      layer.batchDraw();
+      // Keep animating
+      if (node.getLayer()) {
+        requestAnimationFrame(animateGif);
+      }
+    };
+  };
+
+  animateGif();
+};
+
+      img.onerror = () => console.error("GIF LOAD FAILED");
+      mediaElement = img;
+    } 
+    else if (isVideo) {
+      // VIDEO: Use <video> element
+      const video = document.createElement("video");
+      video.crossOrigin = "anonymous";
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.preload = "auto";
+      video.src = src;
+
+      video.onloadeddata = () => {
+        node.image(video);
+        video.play().catch(() => {});
+        console.log("VIDEO LOADED & PLAYING!");
+      };
+
+      video.onerror = (e) => console.error("VIDEO LOAD ERROR:", e);
+      video.load();
+
+      mediaElement = video;
+    }
+
+    // Keep layer updating for animated content
+    const anim = new Konva.Animation(() => {}, layer);
+    anim.start();
+
+    return () => {
+      anim.stop();
+      if (node._gifInterval) clearInterval(node._gifInterval);
+      if (mediaElement && mediaElement.pause) mediaElement.pause();
+      if (mediaElement && mediaElement.src) mediaElement.src = "";
+    };
+  }, [src, isAnimated, isGif, isVideo]);
+
+  // For static images only
+  const displayImage = isAnimated ? null : image;
 
   return (
     <KonvaImage
-      ref={ref}
+      ref={internalRef}
       {...shapeProps}
-      fill={'transparent'}
-      image={shapeProps.type === "video" ? videoRef.current : image}
-      key={shapeProps.src}
-      onClick={(e) => {
-        if (mode === "edit") {
-          onSelect(shapeProps, e);
-          e.cancelBubble = true;
-        }
-      }}
-      onTap={(e) => {
-        if (mode === "edit") {
-          onSelect(shapeProps, e);
-          e.cancelBubble = true;
-        }
-      }}
-      onContextMenu={(e) => {
-        if (mode === "edit") {
-          onContextMenu(e, shapeProps.id);
-        }
-      }}
+      image={displayImage}
+      onClick={(e) => mode === "edit" && (onSelect(shapeProps, e), e.cancelBubble = true)}
+      onTap={(e) => mode === "edit" && (onSelect(shapeProps, e), e.cancelBubble = true)}
+      onContextMenu={(e) => mode === "edit" && onContextMenu(e, shapeProps.id)}
     />
   );
 });
@@ -182,7 +268,7 @@ const ElementRenderer = ({
   onSelect,
   onChange,
   onContextMenu,
-  currentTool,
+  // currentTool,
   onRemovePoint,
   mode,
 }) => {
@@ -411,14 +497,26 @@ const ElementRenderer = ({
           clipFunc={clipFunc}
         >
           {groupChildren.map((child) => (
-            <Shape
-              key={child.id}
-              ref={child.isClippingMask ? maskRef : undefined}
-              shapeProps={child}
-              onSelect={() => onSelect(element)}
-              onContextMenu={onContextMenu}
-              mode={mode}
-            />
+           <Shape
+  key={child.id}
+  ref={(node) => {
+  if (child.isClippingMask) {
+    maskRef.current = node;
+  }
+  if (child.type === "image" || child.type === "video") {
+    shapeRef.current = node;
+    // Force re-render to trigger useEffect in ImageBasedShape
+    node?.getLayer()?.batchDraw();
+  }
+}}
+  shapeProps={{
+    ...child,
+    mediaType: child.mediaType || "image",
+  }}
+  onSelect={() => onSelect(element)}
+  onContextMenu={onContextMenu}
+  mode={mode}
+/>
           ))}
         </Group>
         {mode === "edit" && isSelected && (
@@ -441,6 +539,7 @@ const ElementRenderer = ({
         ref={shapeRef}
         shapeProps={{
           ...element,
+          mediaType: element.mediaType || "image",
           draggable: mode === "edit" && isSelected,
           onDragEnd: handleDragEnd,
           onTransformEnd: handleTransformEnd,
