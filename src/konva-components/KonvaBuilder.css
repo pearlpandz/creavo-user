@@ -229,3 +229,10 @@ div:has(>.konvajs-content) {
 .no-layers-message svg {
   margin-bottom: 10px;
 }
+
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
