@@ -5,6 +5,8 @@ import BannerComponent from "../components/Home/BannerComponent";
 import TemplateCardList from "../components/Home/TemplateCategory/List";
 import CategoryContainer from "../components/CategoryContainer";
 import EventList from "../components/EventList";
+import OnboardingTour from "../components/OnboardingTour";
+
 
 const HomePage = () => {
     const { data: templateCategories } = useTemplateCategories();
@@ -54,6 +56,7 @@ const HomePage = () => {
             ))}
 
             {isFetchingNextPage && <Box sx={{ textAlign: 'center', mt: 2 }}>Loading more...</Box>}
+            <OnboardingTour />
         </Box>
     );
 };

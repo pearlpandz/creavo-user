@@ -122,11 +122,11 @@ const ImageBasedShape = forwardRef((props, ref) => {
   const isVideo = shapeProps.mediaType === "video" || shapeProps.type === "video";
   const isAnimated = isGif || isVideo;
 
-  // const src = shapeProps.src?.includes('https://')
-  //   ? shapeProps.src
-  //   : shapeProps.src?.replace('http://', 'https://');
+  const src = shapeProps.src?.includes('https://')
+    ? shapeProps.src
+    : shapeProps.src?.replace('http://', 'https://');
 
-    const src = shapeProps.src;
+    // const src = shapeProps.src;
 
   // console.log("MEDIA RENDER", {
   //   id: shapeProps.id,

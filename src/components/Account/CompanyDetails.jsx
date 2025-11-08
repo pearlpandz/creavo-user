@@ -82,7 +82,7 @@ const CompanyDetails = ({ detail, isEditorView = false }) => {
         mode === 'view' ?
             isEditorView ?
                 <IconButton aria-label="Edit" size="large" onClick={() => setMode('edit')}><ModeEditOutlinedIcon sx={{ fontSize: 16 }} /></IconButton> :
-                <Button variant="outlined" size="small" onClick={() => setMode('edit')}><ModeEditOutlinedIcon sx={{ fontSize: 16, verticalAlign: 'top', mt: '-2px' }} /> Edit</Button> :
+                <Button className="tour-edit-company" variant="outlined" size="small" onClick={() => setMode('edit')}><ModeEditOutlinedIcon sx={{ fontSize: 16, verticalAlign: 'top', mt: '-2px' }} /> Edit</Button> :
             isEditorView ?
                 null :
                 <Button variant="contained" size="small" onClick={handleSave}><SaveOutlinedIcon sx={{ fontSize: 16, verticalAlign: 'top', mt: '-2px' }} />{isPending ? 'Saving...' : 'Save'}</Button>

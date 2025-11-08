@@ -36,7 +36,7 @@ export default function TopNav({ onMenuClick, darkMode, onToggleTheme }) {
                     {/* <Box sx={{ textAlign: 'right' }}>
                         <Typography variant="body1" sx={{ fontWeight: 500 }}>Muthupandi V</Typography>
                     </Box> */}
-                    <Avatar onClick={routeToAccount} sx={{ bgcolor: 'primary.main', fontSize: 12, width: 30, height: 30, cursor: 'pointer' }}>{profile?.first_name?.[0]}{profile?.last_name?.[0]}</Avatar>
+                    <Avatar className="navbar-avatar" onClick={routeToAccount} sx={{ bgcolor: 'primary.main', fontSize: 12, width: 30, height: 30, cursor: 'pointer' }}>{profile?.first_name?.[0]}{profile?.last_name?.[0]}</Avatar>
                 </Box>
             </Toolbar>
         </AppBar>
