@@ -14,7 +14,7 @@ const MediaContainer = ({ data, title = 'Trending', subCategoryId = 'all', setSe
         <Box component='div' sx={{ mt: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <Box>
-                    <Typography component='h4' sx={() => ({
+                    <Typography className='media-container' component='h4' sx={() => ({
                         fontSize: 18,
                         textTransform: 'capitalize',
                         fontWeight: 'bold',

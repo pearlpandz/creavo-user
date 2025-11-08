@@ -7,6 +7,8 @@ import LayersPanel from "./LayersPanel";
 import ContextMenu from "./ContextMenu";
 import "./KonvaBuilder.css";
 import { saveAs } from "file-saver";
+import EditorTour from "../components/EditorTour"
+
 
 function KonvaBuilder(props) {
   const { elements, setElements, handleSave, mode = "view", stageRef, templateObj,
@@ -66,6 +68,8 @@ function KonvaBuilder(props) {
         textAlign: "left",
       };
     } else if (type === "image") {
+  const actualType = props.mediaType === "gif" ? "gif" : "image";
+
   newElement = {
     ...baseProps,
     src: props.selectedImg || "https://frame-service.creavo.in/uploads/placeholder-image.jpg",
@@ -73,11 +77,12 @@ function KonvaBuilder(props) {
     height: 600,
     x: 0,
     y: 0,
-    mediaType: props.mediaType || "image", // ← THIS IS THE KEY
-    type: "image",
+    mediaType: props.mediaType || "image",
+    type: actualType,
     name: "frame-image",
     draggable: false,
     listening: false,
+    zIndex: -1,
   };
 } else if (type === "gif") {
   newElement = {
@@ -503,6 +508,8 @@ const exportCanvas = () => {
     setShowLayersPanel(!showLayersPanel);
   };
 
+  
+
 const downloadAsVideo = async () => {
   if (!stageRef.current) return;
 
@@ -510,40 +517,20 @@ const downloadAsVideo = async () => {
   setProgress(0);
 
   const stage = stageRef.current;
-  const originalWidth = stage.width();
-
-  // Scale for better resolution
   const WIDTH = 1080;
   const HEIGHT = 1080;
-  const scale = WIDTH / originalWidth;
+  const scale = WIDTH / stage.width();
 
+  // Clone stage for export
   const clonedStage = stage.clone();
   clonedStage.width(WIDTH);
   clonedStage.height(HEIGHT);
   clonedStage.scale({ x: scale, y: scale });
 
-  const layer = clonedStage.findOne("Layer");
-  if (!layer) {
-    alert("No layer found!");
-    setIsExporting(false);
-    return;
-  }
-
-  // Clone video elements separately
-  const videoNodes = [];
-  stage.find("Image").forEach((origNode) => {
-    const img = origNode.image();
-    if (img && img.tagName === "VIDEO") {
-      const cloneVideo = document.createElement("video");
-      cloneVideo.src = img.currentSrc || img.src;
-      cloneVideo.crossOrigin = "anonymous";
-      cloneVideo.muted = true;
-      cloneVideo.playsInline = true;
-
-      const cloneImage = clonedStage.findOne(`#${origNode.id()}`);
-      if (cloneImage) cloneImage.image(cloneVideo);
-      videoNodes.push({ video: cloneVideo });
-    }
+  // Find all video nodes
+  const videoNodes = stage.find("Image").filter(node => {
+    const img = node.image();
+    return img && img.tagName === "VIDEO";
   });
 
   if (videoNodes.length === 0) {
@@ -552,85 +539,123 @@ const downloadAsVideo = async () => {
     return;
   }
 
-  // Get max duration
-  let maxDuration = 0;
-  for (const { video } of videoNodes) {
-    await new Promise((resolve) => {
-      video.onloadedmetadata = resolve;
-    });
-    if (video.duration > maxDuration) maxDuration = video.duration;
-  }
+  // UNLOCK AUDIO: Play all videos on user click (this is the magic)
+  await Promise.all(
+    videoNodes.map(node => {
+      const v = node.image();
+      v.muted = false;
+      v.currentTime = 0;
+      return v.play().catch(() => {});
+    })
+  );
 
-  if (maxDuration === 0 || !isFinite(maxDuration)) {
-    maxDuration = 5; // fallback
-  }
+  console.log("Audio unlocked! Starting recording in 600ms...");
+
+  // Wait a bit then start recording
+  setTimeout(() => startRecording(clonedStage, videoNodes), 600);
+};
+
+const startRecording = async (clonedStage, videoNodes) => {
+  const WIDTH = 1080;
+  const HEIGHT = 1080;
+
+  // Create fresh video elements for recording
+  const videoElements = videoNodes.map(origNode => {
+    const origVideo = origNode.image();
+    const v = document.createElement("video");
+    v.src = origVideo.currentSrc || origVideo.src;
+    v.crossOrigin = "anonymous";
+    v.muted = false;
+    v.loop = true;
+    v.playsInline = true;
+    v.preload = "auto";
+    v.currentTime = 0;
+
+    const cloneNode = clonedStage.findOne(`#${origNode.id()}`);
+    if (cloneNode) cloneNode.image(v);
+    return v;
+  });
+
+  // Wait for videos to be ready
+  await Promise.all(
+    videoElements.map(v => new Promise(r => {
+      if (v.readyState >= 2) r();
+      else v.onloadedmetadata = r;
+    }))
+  );
+
+  let maxDuration = 5;
+  videoElements.forEach(v => {
+    if (v.duration && v.duration > maxDuration) maxDuration = v.duration;
+  });
 
   const offscreen = document.createElement("canvas");
   offscreen.width = WIDTH;
   offscreen.height = HEIGHT;
   const ctx = offscreen.getContext("2d");
 
-  const stream = offscreen.captureStream(30);
+  const canvasStream = offscreen.captureStream(30);
+
+  // Audio mixing
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioContext.state === "suspended") await audioContext.resume();
+
+  const destination = audioContext.createMediaStreamDestination();
+  let hasAudio = false;
+
+  videoElements.forEach(v => {
+    try {
+      const source = audioContext.createMediaElementSource(v);
+      source.connect(destination);
+      hasAudio = true;
+    } catch (e) {
+      console.warn("Audio source failed", e);
+    }
+  });
+
+  const finalStream = new MediaStream();
+  canvasStream.getVideoTracks().forEach(t => finalStream.addTrack(t));
+  if (hasAudio) destination.stream.getAudioTracks().forEach(t => finalStream.addTrack(t));
+
   let recorder;
   try {
-    recorder = new MediaRecorder(stream, {
-      mimeType: "video/mp4;codecs=avc1.42E01E",
-    });
+    recorder = new MediaRecorder(finalStream, { mimeType: "video/mp4;codecs=avc1.42E01E,mp4a.40.2" });
   } catch {
-    recorder = new MediaRecorder(stream, {
-      mimeType: "video/webm;codecs=vp9",
-    });
+    recorder = new MediaRecorder(finalStream, { mimeType: "video/webm;codecs=vp9,opus" });
   }
 
   const chunks = [];
-  recorder.ondataavailable = (e) => chunks.push(e.data);
+  recorder.ondataavailable = e => chunks.push(e.data);
   recorder.onstop = () => {
-    const type = recorder.mimeType.includes("mp4")
-      ? "video/mp4"
-      : "video/webm";
-    const extension = recorder.mimeType.includes("mp4") ? "mp4" : "webm";
-    const blob = new Blob(chunks, { type });
-    saveAs(blob, `creavo-video-${Date.now()}.${extension}`);
+    const ext = recorder.mimeType.includes("mp4") ? "mp4" : "webm";
+    saveAs(new Blob(chunks, { type: recorder.mimeType }), `creavo-video-${Date.now()}.${ext}`);
 
     // Cleanup
     clonedStage.destroy();
-    videoNodes.forEach(({ video }) => {
-      video.pause();
-      video.src = "";
-    });
+    videoElements.forEach(v => { v.pause(); v.src = ""; });
+    finalStream.getTracks().forEach(t => t.stop());
+    audioContext.close();
     setIsExporting(false);
+    setProgress(100);
   };
 
   recorder.start();
-  console.log("🎬 Recording started for", maxDuration, "seconds");
-
-  // Play all videos in sync
-  videoNodes.forEach(({ video }) => {
-    video.currentTime = 0;
-    video.play().catch(() => {});
-  });
+  videoElements.forEach(v => v.play().catch(() => {}));
 
   const startTime = performance.now();
-
-  const render = (timestamp) => {
-    const elapsed = (timestamp - startTime) / 1000;
-
+  const render = (ts) => {
+    const elapsed = (ts - startTime) / 1000;
     if (elapsed >= maxDuration) {
-  setProgress(100);
-  recorder.stop();
-  return;
-} else {
-  setProgress(Math.min((elapsed / maxDuration) * 100, 100));
-}
+      recorder.stop();
+      return;
+    }
 
+    setProgress(Math.min((elapsed / maxDuration) * 100, 99));
 
-    // Background
     ctx.fillStyle = canvasBackgroundColor;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
     clonedStage.draw();
-    const stageCanvas = clonedStage.toCanvas({ pixelRatio: 1 });
-    ctx.drawImage(stageCanvas, 0, 0, WIDTH, HEIGHT);
+    ctx.drawImage(clonedStage.toCanvas(), 0, 0, WIDTH, HEIGHT);
 
     requestAnimationFrame(render);
   };
@@ -639,8 +664,8 @@ const downloadAsVideo = async () => {
 };
 
 
-
   return (
+    <>
     <div className="konva-builder">
       <div className="main-container">
         {mode === "edit" && (
@@ -679,12 +704,12 @@ const downloadAsVideo = async () => {
           onRemovePoint={onRemovePoint}
           mode={mode}
         />
-          <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <div class="download-button" style={{ textAlign: 'center', marginTop: '20px' }}>
             <button
   onClick={() => {
-  console.log("ELEMENTS:", elements);
-  console.log("HAS VIDEO?", elements.some(el => el.type === "video"));
-  console.log("HAS mediaType video?", elements.some(el => el.mediaType === "video"));
+  // console.log("ELEMENTS:", elements);
+  // console.log("HAS VIDEO?", elements.some(el => el.type === "video"));
+  // console.log("HAS mediaType video?", elements.some(el => el.mediaType === "video"));
   
   const hasVideo = elements.some(el => el.type === "video" || el.mediaType === "video");
   console.log("FINAL HAS VIDEO:", hasVideo);
@@ -702,24 +727,19 @@ const downloadAsVideo = async () => {
     document.body.removeChild(link);
   }
 }}
-  style={{
-    padding: '16px 32px',
-    fontWeight: 'bold',
-    fontSize: '18px',
-    background: elements.some(el => el.type === "video") ? '#d32f2f' : '#1976d2',
-    color: '#fff',
-    border: 'none',
-    borderRadius: 12,
-    cursor: 'pointer',
-    boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    margin: '0 auto',
-    minWidth: '280px',
-    justifyContent: 'center'
-  }}
+   style={{
+                padding: '8px 16px',
+                fontWeight: 'bold',
+                background: '#1976d2',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 4,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                justifyContent: 'center'
+              }}
 >
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
@@ -811,6 +831,8 @@ const downloadAsVideo = async () => {
   </div>
 )}
     </div>
+    <EditorTour />
+    </>
   );
 }
 

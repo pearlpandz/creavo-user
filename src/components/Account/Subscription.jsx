@@ -142,6 +142,7 @@ const Subscription = ({ detail }) => {
                             variant="outlined"
                             color="primary"
                             onClick={() => setOpenDialog(true)}
+                            className="tour-upgrade-diamond"
                         >
                             Upgrade to Diamond
                         </Button>
