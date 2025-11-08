@@ -122,11 +122,11 @@ const ImageBasedShape = forwardRef((props, ref) => {
   const isVideo = shapeProps.mediaType === "video" || shapeProps.type === "video";
   const isAnimated = isGif || isVideo;
 
-  // const src = shapeProps.src?.includes('https://')
-  //   ? shapeProps.src
-  //   : shapeProps.src?.replace('http://', 'https://');
+  const src = shapeProps.src?.includes('https://')
+    ? shapeProps.src
+    : shapeProps.src?.replace('http://', 'https://'); 
 
-    const src = shapeProps.src;
+    // const src = shapeProps.src;
 
   // console.log("MEDIA RENDER", {
   //   id: shapeProps.id,
@@ -156,43 +156,41 @@ const ImageBasedShape = forwardRef((props, ref) => {
 
     let mediaElement;
 
-    if (isGif) {
-      // GIF: Use <img> + force redraw
-      const img = new Image();
-      img.crossOrigin = "anonymous";
-      // FOR DATA URLS: DON'T ADD CACHE BUSTER
-// FOR HTTP URLs: ADD CACHE BUSTER
-if (src.startsWith('data:')) {
-  img.src = src;
-} else {
-  img.src = src + (src.includes('?') ? '&' : '?') + Date.now();
-}
+ if (isGif) {
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.src = src; // No cache buster needed for data URLs
 
-     img.onload = () => {
-  console.log("GIF LOADED & ANIMATING!");
+  img.onload = () => {
+    console.log("GIF LOADED & ANIMATING!");
 
-  // FORCE NEW IMAGE EVERY FRAME TO BYPASS KONVA CACHE
-  const animateGif = () => {
-    const newImg = new Image();
-    newImg.crossOrigin = "anonymous";
-    newImg.src = src + (src.startsWith('data:') ? '' : '?t=' + Date.now());
+    // Show first frame
+    node.image(img);
+    layer.batchDraw();
 
-    newImg.onload = () => {
-      node.image(newImg);
-      layer.batchDraw();
-      // Keep animating
-      if (node.getLayer()) {
+    const animateGif = () => {
+      const newImg = new Image();
+      newImg.crossOrigin = "anonymous";
+      
+      // CRITICAL: Don't break data URLs
+      newImg.src = src.startsWith('data:') 
+        ? src 
+        : src + (src.includes('?') ? '&' : '?') + 't=' + Date.now();
+
+      newImg.onload = () => {
+        if (!node.getLayer()) return;
+        node.image(newImg);
+        layer.batchDraw();
         requestAnimationFrame(animateGif);
-      }
+      };
     };
+
+    animateGif();
   };
 
-  animateGif();
-};
-
-      img.onerror = () => console.error("GIF LOAD FAILED");
-      mediaElement = img;
-    } 
+  img.onerror = () => console.error("GIF LOAD FAILED");
+  mediaElement = img;
+} 
     else if (isVideo) {
       // VIDEO: Use <video> element
       const video = document.createElement("video");
