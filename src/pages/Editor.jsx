@@ -11,6 +11,7 @@ import { Box, Typography, TextField, InputLabel, Stack, Button } from "@mui/mate
 import EditorMobileMessage from './EditorMobileMessage';
 import CanvasEditor from "../components/CanvasEditor";
 import CircleColorPicker from "../components/CircleColorPicker";
+import EditorTour from "../components/EditorTour"
 
 export default function Editor() {
     const { data: templateCategories, isLoading, isFetching, isRefetching } = useTemplateCategories();
@@ -157,6 +158,7 @@ export default function Editor() {
                     <CanvasEditor theme={selectedTheme} selectedImg={frameImg} mediaType={mediaType} template={selectedTemplateDetail} profile={profile} mode='view' />
                 </div>}
             </div>
+             <EditorTour />
         </>
     )
 }

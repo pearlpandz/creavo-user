@@ -41,6 +41,7 @@ const ProductInfo = ({ productList, isEditorView = false }) => {
         if (allSuccess) {
             // Invalidate profile query to refresh data
             queryClient.invalidateQueries({ queryKey: ['profile'] });
+             setOpen(true);
         }
         console.log(results);
     }, [mutateAsync, products, queryClient])

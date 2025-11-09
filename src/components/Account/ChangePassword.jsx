@@ -51,11 +51,17 @@ const InputPassword = (props) => {
 }
 
 const ChangePassword = ({ isMobile = false }) => {
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState({ open: false, message: '', severity: 'success' });
+
     const [passwords, setPasswords] = useState({})
-    const { mutate, isPending } = useChangePassword(() => {
-        setOpen(true);
-    });
+   const { mutate, isPending } = useChangePassword(
+  () => setOpen({ open: true, message: 'Password Successfully Updated!', severity: 'success' }),
+  (error) => {
+    const msg = error?.response?.data?.detail || 'Failed to update password';
+    setOpen({ open: true, message: msg, severity: 'error' });
+  }
+);
+
 
     const handleChange = (event) => {
         setPasswords((prev) => ({
@@ -84,7 +90,7 @@ const ChangePassword = ({ isMobile = false }) => {
         if (reason === 'clickaway') {
             return;
         }
-        setOpen(false);
+        setOpen((prev) => ({ ...prev, open: false }));
     };
 
     const paperStyle = { p: 3, borderRadius: 3, border: '1px solid #f0f0f0' };
@@ -133,16 +139,22 @@ const ChangePassword = ({ isMobile = false }) => {
                 </Box>
             )}
 
-            <Snackbar open={open} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
-                <Alert
-                    onClose={handleClose}
-                    severity="success"
-                    variant="filled"
-                    sx={{ width: '100%' }}
-                >
-                    Password Successfully Updated!
-                </Alert>
-            </Snackbar>
+            <Snackbar
+  open={open.open}
+  autoHideDuration={6000}
+  onClose={handleClose}
+  anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+>
+  <Alert
+    onClose={handleClose}
+    severity={open.severity}
+    variant="filled"
+    sx={{ width: '100%' }}
+  >
+    {open.message}
+  </Alert>
+</Snackbar>
+
         </Box>
     )
 };
