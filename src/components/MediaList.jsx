@@ -70,19 +70,24 @@ const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
         }
     }, [data, slider])
 
-    const handleSelectedImg = (item) => {
-        if (!profile?.license) { // if no license
-            if (expireIn === 0) { // if expired
-                navigate('/subscription')
-            } else { // if not expired
-                dispatch(updateFrameImage(item))
-                navigate('/editor')
-            }
-        } else {
-            dispatch(updateFrameImage(item))
-            navigate('/editor')
-        }
+const handleSelectedImg = (item) => {
+  const payload = {
+    url: item.media_type === "video" ? item.media : item.image,
+    type: item.media_type === "video" ? "video" : "image",
+  };
+
+  if (!profile?.license) {
+    if (expireIn === 0) {
+      navigate("/subscription");
+    } else {
+      dispatch(updateFrameImage(payload));
+      navigate("/editor");
     }
+  } else {
+    dispatch(updateFrameImage(payload));
+    navigate("/editor");
+  }
+};
 
     return (
         <Box sx={{ width: '100%', overflow: 'hidden', position: 'relative', mt: 2 }}>
@@ -131,11 +136,11 @@ const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
                         {
                             data.map((item) => (
                                 <Box
-                                    key={item.id}
-                                    className="keen-slider__slide"
-                                    onClick={() => handleSelectedImg(item.image)}
-                                    sx={{ p: 1, cursor: 'pointer' }}
-                                >
+  key={item.id}
+  className="keen-slider__slide"
+  onClick={() => handleSelectedImg(item)}  // ← PASS FULL ITEM!
+  sx={{ p: 1, cursor: 'pointer' }}
+>
                                     <MediaCard
                                         item={item}
                                         height={isMobile ? 180 : (noOfCards > 5 ? 120 : 180)}

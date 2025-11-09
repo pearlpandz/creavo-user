@@ -11,10 +11,11 @@ import { Box, Typography, TextField, InputLabel, Stack, Button } from "@mui/mate
 import EditorMobileMessage from './EditorMobileMessage';
 import CanvasEditor from "../components/CanvasEditor";
 import CircleColorPicker from "../components/CircleColorPicker";
+import EditorTour from "../components/EditorTour"
 
 export default function Editor() {
     const { data: templateCategories, isLoading, isFetching, isRefetching } = useTemplateCategories();
-    const { frameImg, selectedTemp } = useEditor();
+    const { frameImg, mediaType, selectedTemp } = useEditor();
     const { data: profile } = useProfile();
     const [selectedCategory, setSelectedCategory] = useState(null)
     const [selectedTemplate, setSelectedTemplate] = useState(null)
@@ -154,9 +155,10 @@ export default function Editor() {
 
                 {/* selectedTemplate && */}
                 {<div className="canvas-container">
-                    <CanvasEditor theme={selectedTheme} selectedImg={frameImg} template={selectedTemplateDetail} profile={profile} mode='view' />
+                    <CanvasEditor theme={selectedTheme} selectedImg={frameImg} mediaType={mediaType} template={selectedTemplateDetail} profile={profile} mode='view' />
                 </div>}
             </div>
+             <EditorTour />
         </>
     )
 }
@@ -281,24 +283,33 @@ const ThemesContainer = ({ handleColorChange, selectedTheme }) => {
                         />
                     )}
                     <Button variant="contained" component="label" size="small" sx={{ fontSize: 12, width: 150, height: 30 }}>
-                        Upload Image
-                        <input
-                            type="file"
-                            accept="image/*"
-                            hidden
-                            id="frame-image-upload"
-                            onChange={e => {
-                                if (e.target.files && e.target.files[0]) {
-                                    const file = e.target.files[0];
-                                    const reader = new FileReader();
-                                    reader.onload = function (event) {
-                                        dispatch(updateFrameImage(event.target.result));
-                                    };
-                                    reader.readAsDataURL(file);
-                                }
-                            }}
-                        />
-                    </Button>
+  Upload Image
+  <input
+    type="file"
+    accept="image/*,.gif"
+    hidden
+    id="frame-image-upload"
+    onChange={e => {
+      if (e.target.files?.[0]) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = (event) => {
+          const dataUrl = event.target.result;
+          const isGif = file.type === "image/gif" || dataUrl.includes("image/gif");
+
+          // THIS MATCHES YOUR REDUCER
+          dispatch(updateFrameImage({
+            url: dataUrl,
+            type: isGif ? "gif" : "image"
+          }));
+        };
+
+        reader.readAsDataURL(file);
+      }
+    }}
+  />
+</Button>
                 </Stack>
             </Box>
         </Box>

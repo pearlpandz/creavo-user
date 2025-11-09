@@ -54,7 +54,7 @@ const TemplateCard = ({ item }) => {
     }
 
     return (
-        <Card sx={styles.card}>
+        <Card sx={styles.card} className="tour-template-card">
             <CardContent sx={{ py: '0 !important', width: '100%' }}>
                 <img style={{ height: 40, objectFit: 'contain' }} src={item.image} alt={item.name} />
                 <Typography sx={styles.title}>{item.name}</Typography>

@@ -10,9 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@hello-pangea/dnd": "^18.0.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@hello-pangea/dnd": "^18.0.1",
     "@mui/icons-material": "^7.1.0",
     "@mui/material": "^7.1.0",
     "@mui/x-charts": "^8.3.1",
@@ -20,6 +20,8 @@
     "@react-spring/web": "^10.0.0",
     "@tanstack/react-query": "^5.74.4",
     "axios": "^1.9.0",
+    "file-saver": "^2.0.5",
+    "gifler": "^0.1.0",
     "keen-slider": "^6.8.6",
     "konva": "^9.3.20",
     "moment": "^2.30.1",
@@ -29,6 +31,7 @@
     "react-hook-form": "^7.55.0",
     "react-icons": "^5.5.0",
     "react-infinite-scroll-component": "^6.1.0",
+    "react-joyride": "^2.9.3",
     "react-konva": "^19.0.3",
     "react-konva-utils": "^1.1.0",
     "react-router": "^7.4.1",

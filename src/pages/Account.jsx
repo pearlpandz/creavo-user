@@ -9,6 +9,9 @@ import ProductInfo from '../components/Account/ProductInfo';
 import PoliticalDetails from '../components/Account/Political';
 import Subscription from '../components/Account/Subscription';
 import Preference from '../components/Account/Preference';
+import AccountTour from "../components/AccountTour";
+
+
 
 const SECTIONS = [
     "My Profile",
@@ -72,7 +75,34 @@ function AccountPage() {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
+   useEffect(() => {
+       const handleOpenSubscriptionTab = () => {
+           setValue(5);
+       };
+
+       window.addEventListener("open-subscription-tab", handleOpenSubscriptionTab);
+
+       return () => {
+           window.removeEventListener("open-subscription-tab", handleOpenSubscriptionTab);
+       };
+   }, []);
+
+   
+useEffect(() => {
+  const handleOpenCompanyDetailsTab = () => {
+    setValue(2);
+  };
+
+  window.addEventListener("open-company-details-tab", handleOpenCompanyDetailsTab);
+
+  return () => {
+    window.removeEventListener("open-company-details-tab", handleOpenCompanyDetailsTab);
+  };
+}, []);
+
+
     return (
+        <>
         <Box sx={{ p: 2, width: '100%' }}>
             <Typography component='h1' variant='h6' sx={{ fontWeight: 'bold', mb: 2 }}>Account & Settings</Typography>
             <Box sx={{
@@ -175,6 +205,8 @@ function AccountPage() {
                 </TabPanel>
             </Box>
         </Box>
+        <AccountTour />
+</>
     )
 }
 
