@@ -703,23 +703,18 @@ const downloadAsVideo = async () => {
   }
 }}
   style={{
-    padding: '16px 32px',
-    fontWeight: 'bold',
-    fontSize: '18px',
-    background: elements.some(el => el.type === "video") ? '#d32f2f' : '#1976d2',
-    color: '#fff',
-    border: 'none',
-    borderRadius: 12,
-    cursor: 'pointer',
-    boxShadow: '0 8px 25px rgba(0,0,0,0.3)',
-    transition: 'all 0.3s ease',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 12,
-    margin: '0 auto',
-    minWidth: '280px',
-    justifyContent: 'center'
-  }}
+                padding: '8px 16px',
+                fontWeight: 'bold',
+                background: '#1976d2',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 4,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+                justifyContent: 'center'
+              }}
 >
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
