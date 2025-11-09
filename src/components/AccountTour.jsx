@@ -1,115 +1,148 @@
+// AccountTour.jsx
 import React, { useEffect, useState } from "react";
 import Joyride, { STATUS } from "react-joyride";
 
 const AccountTour = () => {
   const [run, setRun] = useState(false);
   const [steps, setSteps] = useState([]);
+  const [stepIndex, setStepIndex] = useState(0);
 
   useEffect(() => {
     const continueTour = localStorage.getItem("continueTour");
 
     if (continueTour === "account") {
+      document.body.style.overflow = "auto";
+      document.documentElement.style.overflow = "auto";
+
       const timer = setTimeout(() => {
         window.dispatchEvent(new Event("open-company-details-tab"));
 
         setTimeout(() => {
           window.scrollTo({ top: 0, behavior: "smooth" });
+
           setSteps([
             {
               target: ".tour-edit-company",
               content: (
                 <div>
                   <h3>Edit Company Details</h3>
-                  <p>Enable editing mode to update your company information.</p>
+                  <p>Personalize your brand identity — update your company name, logo, and color palette to match your style.</p>
                 </div>
               ),
               placement: "bottom",
               disableBeacon: true,
             },
             {
-              target: ".tour-save-company",
+              target: ".tour-upgrade-diamond",
               content: (
                 <div>
-                  <h3> Save Your Changes</h3>
-                  <p>Once done, save your updates to keep them stored safely.</p>
+                  <h3>Upgrade to Diamond Plan</h3>
+                  <p>Access exclusive templates, remove limits on downloads, and collaborate seamlessly with your team in one powerful plan.</p>
                 </div>
               ),
-              placement: "bottom",
+              placement: "top",
+              disableBeacon: true,
             },
           ]);
+
           setRun(true);
-        }, 600);
-      }, 500);
+          setStepIndex(0);
+        }, 800);
+      }, 600);
 
       return () => clearTimeout(timer);
     }
   }, []);
 
   const handleCallback = (data) => {
-    const { status, index, type } = data;
+    const { status, type, index, action } = data;
 
-    if (type === "step:after" && index === 1) {
+    // STEP 1 → STEP 2: Switch tab when user clicks "Next"
+    if (type === "step:after" && index === 0 && action === "next") {
+      setRun(false);
+      setStepIndex(1);
+
+      window.dispatchEvent(new Event("open-subscription-tab"));
+
       setTimeout(() => {
-        window.dispatchEvent(new Event("open-subscription-tab"));
-        document
-          .querySelector(".tour-upgrade-diamond")
-          ?.scrollIntoView({ behavior: "smooth", block: "center" });
+        const el = document.querySelector(".tour-upgrade-diamond");
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          setTimeout(() => setRun(true), 700);
+        } else {
+          // Fallback if element not found
+          setTimeout(() => setRun(true), 1200);
+        }
+      }, 600);
 
-        setSteps([
-          {
-            target: ".tour-upgrade-diamond",
-            content: (
-              <div>
-                <h3>Upgrade to Diamond</h3>
-                <p>Unlock premium tools and creative power by upgrading.</p>
-              </div>
-            ),
-            placement: "top",
-            disableBeacon: true,
-          },
-        ]);
-        setRun(true);
-      }, 800);
+      return; // Prevent further execution
     }
 
+    // THIS IS THE FIX: Detect when user clicks "Last" on final step
+    if (type === "step:after" && index === 1 && (action === "next" || action === "close")) {
+      // User clicked "Last" or closed
+      finishTour();
+      return;
+    }
+
+    // Also catch skip/finish
     if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
-      setRun(false);
-      localStorage.removeItem("continueTour");
+      finishTour();
     }
   };
+
+  const finishTour = () => {
+    setRun(false);
+    localStorage.removeItem("continueTour");
+
+    document.body.style.overflow = "auto";
+    document.documentElement.style.overflow = "auto";
+
+    setTimeout(() => {
+      window.location.href = "/";
+    }, 1000);
+  };
+
+  if (!run) return null;
 
   return (
     <Joyride
       steps={steps}
       run={run}
+      stepIndex={stepIndex}
       continuous
       showProgress
       showSkipButton
-      disableOverlayClose
-      scrollToFirstStep={false}
-      scrollOffset={80}
+      scrollToFirstStep
+      scrollOffset={120}
+      spotlightClicks={false}
       callback={handleCallback}
       styles={{
         options: {
           zIndex: 10000,
-          primaryColor: "#6C63FF",
+          primaryColor: "#9793e9ff",
+          backgroundColor: "#ffffff",
+          arrowColor: "#ffffff",
           textColor: "#1f1f1f",
-          backgroundColor: "#fff",
-          arrowColor: "#fff",
         },
         tooltip: {
-          borderRadius: "14px",
-          padding: "18px 20px",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
-          transition: "all 0.3s ease-in-out",
-          animation: "fadeInScale 0.3s ease",
-        },
-        tooltipContainer: {
-          textAlign: "left",
+          borderRadius: "16px",
+          padding: "20px",
+          boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
         },
         spotlight: {
-          borderRadius: "10px",
-          transition: "all 0.3s ease-in-out",
+          borderRadius: "16px",
+          backgroundColor: "rgba(143, 138, 235, 0.3)",
+          boxShadow: "0 0 0 9999px rgba(0,0,0,0.5)",
+        },
+        buttonNext: {
+          backgroundColor: "#9793f1ff",
+          borderRadius: "8px",
+          padding: "10px 24px",
+          fontWeight: "600",
+        },
+        buttonClose: {
+          color: "#9894f5ff",
         },
       }}
     />

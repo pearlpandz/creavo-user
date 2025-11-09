@@ -1,3 +1,4 @@
+// OnboardingTour.jsx
 import React, { useEffect, useState } from "react";
 import Joyride, { STATUS } from "react-joyride";
 import { useProfile } from "../hook/usePageData";
@@ -14,100 +15,109 @@ const OnboardingTour = () => {
       const hasSeenTour = localStorage.getItem("hasSeenDashboardTour");
 
       if (isFirstLogin && !hasSeenTour) {
-        setTimeout(() => setRun(true), 600); // slight delay to avoid flicker
-        localStorage.setItem("hasSeenDashboardTour", "true");
+        setTimeout(() => {
+          setRun(true);
+          localStorage.setItem("hasSeenDashboardTour", "true");
+        }, 800);
       }
     }
   }, [isLoading, profile]);
 
-  const steps = [
-    {
-      target: ".tour-start-designing",
-      content: (
-        <div>
-          <h3>Start Designing</h3>
-          <p>Open the editor and start bringing your ideas to life instantly.</p>
-        </div>
-      ),
-      disableBeacon: true,
-      placement: "bottom",
-    },
-    {
-      target: ".tour-create-new",
-      content: (
-        <div>
-          <h3>Create New Project</h3>
-          <p>Click here to begin a fresh design project from scratch.</p>
-        </div>
-      ),
-      placement: "bottom",
-    },
-    {
-      target: ".tour-template-card",
-      content: (
-        <div>
-          <h3>Template Categories</h3>
-          <p>Explore templates by category and start customizing instantly.</p>
-        </div>
-      ),
-      placement: "top",
-    },
-    {
-      target: ".day-container",
-      content: (
-        <div>
-          <h3>Festival Calendar</h3>
-          <p>Check upcoming festivals and prepare creatives in advance.</p>
-        </div>
-      ),
-      placement: "auto",
-    },
-    {
-      target: ".events",
-      content: (
-        <div>
-          <h3>Events</h3>
-          <p>Click any event to see details or start designing related posts.</p>
-        </div>
-      ),
-      placement: "auto",
-    },
-    {
-      target: ".media-container",
-      content: (
-        <div>
-          <h3>Trending Templates</h3>
-          <p>Discover the most popular templates and explore subcategories here.</p>
-        </div>
-      ),
-      placement: "auto",
-    },
-    {
-      target: ".navbar-avatar",
-      content: (
-        <div>
-          <h3>Your Profile</h3>
-          <p>Access your account settings and personal details here.</p>
-        </div>
-      ),
-      placement: "left",
-    },
-  ];
+const steps = [
+  {
+    target: ".tour-start-designing",
+    content: (
+      <div>
+        <h3>Welcome! Let’s Get Started</h3>
+        <p>
+          Begin your creative journey with our easy-to-use editor — design stunning visuals in just a few clicks.
+        </p>
+      </div>
+    ),
+    disableBeacon: true,
+    placement: "bottom",
+  },
+  {
+    target: ".tour-create-new",
+    content: (
+      <div>
+        <h3>Create a New Project</h3>
+        <p>
+          Start from a blank canvas and craft your own unique design, perfectly suited to your vision.
+        </p>
+      </div>
+    ),
+    placement: "bottom",
+  },
+  {
+    target: ".tour-template-card",
+    content: (
+      <div>
+        <h3>Explore Ready-Made Templates</h3>
+        <p>
+          Browse a wide range of templates by category — customize them instantly to match your brand and style.
+        </p>
+      </div>
+    ),
+    placement: "top",
+  },
+  {
+    target: ".day-container",
+    content: (
+      <div>
+        <h3>Festival Calendar</h3>
+        <p>
+          Stay ahead of the curve with upcoming festivals and events — plan your creative posts in advance.
+        </p>
+      </div>
+    ),
+    placement: "auto",
+  },
+  {
+    target: ".events",
+    content: (
+      <div>
+        <h3>Discover Events</h3>
+        <p>
+          Tap on any event to instantly open design ideas and templates tailored for that occasion.
+        </p>
+      </div>
+    ),
+    placement: "auto",
+  },
+  {
+    target: ".media-container",
+    content: (
+      <div>
+        <h3>Trending Templates</h3>
+        <p>
+          See what’s popular right now — explore trending templates and get inspired by the latest design ideas.
+        </p>
+      </div>
+    ),
+    placement: "auto",
+  }
+];
+
 
   const handleCallback = (data) => {
     const { status, index, type } = data;
-    const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
 
-    // Navigate after profile step
-    if (type === "step:after" && index === 6) {
-      localStorage.setItem("continueTour", "account");
-      setTimeout(() => navigate("/account"), 600);
+    if (type === "step:after" && index === 5) { // After "Trending Templates"
+      localStorage.setItem("continueTour", "editor");
+      setTimeout(() => {
+        document.body.style.overflow = "auto";
+        navigate("/editor");
+      }, 600);
     }
 
-    if (finishedStatuses.includes(status)) {
+    if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
       setRun(false);
+      document.body.style.overflow = "auto";
     }
   };
+
+  if (!run) return null;
 
   return (
     <Joyride
@@ -116,35 +126,26 @@ const OnboardingTour = () => {
       continuous
       showProgress
       showSkipButton
-      disableOverlayClose
-      scrollToFirstStep={false}
-      scrollOffset={80}
-      spotlightPadding={8}
+      scrollToFirstStep
+      scrollOffset={90}
+      spotlightClicks
       callback={handleCallback}
       styles={{
         options: {
           zIndex: 10000,
           primaryColor: "#6C63FF",
+          backgroundColor: "#ffffff",
+          arrowColor: "#ffffff",
           textColor: "#1f1f1f",
-          backgroundColor: "#fff",
-          arrowColor: "#fff",
         },
         tooltip: {
-          borderRadius: "14px",
-          padding: "18px 20px",
-          boxShadow: "0 8px 30px rgba(0,0,0,0.15)",
-          transition: "all 0.3s ease-in-out",
-          animation: "fadeInScale 0.3s ease",
-        },
-        tooltipContainer: {
-          textAlign: "left",
-        },
-        tooltipContent: {
-          lineHeight: 1.5,
+          borderRadius: "16px",
+          padding: "20px",
+          boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
         },
         spotlight: {
-          borderRadius: "10px",
-          transition: "all 0.3s ease-in-out",
+          borderRadius: "12px",
+          backgroundColor: "rgba(108, 99, 255, 0.25)",
         },
       }}
     />
