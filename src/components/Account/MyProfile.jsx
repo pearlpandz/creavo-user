@@ -3,6 +3,8 @@ import { useState, useEffect, useMemo } from 'react';
 import ModeEditOutlinedIcon from '@mui/icons-material/ModeEditOutlined';
 import SaveOutlinedIcon from '@mui/icons-material/SaveOutlined';
 import { usePatchUser } from '../../hook/usePageData';
+import { toast } from 'react-toastify'; 
+
 
 function ReadOnlyText({ value, readOnly, onChange, name }) {
     return readOnly ? (
@@ -22,11 +24,12 @@ const MyProfile = ({ userDetail }) => {
         email: userDetail.email
     } : {};
     const [profile, setProfile] = useState(initialValue ?? {})
-    const { mutate, isPending } = usePatchUser((updatedUser) => {
-        console.log(updatedUser);
-        setOpen(true);
-        setMode('view')
-    });
+     const { mutate, isPending } = usePatchUser((updatedUser) => {
+    console.log(updatedUser);
+    setOpen(true);
+    setMode('view');
+    toast.success('Profile updated successfully!');
+  });
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 600);
 
     useEffect(() => {
