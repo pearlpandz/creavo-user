@@ -23,6 +23,9 @@ import TrialExpiryAnnouncement from './components/TrialExpiryAnnouncement'
 import SubscriptionPage from './pages/Subscription'
 import EventPage from './pages/Event'
 import { Brightness4, Brightness7 } from '@mui/icons-material'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 
 
 function ProtectedRoute({ isAuthenticated }) {
@@ -149,6 +152,18 @@ function App() {
                             <Route path="*" element={<ComingSoon />} />
                         </Routes>
                     </Router>
+                    <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={darkMode ? 'dark' : 'light'}
+      />
                 </AuthContext.Provider>
             </ThemeProvider>
         </TanstackProvider>

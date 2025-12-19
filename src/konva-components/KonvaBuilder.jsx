@@ -727,7 +727,8 @@ const startRecording = async (clonedStage, videoNodes) => {
     document.body.removeChild(link);
   }
 }}
-   style={{
+  style={{
+
                 padding: '8px 16px',
                 fontWeight: 'bold',
                 background: '#1976d2',

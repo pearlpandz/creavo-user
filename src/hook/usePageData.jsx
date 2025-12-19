@@ -207,19 +207,20 @@ const changePassword = async (userId, data) => {
     return response.data;
 };
 
-export const useChangePassword = (onSuccessCallback) => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: ({ userId, data }) => changePassword(userId, data),
-        onSuccess: (data) => {
-            // Optional: invalidate or update cache
-            queryClient.invalidateQueries({ queryKey: ['user'] });
-            if (onSuccessCallback) {
-                onSuccessCallback(data); // trigger state update from component
-            }
-        },
-    });
+export const useChangePassword = (onSuccessCallback, onErrorCallback) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, data }) => changePassword(userId, data),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+      if (onSuccessCallback) onSuccessCallback(data);
+    },
+    onError: (error) => {
+      if (onErrorCallback) onErrorCallback(error);
+    },
+  });
 };
+
 
 const patchCompanyDetails = async (id, data) => {
     const response = await axios.patch(`${SETTINGS.DJANGO_URL}/accounts/companydetails/${id}/`, data);
