@@ -125,6 +125,8 @@ const ImageBasedShape = forwardRef((props, ref) => {
     ? shapeProps.src
     : shapeProps.src?.replace("http://", "https://");
 
+    // const src = shapeProps.src
+
   const [image] = useImage(src, "anonymous");
   const internalRef = useRef(null);
 
