@@ -9,17 +9,19 @@ const OnboardingTour = () => {
   const [run, setRun] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!isLoading && profile) {
-      const isFirstLogin = profile.last_login === null;
-      const hasSeenTour = localStorage.getItem("hasSeenDashboardTour");
+useEffect(() => {
+    if (isLoading || !profile) return;
 
-      if (isFirstLogin && !hasSeenTour) {
-        setTimeout(() => {
-          setRun(true);
-          localStorage.setItem("hasSeenDashboardTour", "true");
-        }, 800);
-      }
+    const isFirstLogin = profile.last_login === null;
+
+    if (isFirstLogin) {
+      const timer = setTimeout(() => {
+        setRun(true);
+      }, 800);
+
+      return () => clearTimeout(timer);
+    } else {
+      setRun(false);
     }
   }, [isLoading, profile]);
 
