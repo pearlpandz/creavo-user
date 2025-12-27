@@ -73,10 +73,11 @@ const Login = () => {
         });
       }
     } catch (error) {
+      const errorMessage = error?.response?.data?.detail || error?.message || 'Something went wrong. Please try again!';
       setError(error);
       setSnackbar({
         open: true,
-        message: 'Something went wrong. Please try again!',
+        message: errorMessage,
         severity: 'error',
       });
     }
@@ -289,7 +290,7 @@ const Login = () => {
         </Grid>
       </Grid>
 
-      <ErrorDialog error={dialogError} onClose={handleDialogClose} />
+      {/* <ErrorDialog error={dialogError} onClose={handleDialogClose} /> */}
 
       <Snackbar
         open={snackbar.open}
