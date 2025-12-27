@@ -198,7 +198,7 @@ useEffect(() => {
                     <PoliticalDetails detail={profile?.political} isEditorView={isMobile} />
                 </TabPanel>
                 <TabPanel value={value} index={5}>
-                    <Subscription detail={profile?.license_details} isEditorView={isMobile} />
+                    <Subscription   detail={{...profile?.license_details, overall_downloads: profile?.overall_downloads, day_downloads: profile?.day_downloads}} isEditorView={isMobile} />
                 </TabPanel>
                 <TabPanel value={value} index={6}>
                     <Preference profile={profile} />

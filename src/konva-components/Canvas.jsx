@@ -666,6 +666,7 @@ const Canvas = ({
             mode={mode}
           />
         ))}
+        
       </Layer>
       {showWaterMark && <Watermark width={600} height={600} />}
     </Stage>
