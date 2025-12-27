@@ -291,7 +291,6 @@ const Login = () => {
 
       <ErrorDialog error={dialogError} onClose={handleDialogClose} />
 
-      {/* ✅ Snackbar for success/error notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

@@ -39,6 +39,7 @@ import EventPage from "./pages/Event";
 import { Brightness4, Brightness7 } from "@mui/icons-material";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import DailyDownloadLimitBanner from "./konva-components/DailyDownloadLimitBanner";
 
 function ProtectedRoute({ isAuthenticated }) {
   return isAuthenticated ? <Outlet /> : <Navigate to="/" />;
@@ -80,6 +81,7 @@ function ProtectedLayout({
         />
         <div style={{ flex: 1, overflowY: "auto" }} id="scrollable-container">
           <TrialExpiryAnnouncement />
+          {/* <DailyDownloadLimitBanner /> */}
           <Outlet />
         </div>
       </div>
