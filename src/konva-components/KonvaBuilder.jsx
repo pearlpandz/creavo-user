@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { v4 as uuidv4 } from "uuid";
 import Toolbar from "./Toolbar";
 import Canvas from "./Canvas";
@@ -7,12 +7,21 @@ import LayersPanel from "./LayersPanel";
 import ContextMenu from "./ContextMenu";
 import "./KonvaBuilder.css";
 import { saveAs } from "file-saver";
-import EditorTour from "../components/EditorTour"
-
+import Konva from "konva";
+import EditorTour from "../components/EditorTour";
+import { useProfile, usePatchUser } from "../hook/usePageData";
+import DailyDownloadLimitBanner from "./DailyDownloadLimitBanner";
 
 function KonvaBuilder(props) {
-  const { elements, setElements, handleSave, mode = "view", stageRef, templateObj,
-    setTemplateObj } = props;
+  const {
+    elements,
+    setElements,
+    handleSave,
+    mode = "view",
+    stageRef,
+    templateObj,
+    setTemplateObj,
+  } = props;
   const [selectedElement, setSelectedElement] = useState(null);
   const [showLayersPanel, setShowLayersPanel] = useState(mode === "edit");
   const [canvasBackgroundColor, setCanvasBackgroundColor] = useState("#ffffff");
@@ -20,10 +29,33 @@ function KonvaBuilder(props) {
   const [contextMenu, setContextMenu] = useState(null);
   const [selectedElementsForClipping, setSelectedElementsForClipping] =
     useState([]);
-    const [isExporting, setIsExporting] = useState(false);
-    const [progress, setProgress] = useState(0);
+  const [isExporting, setIsExporting] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const { data: profile } = useProfile();
+  const { mutate: patchUser } = usePatchUser();
+  const [showUpgradePopup, setShowUpgradePopup] = useState(false);
+  const dailyLimit = useMemo(() => {
+    if (profile?.license_details?.subscription?.daily_download_limit) {
+      return parseInt(
+        profile.license_details.subscription.daily_download_limit,
+        10
+      );
+    }
+    return 3; // Free users: 3 downloads per day
+  }, [profile]);
 
+  const hasReachedDailyLimit = useMemo(() => {
+    return profile?.day_downloads >= dailyLimit;
+  }, [profile, dailyLimit]);
 
+  const shouldShowWatermark = useMemo(() => {
+    // Free users (no license_details): always watermark
+    if (!profile?.license_details) {
+      return true;
+    }
+    // Paid users: watermark only AFTER daily limit reached
+    return hasReachedDailyLimit;
+  }, [profile, hasReachedDailyLimit]);
 
   const addElement = (type) => {
     if (mode === "view") return;
@@ -68,31 +100,33 @@ function KonvaBuilder(props) {
         textAlign: "left",
       };
     } else if (type === "image") {
-  const actualType = props.mediaType === "gif" ? "gif" : "image";
+      const actualType = props.mediaType === "gif" ? "gif" : "image";
 
-  newElement = {
-    ...baseProps,
-    src: props.selectedImg || "https://frame-service.creavo.in/uploads/placeholder-image.jpg",
-    width: 600,
-    height: 600,
-    x: 0,
-    y: 0,
-    mediaType: props.mediaType || "image",
-    type: actualType,
-    name: "frame-image",
-    draggable: false,
-    listening: false,
-    zIndex: -1,
-  };
-} else if (type === "gif") {
-  newElement = {
-    ...baseProps,
-    src: "https://media.giphy.com/media/3o7bu3hilQ0Q0Q0Q0/giphy.gif",
-    width: 150,
-    height: 150,
-    mediaType: "gif", // ← ADD THIS
-  };
-} else if (type === "video") {
+      newElement = {
+        ...baseProps,
+        src:
+          props.selectedImg ||
+          "https://frame-service.creavo.in/uploads/placeholder-image.jpg",
+        width: 600,
+        height: 600,
+        x: 0,
+        y: 0,
+        mediaType: props.mediaType || "image",
+        type: actualType,
+        name: "frame-image",
+        draggable: false,
+        listening: false,
+        zIndex: -1,
+      };
+    } else if (type === "gif") {
+      newElement = {
+        ...baseProps,
+        src: "https://media.giphy.com/media/3o7bu3hilQ0Q0Q0Q0/giphy.gif",
+        width: 150,
+        height: 150,
+        mediaType: "gif", // ← ADD THIS
+      };
+    } else if (type === "video") {
       newElement = {
         ...baseProps,
         src: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -471,24 +505,90 @@ function KonvaBuilder(props) {
 
     setElements(currentElements);
   };
-  
 
-const exportCanvas = () => {
-  const hasVideo = elements.some(el => el.type === "video");
+  const handleDownloadAttempt = () => {
+    if (hasReachedDailyLimit) {
+      setShowUpgradePopup(true);
+      return;
+    }
 
-  if (hasVideo) {
-    downloadAsVideo(); // Use the same video exporter
-  } else {
-    // Old PNG export
-    const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
-    const link = document.createElement("a");
-    link.download = `creavo-design-${Date.now()}.png`;
-    link.href = uri;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-};
+    // Use the latest profile directly here
+    if (!profile?.id) {
+      console.warn("Profile not loaded yet – cannot increment downloads");
+      // Still allow download but warn
+    } else {
+      patchUser({
+        userId: profile.id,
+        data: {
+          day_downloads: (profile.day_downloads || 0) + 1,
+          overall_downloads: (profile.overall_downloads || 0) + 1,
+        },
+      });
+    }
+
+    const hasVideo = elements.some(
+      (el) => el.type === "video" || el.mediaType === "video"
+    );
+
+    if (hasVideo) {
+      downloadAsVideo();
+    } else {
+      downloadAsPNG();
+    }
+  };
+
+  const downloadAsPNG = () => {
+    if (shouldShowWatermark) {
+      // Create temporary watermark layer for export
+      const stage = stageRef.current;
+      const watermarkLayer = new Konva.Layer();
+
+      // Add watermark elements
+      const watermarkText = "Creavo";
+      const textWidth = 120;
+      const textHeight = 80;
+
+      for (let y = 0; y < 600; y += textHeight) {
+        for (let x = 0; x < 600; x += textWidth) {
+          const text = new Konva.Text({
+            text: watermarkText,
+            x: x,
+            y: y,
+            fontSize: 24,
+            fontFamily: "Arial",
+            fill: "rgba(0, 0, 0, 0.1)",
+            rotation: -30,
+            listening: false,
+          });
+          watermarkLayer.add(text);
+        }
+      }
+
+      stage.add(watermarkLayer);
+
+      // Export with watermark
+      const uri = stage.toDataURL({ pixelRatio: 2 });
+
+      // Remove watermark layer after export
+      watermarkLayer.destroy();
+
+      const link = document.createElement("a");
+      link.download = `creavo-design-${Date.now()}.png`;
+      link.href = uri;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // Export without watermark
+      const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
+      const link = document.createElement("a");
+      link.download = `creavo-design-${Date.now()}.png`;
+      link.href = uri;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
   const saveTemplate = () => {
     handleSave(elements);
   };
@@ -508,331 +608,487 @@ const exportCanvas = () => {
     setShowLayersPanel(!showLayersPanel);
   };
 
-  
+  const downloadAsVideo = async () => {
+    if (!stageRef.current) return;
 
-const downloadAsVideo = async () => {
-  if (!stageRef.current) return;
+    setIsExporting(true);
+    setProgress(0);
 
-  setIsExporting(true);
-  setProgress(0);
+    const stage = stageRef.current;
+    const WIDTH = 1080;
+    const HEIGHT = 1080;
+    const scale = WIDTH / stage.width();
 
-  const stage = stageRef.current;
-  const WIDTH = 1080;
-  const HEIGHT = 1080;
-  const scale = WIDTH / stage.width();
+    // Clone stage for export
+    const clonedStage = stage.clone();
+    clonedStage.width(WIDTH);
+    clonedStage.height(HEIGHT);
+    clonedStage.scale({ x: scale, y: scale });
 
-  // Clone stage for export
-  const clonedStage = stage.clone();
-  clonedStage.width(WIDTH);
-  clonedStage.height(HEIGHT);
-  clonedStage.scale({ x: scale, y: scale });
+    // Add watermark to cloned stage if needed
+    if (shouldShowWatermark) {
+      const watermarkLayer = new Konva.Layer();
+      const watermarkText = "Creavo";
+      const textWidth = 120 * scale;
+      const textHeight = 80 * scale;
 
-  // Find all video nodes
-  const videoNodes = stage.find("Image").filter(node => {
-    const img = node.image();
-    return img && img.tagName === "VIDEO";
-  });
-
-  if (videoNodes.length === 0) {
-    alert("No video found!");
-    setIsExporting(false);
-    return;
-  }
-
-  // UNLOCK AUDIO: Play all videos on user click (this is the magic)
-  await Promise.all(
-    videoNodes.map(node => {
-      const v = node.image();
-      v.muted = false;
-      v.currentTime = 0;
-      return v.play().catch(() => {});
-    })
-  );
-
-  console.log("Audio unlocked! Starting recording in 600ms...");
-
-  // Wait a bit then start recording
-  setTimeout(() => startRecording(clonedStage, videoNodes), 600);
-};
-
-const startRecording = async (clonedStage, videoNodes) => {
-  const WIDTH = 1080;
-  const HEIGHT = 1080;
-
-  // Create fresh video elements for recording
-  const videoElements = videoNodes.map(origNode => {
-    const origVideo = origNode.image();
-    const v = document.createElement("video");
-    v.src = origVideo.currentSrc || origVideo.src;
-    v.crossOrigin = "anonymous";
-    v.muted = false;
-    v.loop = true;
-    v.playsInline = true;
-    v.preload = "auto";
-    v.currentTime = 0;
-
-    const cloneNode = clonedStage.findOne(`#${origNode.id()}`);
-    if (cloneNode) cloneNode.image(v);
-    return v;
-  });
-
-  // Wait for videos to be ready
-  await Promise.all(
-    videoElements.map(v => new Promise(r => {
-      if (v.readyState >= 2) r();
-      else v.onloadedmetadata = r;
-    }))
-  );
-
-  let maxDuration = 5;
-  videoElements.forEach(v => {
-    if (v.duration && v.duration > maxDuration) maxDuration = v.duration;
-  });
-
-  const offscreen = document.createElement("canvas");
-  offscreen.width = WIDTH;
-  offscreen.height = HEIGHT;
-  const ctx = offscreen.getContext("2d");
-
-  const canvasStream = offscreen.captureStream(30);
-
-  // Audio mixing
-  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-  if (audioContext.state === "suspended") await audioContext.resume();
-
-  const destination = audioContext.createMediaStreamDestination();
-  let hasAudio = false;
-
-  videoElements.forEach(v => {
-    try {
-      const source = audioContext.createMediaElementSource(v);
-      source.connect(destination);
-      hasAudio = true;
-    } catch (e) {
-      console.warn("Audio source failed", e);
+      for (let y = 0; y < HEIGHT; y += textHeight) {
+        for (let x = 0; x < WIDTH; x += textWidth) {
+          const text = new Konva.Text({
+            text: watermarkText,
+            x: x,
+            y: y,
+            fontSize: 24 * scale,
+            fontFamily: "Arial",
+            fill: "rgba(0, 0, 0, 0.1)",
+            rotation: -30,
+            listening: false,
+          });
+          watermarkLayer.add(text);
+        }
+      }
+      clonedStage.add(watermarkLayer);
     }
-  });
 
-  const finalStream = new MediaStream();
-  canvasStream.getVideoTracks().forEach(t => finalStream.addTrack(t));
-  if (hasAudio) destination.stream.getAudioTracks().forEach(t => finalStream.addTrack(t));
+    // Find all video nodes
+    const videoNodes = stage.find("Image").filter((node) => {
+      const img = node.image();
+      return img && img.tagName === "VIDEO";
+    });
 
-  let recorder;
-  try {
-    recorder = new MediaRecorder(finalStream, { mimeType: "video/mp4;codecs=avc1.42E01E,mp4a.40.2" });
-  } catch {
-    recorder = new MediaRecorder(finalStream, { mimeType: "video/webm;codecs=vp9,opus" });
-  }
-
-  const chunks = [];
-  recorder.ondataavailable = e => chunks.push(e.data);
-  recorder.onstop = () => {
-    const ext = recorder.mimeType.includes("mp4") ? "mp4" : "webm";
-    saveAs(new Blob(chunks, { type: recorder.mimeType }), `creavo-video-${Date.now()}.${ext}`);
-
-    // Cleanup
-    clonedStage.destroy();
-    videoElements.forEach(v => { v.pause(); v.src = ""; });
-    finalStream.getTracks().forEach(t => t.stop());
-    audioContext.close();
-    setIsExporting(false);
-    setProgress(100);
-  };
-
-  recorder.start();
-  videoElements.forEach(v => v.play().catch(() => {}));
-
-  const startTime = performance.now();
-  const render = (ts) => {
-    const elapsed = (ts - startTime) / 1000;
-    if (elapsed >= maxDuration) {
-      recorder.stop();
+    if (videoNodes.length === 0) {
+      alert("No video found!");
+      setIsExporting(false);
       return;
     }
 
-    setProgress(Math.min((elapsed / maxDuration) * 100, 99));
+    // UNLOCK AUDIO: Play all videos on user click (this is the magic)
+    await Promise.all(
+      videoNodes.map((node) => {
+        const v = node.image();
+        v.muted = false;
+        v.currentTime = 0;
+        return v.play().catch(() => {});
+      })
+    );
 
-    ctx.fillStyle = canvasBackgroundColor;
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
-    clonedStage.draw();
-    ctx.drawImage(clonedStage.toCanvas(), 0, 0, WIDTH, HEIGHT);
+    console.log("Audio unlocked! Starting recording in 600ms...");
+
+    // Wait a bit then start recording
+    setTimeout(() => startRecording(clonedStage, videoNodes), 600);
+  };
+
+  const startRecording = async (clonedStage, videoNodes) => {
+    const WIDTH = 1080;
+    const HEIGHT = 1080;
+
+    // Create fresh video elements for recording
+    const videoElements = videoNodes.map((origNode) => {
+      const origVideo = origNode.image();
+      const v = document.createElement("video");
+      v.src = origVideo.currentSrc || origVideo.src;
+      v.crossOrigin = "anonymous";
+      v.muted = false;
+      v.loop = true;
+      v.playsInline = true;
+      v.preload = "auto";
+      v.currentTime = 0;
+
+      const cloneNode = clonedStage.findOne(`#${origNode.id()}`);
+      if (cloneNode) cloneNode.image(v);
+      return v;
+    });
+
+    // Wait for videos to be ready
+    await Promise.all(
+      videoElements.map(
+        (v) =>
+          new Promise((r) => {
+            if (v.readyState >= 2) r();
+            else v.onloadedmetadata = r;
+          })
+      )
+    );
+
+    let maxDuration = 5;
+    videoElements.forEach((v) => {
+      if (v.duration && v.duration > maxDuration) maxDuration = v.duration;
+    });
+
+    const offscreen = document.createElement("canvas");
+    offscreen.width = WIDTH;
+    offscreen.height = HEIGHT;
+    const ctx = offscreen.getContext("2d");
+
+    const canvasStream = offscreen.captureStream(30);
+
+    // Audio mixing
+    const audioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
+    if (audioContext.state === "suspended") await audioContext.resume();
+
+    const destination = audioContext.createMediaStreamDestination();
+    let hasAudio = false;
+
+    videoElements.forEach((v) => {
+      try {
+        const source = audioContext.createMediaElementSource(v);
+        source.connect(destination);
+        hasAudio = true;
+      } catch (e) {
+        console.warn("Audio source failed", e);
+      }
+    });
+
+    const finalStream = new MediaStream();
+    canvasStream.getVideoTracks().forEach((t) => finalStream.addTrack(t));
+    if (hasAudio)
+      destination.stream
+        .getAudioTracks()
+        .forEach((t) => finalStream.addTrack(t));
+
+    let recorder;
+    try {
+      recorder = new MediaRecorder(finalStream, {
+        mimeType: "video/mp4;codecs=avc1.42E01E,mp4a.40.2",
+      });
+    } catch {
+      recorder = new MediaRecorder(finalStream, {
+        mimeType: "video/webm;codecs=vp9,opus",
+      });
+    }
+
+    const chunks = [];
+    recorder.ondataavailable = (e) => chunks.push(e.data);
+    recorder.onstop = () => {
+      const ext = recorder.mimeType.includes("mp4") ? "mp4" : "webm";
+      saveAs(
+        new Blob(chunks, { type: recorder.mimeType }),
+        `creavo-video-${Date.now()}.${ext}`
+      );
+
+      // Cleanup
+      clonedStage.destroy();
+      videoElements.forEach((v) => {
+        v.pause();
+        v.src = "";
+      });
+      finalStream.getTracks().forEach((t) => t.stop());
+      audioContext.close();
+      setIsExporting(false);
+      setProgress(100);
+    };
+
+    recorder.start();
+    videoElements.forEach((v) => v.play().catch(() => {}));
+
+    const startTime = performance.now();
+    const render = (ts) => {
+      const elapsed = (ts - startTime) / 1000;
+      if (elapsed >= maxDuration) {
+        recorder.stop();
+        return;
+      }
+
+      setProgress(Math.min((elapsed / maxDuration) * 100, 99));
+
+      ctx.fillStyle = canvasBackgroundColor;
+      ctx.fillRect(0, 0, WIDTH, HEIGHT);
+      clonedStage.draw();
+      ctx.drawImage(clonedStage.toCanvas(), 0, 0, WIDTH, HEIGHT);
+
+      requestAnimationFrame(render);
+    };
 
     requestAnimationFrame(render);
   };
 
-  requestAnimationFrame(render);
-};
+  const incrementDownloads = () => {
+    if (!profile?.id) {
+      console.warn("Profile not loaded yet");
+      return;
+    }
 
+    patchUser({
+      userId: profile.id,
+      data: {
+        day_downloads: profile.day_downloads + 1,
+        overall_downloads: profile.overall_downloads + 1,
+      },
+    });
+  };
 
   return (
     <>
-    <div className="konva-builder">
-      <div className="main-container">
-        {mode === "edit" && (
-          <Toolbar
-            addElement={addElement}
-            exportCanvas={exportCanvas}
-            saveTemplate={saveTemplate}
-            loadTemplate={loadTemplate}
-            toggleLayersPanel={toggleLayersPanel}
-            mode={mode}
-          />
-        )}
-        {mode === "edit" && showLayersPanel && (
-          <LayersPanel
-            elements={elements}
-            selectedElement={selectedElement}
-            setSelectedElement={handleSelectElement}
-            onContextMenu={handleContextMenu}
-            selectedElementsForClipping={selectedElementsForClipping}
-            onReorderElements={onReorderElements}
-            updateElement={updateElement}
-            mode={mode}
-          />
-        )}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }}>
-        <Canvas
-          elements={elements}
-          selectedElement={selectedElement}
-          setSelectedElement={handleSelectElement}
-          updateElement={updateElement}
-          stageRef={stageRef}
-          onContextMenu={handleContextMenu}
-          canvasBackgroundColor={canvasBackgroundColor}
-          currentTool={currentTool}
-          onAddPoint={onAddPoint}
-          onRemovePoint={onRemovePoint}
-          mode={mode}
-        />
-          <div class="download-button" style={{ textAlign: 'center', marginTop: '20px' }}>
-            <button
-  onClick={() => {
-  // console.log("ELEMENTS:", elements);
-  // console.log("HAS VIDEO?", elements.some(el => el.type === "video"));
-  // console.log("HAS mediaType video?", elements.some(el => el.mediaType === "video"));
-  
-  const hasVideo = elements.some(el => el.type === "video" || el.mediaType === "video");
-  console.log("FINAL HAS VIDEO:", hasVideo);
-
-  if (hasVideo) {
-    downloadAsVideo();
-  } else {
-    // PNG fallback
-    const uri = stageRef.current.toDataURL({ pixelRatio: 2 });
-    const link = document.createElement("a");
-    link.download = `creavo-design-${Date.now()}.png`;
-    link.href = uri;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-}}
-  style={{
-
-                padding: '8px 16px',
-                fontWeight: 'bold',
-                background: '#1976d2',
-                color: '#fff',
-                border: 'none',
-                borderRadius: 4,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 8,
-                justifyContent: 'center'
-              }}
->
-  <svg 
-    xmlns="http://www.w3.org/2000/svg" 
-    height="28" 
-    viewBox="0 0 24 24" 
-    width="28" 
-    fill="#fff"
-  >
-    <path d="M5 20h14v-2H5v2zm7-18c-1.1 0-2 .9-2 2v8.59l-2.29-2.3a.996.996 0 1 0-1.41 1.41l4 4c.39.39 1.02.39 1.41 0l4-4a.996.996 0 1 0-1.41-1.41L13 12.59V4c0-1.1-.9-2-2-2z" />
-  </svg>
-  {elements.some(el => el.type === "video" || el.mediaType === "video") 
-  ? "Download MP4 Video" 
-  : "Download PNG Image"}
-</button>
+      <div className="konva-builder">
+        <div className="main-container">
+          {mode === "edit" && (
+            <Toolbar
+              addElement={addElement}
+              exportCanvas={handleDownloadAttempt}
+              saveTemplate={saveTemplate}
+              loadTemplate={loadTemplate}
+              toggleLayersPanel={toggleLayersPanel}
+              mode={mode}
+            />
+          )}
+          {mode === "edit" && showLayersPanel && (
+            <LayersPanel
+              elements={elements}
+              selectedElement={selectedElement}
+              setSelectedElement={handleSelectElement}
+              onContextMenu={handleContextMenu}
+              selectedElementsForClipping={selectedElementsForClipping}
+              onReorderElements={onReorderElements}
+              updateElement={updateElement}
+              mode={mode}
+            />
+          )}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexDirection: "column",
+            }}
+          >
+            <Canvas
+              elements={elements}
+              selectedElement={selectedElement}
+              setSelectedElement={handleSelectElement}
+              updateElement={updateElement}
+              stageRef={stageRef}
+              onContextMenu={handleContextMenu}
+              canvasBackgroundColor={canvasBackgroundColor}
+              currentTool={currentTool}
+              onAddPoint={onAddPoint}
+              onRemovePoint={onRemovePoint}
+              mode={mode}
+            />
+            {/* <DailyDownloadLimitBanner /> */}
+            <div
+              class="download-button"
+              style={{ textAlign: "center", marginTop: "20px" }}
+            >
+              <button
+                onClick={handleDownloadAttempt}
+                style={{
+                  padding: "8px 16px",
+                  fontWeight: "bold",
+                  background: hasReachedDailyLimit ? "#ff4444" : "#1976d2",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 4,
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  justifyContent: "center",
+                  opacity: 1,
+                  boxShadow: hasReachedDailyLimit
+                    ? "0 4px 12px rgba(255,68,68,0.3)"
+                    : "none",
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={(e) => {
+                  if (hasReachedDailyLimit) {
+                    e.currentTarget.style.background = "#ff6666";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (hasReachedDailyLimit) {
+                    e.currentTarget.style.background = "#ff4444";
+                  }
+                }}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  height="28"
+                  viewBox="0 0 24 24"
+                  width="28"
+                  fill="#fff"
+                >
+                  <path d="M5 20h14v-2H5v2zm7-18c-1.1 0-2 .9-2 2v8.59l-2.29-2.3a.996.996 0 1 0-1.41 1.41l4 4c.39.39 1.02.39 1.41 0l4-4a.996.996 0 1 0-1.41-1.41L13 12.59V4c0-1.1-.9-2-2-2z" />
+                </svg>
+                {hasReachedDailyLimit
+                  ? "Daily Limit Reached - Upgrade"
+                  : elements.some(
+                      (el) => el.type === "video" || el.mediaType === "video"
+                    )
+                  ? "Download MP4 Video"
+                  : "Download PNG Image"}
+              </button>
+            </div>
           </div>
+          {mode === "edit" && (
+            <PropertiesPanel
+              selectedElement={selectedElement}
+              updateElement={updateElement}
+              canvasBackgroundColor={canvasBackgroundColor}
+              setCanvasBackgroundColor={setCanvasBackgroundColor}
+              templateObj={templateObj}
+              setTemplateObj={setTemplateObj}
+              mode={mode}
+            />
+          )}
         </div>
-        {mode === "edit" && (
-          <PropertiesPanel
-            selectedElement={selectedElement}
-            updateElement={updateElement}
-            canvasBackgroundColor={canvasBackgroundColor}
-            setCanvasBackgroundColor={setCanvasBackgroundColor}
-            templateObj={templateObj}
-            setTemplateObj={setTemplateObj}
+        {contextMenu && (
+          <ContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            elementId={contextMenu.elementId}
+            onDelete={() => deleteElement(contextMenu.elementId)}
+            onDuplicate={() => duplicateElement(contextMenu.elementId)}
+            onApplyClippingMask={applyClippingMask}
+            onReleaseClippingMask={() =>
+              releaseClippingMask(contextMenu.elementId)
+            }
+            canApplyClippingMask={selectedElementsForClipping.length === 2}
+            isElementClipped={
+              !!elements.find((el) => el.id === contextMenu.elementId)?.groupId
+            }
+            onClose={() => setContextMenu(null)}
             mode={mode}
           />
+        )}
+
+        {isExporting && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              background: "rgba(0,0,0,0.7)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              flexDirection: "column",
+              zIndex: 9999,
+              color: "#fff",
+              fontSize: "20px",
+              fontWeight: 600,
+            }}
+          >
+            <p style={{ marginBottom: 20 }}>
+              Exporting Video... {Math.round(progress)}%
+            </p>
+
+            <div
+              style={{
+                width: "60%",
+                maxWidth: 500,
+                height: 20,
+                background: "rgba(255,255,255,0.2)",
+                borderRadius: 10,
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  width: `${progress}%`,
+                  height: "100%",
+                  background: `linear-gradient(90deg, #8CA2FF, #FF87C5)`,
+                  transition: "width 0.2s ease-out",
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {showUpgradePopup && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              background: "rgba(0,0,0,0.8)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 10000,
+              flexDirection: "column",
+              padding: "20px",
+            }}
+          >
+            <div
+              style={{
+                background: "#fff",
+                padding: "40px 30px",
+                borderRadius: "16px",
+                maxWidth: "480px",
+                textAlign: "center",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+              }}
+            >
+              <h2
+                style={{ margin: "0 0 20px", fontSize: "28px", color: "#333" }}
+              >
+                Daily Download Limit Reached
+              </h2>
+              <p
+                style={{
+                  fontSize: "18px",
+                  color: "#555",
+                  marginBottom: "30px",
+                  lineHeight: "1.5",
+                }}
+              >
+                You've reached your daily limit of <strong>{dailyLimit}</strong>{" "}
+                downloads.
+                <br />
+                {profile?.license_details ? (
+                  <>
+                    Upgrade your plan for unlimited downloads and no watermarks!
+                  </>
+                ) : (
+                  <>
+                    Upgrade to a paid plan to remove watermarks and get more
+                    downloads!
+                  </>
+                )}
+              </p>
+              <button
+                onClick={() => {
+                  window.location.href = "#/subscription";
+                }}
+                style={{
+                  padding: "14px 40px",
+                  fontSize: "18px",
+                  fontWeight: "bold",
+                  background: "#1976d2",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  marginBottom: "20px",
+                }}
+              >
+                Upgrade Plan Now
+              </button>
+              <div>
+                <button
+                  onClick={() => setShowUpgradePopup(false)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#666",
+                    fontSize: "16px",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-      {contextMenu && (
-        <ContextMenu
-          x={contextMenu.x}
-          y={contextMenu.y}
-          elementId={contextMenu.elementId}
-          onDelete={() => deleteElement(contextMenu.elementId)}
-          onDuplicate={() => duplicateElement(contextMenu.elementId)}
-          onApplyClippingMask={applyClippingMask}
-          onReleaseClippingMask={() =>
-            releaseClippingMask(contextMenu.elementId)
-          }
-          canApplyClippingMask={selectedElementsForClipping.length === 2}
-          isElementClipped={
-            !!elements.find((el) => el.id === contextMenu.elementId)?.groupId
-          }
-          onClose={() => setContextMenu(null)}
-          mode={mode}
-        />
-      )}
-
-      {isExporting && (
-  <div
-    style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100vw",
-      height: "100vh",
-      background: "rgba(0,0,0,0.7)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      flexDirection: "column",
-      zIndex: 9999,
-      color: "#fff",
-      fontSize: "20px",
-      fontWeight: 600,
-    }}
-  >
-    <p style={{ marginBottom: 20 }}>Exporting Video... {Math.round(progress)}%</p>
-
-    <div
-      style={{
-        width: "60%",
-        maxWidth: 500,
-        height: 20,
-        background: "rgba(255,255,255,0.2)",
-        borderRadius: 10,
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          width: `${progress}%`,
-          height: "100%",
-          background: `linear-gradient(90deg, #8CA2FF, #FF87C5)`,
-          transition: "width 0.2s ease-out",
-        }}
-      />
-    </div>
-  </div>
-)}
-    </div>
-    <EditorTour />
+      <EditorTour />
     </>
   );
 }
