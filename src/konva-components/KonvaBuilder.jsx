@@ -11,6 +11,14 @@ import Konva from "konva";
 import EditorTour from "../components/EditorTour";
 import { useProfile, usePatchUser } from "../hook/usePageData";
 import DailyDownloadLimitBanner from "./DailyDownloadLimitBanner";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Button
+} from '@mui/material';
 
 function KonvaBuilder(props) {
   const {
@@ -997,96 +1005,45 @@ function KonvaBuilder(props) {
           </div>
         )}
 
-        {showUpgradePopup && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100vw",
-              height: "100vh",
-              background: "rgba(0,0,0,0.8)",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              zIndex: 10000,
-              flexDirection: "column",
-              padding: "20px",
-            }}
-          >
-            <div
-              style={{
-                background: "#fff",
-                padding: "40px 30px",
-                borderRadius: "16px",
-                maxWidth: "480px",
-                textAlign: "center",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+        <Dialog 
+          open={showUpgradePopup} 
+          onClose={() => setShowUpgradePopup(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ textAlign: 'center', pb: 1, fontSize: '1.75rem', fontWeight: 'bold' }}>
+            Daily Download Limit Reached
+          </DialogTitle>
+          <DialogContent sx={{ textAlign: 'center', pt: 1 }}>
+            <Typography variant="body1" sx={{ mb: 2, fontSize: '1.125rem', lineHeight: 1.5 }}>
+              You've reached your daily limit of <strong>{dailyLimit}</strong> downloads.
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem' }}>
+              {profile?.license_details ? (
+                "Upgrade your plan for unlimited downloads and no watermarks!"
+              ) : (
+                "Upgrade to a paid plan to remove watermarks and get more downloads!"
+              )}
+            </Typography>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'flex-end' }}>
+            <Button 
+              onClick={() => setShowUpgradePopup(false)}
+              color="inherit"
+              sx={{ mr: 1 }}
+            >
+              Close
+            </Button>
+            <Button 
+              variant="contained" 
+              onClick={() => {
+                window.location.href = "#/subscription";
               }}
             >
-              <h2
-                style={{ margin: "0 0 20px", fontSize: "28px", color: "#333" }}
-              >
-                Daily Download Limit Reached
-              </h2>
-              <p
-                style={{
-                  fontSize: "18px",
-                  color: "#555",
-                  marginBottom: "30px",
-                  lineHeight: "1.5",
-                }}
-              >
-                You've reached your daily limit of <strong>{dailyLimit}</strong>{" "}
-                downloads.
-                <br />
-                {profile?.license_details ? (
-                  <>
-                    Upgrade your plan for unlimited downloads and no watermarks!
-                  </>
-                ) : (
-                  <>
-                    Upgrade to a paid plan to remove watermarks and get more
-                    downloads!
-                  </>
-                )}
-              </p>
-              <button
-                onClick={() => {
-                  window.location.href = "#/subscription";
-                }}
-                style={{
-                  padding: "14px 40px",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  background: "#1976d2",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  marginBottom: "20px",
-                }}
-              >
-                Upgrade Plan Now
-              </button>
-              <div>
-                <button
-                  onClick={() => setShowUpgradePopup(false)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#666",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                  }}
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+              Upgrade Plan Now
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
       <EditorTour />
     </>

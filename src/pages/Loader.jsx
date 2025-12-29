@@ -7,10 +7,11 @@ const Loader = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Navigate to dashboard using window.location for reliable reload
         setTimeout(() => {
-            navigate('/')
-        }, 2500);
-    }, [])
+            window.location.href = '/';
+        }, 2000);
+    }, []);
 
     return (
         <Box
