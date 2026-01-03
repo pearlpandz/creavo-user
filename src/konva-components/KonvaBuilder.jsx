@@ -1032,7 +1032,7 @@ function KonvaBuilder(props) {
               color="inherit"
               sx={{ mr: 1 }}
             >
-              Close
+              May be Later
             </Button>
             <Button 
               variant="contained" 
