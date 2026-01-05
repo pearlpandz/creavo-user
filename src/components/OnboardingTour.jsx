@@ -35,21 +35,21 @@ useEffect(() => {
     const hasRealProfileData = hasRealCompanyData || hasRealProducts || hasRealPoliticalData || hasDownloads;
 
     // Debug console logs
-    console.log("🔍 OnboardingTour Debug:");
-    console.log("📅 profile.last_login:", profile.last_login);
-    console.log("🆕 isFirstLogin:", isFirstLogin);
-    console.log("📊 hasRealProfileData:", hasRealProfileData);
-    console.log("✅ tourCompleted:", tourCompleted);
+    // console.log("🔍 OnboardingTour Debug:");
+    // console.log("📅 profile.last_login:", profile.last_login);
+    // console.log("🆕 isFirstLogin:", isFirstLogin);
+    // console.log("📊 hasRealProfileData:", hasRealProfileData);
+    // console.log("✅ tourCompleted:", tourCompleted);
 
     // Show tour only for truly new users (no last_login AND no real profile data AND not completed)
     if (isFirstLogin && !hasRealProfileData && !tourCompleted) {
-      console.log("🎯 New user detected - starting tour...");
+      // console.log("🎯 New user detected - starting tour...");
       const timer = setTimeout(() => {
         setRun(true);
       }, 800);
       return () => clearTimeout(timer);
     } else {
-      console.log("🚫 Existing user or tour completed - blocking tour");
+      // console.log("🚫 Existing user or tour completed - blocking tour");
       setRun(false);
     }
   }, [isLoading, profile]);

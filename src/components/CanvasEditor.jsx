@@ -15,7 +15,7 @@ const CanvasEditor = (props) => {
   const { template, theme, selectedImg,mediaType: propMediaType, profile, mode = "edit" } = props;
   const stageRef = useRef();
   const { mediaType: reduxMediaType } = useEditor();
-console.log("REDUX mediaType:", reduxMediaType); // ← ADD THIS DEBUG
+// console.log("REDUX mediaType:", reduxMediaType); // ← ADD THIS DEBUG
   const mediaType = propMediaType || reduxMediaType || "image"; // ← SAFE
   const [elements, setElements] = useUndoRedo([]);
   const [templateObj, setTemplateObj] = useState({});
@@ -23,14 +23,14 @@ console.log("REDUX mediaType:", reduxMediaType); // ← ADD THIS DEBUG
   const { mutate: createMutate } = useCreateTemplate();
   const mutate = mode === "edit" ? patchMutate : createMutate;
   const { mutate: mutateUser } = usePatchUser((updatedUser) => {
-    console.log(updatedUser);
+    // console.log(updatedUser);
   });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const navigate = useNavigate();
 
 useEffect(() => {
-    console.log('TEMPLATE DATA:', template); // Add this line
+    // console.log('TEMPLATE DATA:', template); // Add this line
     if (template?.elements) {
       const updatedElements = template.elements.map((element) => {
         // Handle Images (including frame-img with video support)
