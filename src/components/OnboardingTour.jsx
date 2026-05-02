@@ -13,14 +13,43 @@ useEffect(() => {
     if (isLoading || !profile) return;
 
     const isFirstLogin = profile.last_login === null;
+    const tourCompleted = localStorage.getItem("onboardingTourCompleted");
+    
+    // Check if user has meaningful profile data (not just default values)
+    const hasRealCompanyData = profile.company_details && 
+                              (profile.company_details.company_name !== "Default Company" ||
+                               profile.company_details.email ||
+                               profile.company_details.primary_contact ||
+                               profile.company_details.description);
+    
+    const hasRealProducts = profile.products && 
+                           profile.products.some(p => p.name !== "Product 1" && p.name !== "Product 2" && p.name !== "Product 3");
+    
+    const hasRealPoliticalData = profile.political && 
+                                (profile.political.leader_name !== "Leader" ||
+                                 profile.political.leader_designation ||
+                                 profile.political.image);
+    
+    const hasDownloads = profile.day_downloads > 0 || profile.overall_downloads > 0;
+    
+    const hasRealProfileData = hasRealCompanyData || hasRealProducts || hasRealPoliticalData || hasDownloads;
 
-    if (isFirstLogin) {
+    // Debug console logs
+    // console.log("🔍 OnboardingTour Debug:");
+    // console.log("📅 profile.last_login:", profile.last_login);
+    // console.log("🆕 isFirstLogin:", isFirstLogin);
+    // console.log("📊 hasRealProfileData:", hasRealProfileData);
+    // console.log("✅ tourCompleted:", tourCompleted);
+
+    // Show tour only for truly new users (no last_login AND no real profile data AND not completed)
+    if (isFirstLogin && !hasRealProfileData && !tourCompleted) {
+      // console.log("🎯 New user detected - starting tour...");
       const timer = setTimeout(() => {
         setRun(true);
       }, 800);
-
       return () => clearTimeout(timer);
     } else {
+      // console.log("🚫 Existing user or tour completed - blocking tour");
       setRun(false);
     }
   }, [isLoading, profile]);
@@ -116,6 +145,8 @@ const steps = [
     if ([STATUS.FINISHED, STATUS.SKIPPED].includes(status)) {
       setRun(false);
       document.body.style.overflow = "auto";
+      // Mark tour as completed when user finishes or skips
+      localStorage.setItem("onboardingTourCompleted", "true");
     }
   };
 

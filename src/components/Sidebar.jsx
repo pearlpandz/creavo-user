@@ -7,6 +7,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/auth.context';
+import { useQueryClient } from '@tanstack/react-query';
 
 
 const menu = [
@@ -19,9 +20,17 @@ const menu = [
 
 export default function Sidebar({ open }) {
     const isOpen = open === 'true';
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const location = useLocation();
-    const { logout } = useAuth()
+    const { logout } = useAuth();
+    const queryClient = useQueryClient();
+
+    const handleLogout = () => {
+        // Clear profile cache before logout
+        queryClient.removeQueries({ queryKey: ['profile'] });
+        queryClient.clear(); // Clear all cache
+        logout();
+    };
 
     return (
         <Box
@@ -46,7 +55,14 @@ export default function Sidebar({ open }) {
                     <ListItem
                         button
                         key={item.text}
-                        onClick={() => navigate(item.path)}
+                        onClick={() => {
+                            if (item.path === '/') {
+                                // Reload dashboard to get fresh profile data
+                                window.location.href = '/';
+                            } else {
+                                navigate(item.path);
+                            }
+                        }}
                         sx={{
                             mb: 1,
                             borderRadius: 2,
@@ -79,7 +95,7 @@ export default function Sidebar({ open }) {
                             color: 'white'
                         }
                     }}
-                    onClick={logout}
+                    onClick={handleLogout}
                 >
                     <ListItemIcon sx={{ color: 'white' }}>
                         <LogoutIcon />

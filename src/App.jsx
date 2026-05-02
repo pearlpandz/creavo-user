@@ -166,6 +166,8 @@ function App() {
     setUserDetails(null);
     localStorage.removeItem("isAuthenticated");
     localStorage.removeItem("userDetails");
+    localStorage.removeItem("onboardingTourCompleted");
+    localStorage.removeItem("continueTour");
   };
 
   return (
