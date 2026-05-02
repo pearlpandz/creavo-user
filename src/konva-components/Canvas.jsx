@@ -68,6 +68,7 @@ const GeneralShape = forwardRef((props, ref) => {
       return null;
   }
 
+
   return (
     <KonvaShape
       ref={ref}
@@ -121,11 +122,11 @@ const ImageBasedShape = forwardRef((props, ref) => {
   const isVideo = shapeProps.mediaType === "video" || shapeProps.type === "video";
   const isAnimated = isGif || isVideo;
 
-  const src = shapeProps.src?.includes("https://")
-    ? shapeProps.src
-    : shapeProps.src?.replace("http://", "https://");
+  // const src = shapeProps.src?.includes("https://")
+  //   ? shapeProps.src
+  //   : shapeProps.src?.replace("http://", "https://");
 
-    // const src = shapeProps.src
+    const src = shapeProps.src
 
   const [image] = useImage(src, "anonymous");
   const internalRef = useRef(null);
@@ -146,57 +147,54 @@ const ImageBasedShape = forwardRef((props, ref) => {
     const layer = node.getLayer();
     if (!layer) return;
 
-    // ——————— GIF ANIMATION (FIXED & WORKING) ———————
+    // ——————— GIF ANIMATION (KONVA DOCS APPROACH) ———————
     if (isGif) {
-      const gifImg = new Image();
-      gifImg.crossOrigin = "anonymous";
-      gifImg.src = src;
-      gifImg.loading = "eager";
-
-      const gifCanvas = document.createElement("canvas");
-      const gifCtx = gifCanvas.getContext("2d");
-
-      let rafId = null;
-
-      const updateFrame = () => {
-        if (!node.getLayer()) {
-          if (rafId) cancelAnimationFrame(rafId);
-          return;
+      // Load gifler library from CDN
+      const loadGifler = () => {
+        if (window.gifler) {
+          startGifAnimation();
+        } else {
+          const script = document.createElement('script');
+          script.src = 'https://unpkg.com/gifler@0.1.0/gifler.min.js';
+          script.onload = startGifAnimation;
+          script.onerror = () => {
+            console.log("Gifler failed to load, using static image");
+            if (image) {
+              node.image(image);
+              layer.batchDraw();
+            }
+          };
+          document.head.appendChild(script);
         }
-
-        if (gifImg.naturalWidth && gifImg.naturalHeight) {
-          gifCanvas.width = gifImg.naturalWidth;
-          gifCanvas.height = gifImg.naturalHeight;
-          gifCtx.clearRect(0, 0, gifCanvas.width, gifCanvas.height);
-          gifCtx.drawImage(gifImg, 0, 0);
-
-          createImageBitmap(gifCanvas)
-            .then((bitmap) => {
-              if (node.getLayer()) {
-                node.image(bitmap);
-                layer.batchDraw();
-              }
-            })
-            .catch(() => {});
-        }
-
-        rafId = requestAnimationFrame(updateFrame);
       };
 
-      gifImg.onload = () => {
-        console.log("GIF PLAYING SMOOTHLY (via createImageBitmap)");
-        updateFrame();
+      const startGifAnimation = () => {
+        const canvas = document.createElement('canvas');
+        
+        // Frame callback function
+        function onDrawFrame(ctx, frame) {
+          canvas.width = frame.width;
+          canvas.height = frame.height;
+          ctx.drawImage(frame.buffer, 0, 0);
+          
+          // Set canvas as Konva image and redraw
+          node.image(canvas);
+          layer.batchDraw();
+        }
+        
+        // Start GIF animation
+        window.gifler(src).frames(canvas, onDrawFrame);
+        console.log("GIF animation started with CDN gifler");
+        
+        node._gifCanvas = canvas;
       };
 
-      gifImg.onerror = (e) => console.error("GIF load failed:", e);
-
-      const anim = new Konva.Animation(() => {}, layer);
-      anim.start();
+      loadGifler();
 
       return () => {
-        if (rafId) cancelAnimationFrame(rafId);
-        anim.stop();
-        gifImg.src = "";
+        if (node._gifCanvas) {
+          node._gifCanvas = null;
+        }
       };
     }
 

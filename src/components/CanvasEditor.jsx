@@ -15,7 +15,7 @@ const CanvasEditor = (props) => {
   const { template, theme, selectedImg,mediaType: propMediaType, profile, mode = "edit" } = props;
   const stageRef = useRef();
   const { mediaType: reduxMediaType } = useEditor();
-console.log("REDUX mediaType:", reduxMediaType); // ← ADD THIS DEBUG
+// console.log("REDUX mediaType:", reduxMediaType); // ← ADD THIS DEBUG
   const mediaType = propMediaType || reduxMediaType || "image"; // ← SAFE
   const [elements, setElements] = useUndoRedo([]);
   const [templateObj, setTemplateObj] = useState({});
@@ -23,13 +23,14 @@ console.log("REDUX mediaType:", reduxMediaType); // ← ADD THIS DEBUG
   const { mutate: createMutate } = useCreateTemplate();
   const mutate = mode === "edit" ? patchMutate : createMutate;
   const { mutate: mutateUser } = usePatchUser((updatedUser) => {
-    console.log(updatedUser);
+    // console.log(updatedUser);
   });
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const navigate = useNavigate();
 
 useEffect(() => {
+    // console.log('TEMPLATE DATA:', template); // Add this line
     if (template?.elements) {
       const updatedElements = template.elements.map((element) => {
         // Handle Images (including frame-img with video support)
@@ -41,8 +42,8 @@ useEffect(() => {
             src = profile?.company_details?.image || src;
           } 
           else if (element.slug === "{{frame-img}}") {
-            src = selectedImg;
-            currentMediaType = mediaType; // ← FIXED: Use Redux value!
+            src = selectedImg || null; // Don't use fallback placeholder
+            currentMediaType = mediaType;
           } 
           else if (element.slug === "{{product-img1}}") {
             src = profile?.products?.[0]?.image || src;
@@ -66,10 +67,15 @@ useEffect(() => {
             src = profile?.political?.image || src;
           }
 
+          // Only return element if src exists for frame-img
+          if (element.slug === "{{frame-img}}" && !src) {
+            return null; // Don't render frame-img if no image selected
+          }
+
           return {
             ...element,
             src,
-            mediaType: currentMediaType, // ← Now it's correct!
+            mediaType: currentMediaType,
           };
         }
 
@@ -116,7 +122,7 @@ useEffect(() => {
         return element;
       });
 
-      setElements(updatedElements);
+      setElements(updatedElements.filter(Boolean)); // Filter out null elements
       setTemplateObj({
         name: template.name,
         category: template.category,

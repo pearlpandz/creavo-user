@@ -71,9 +71,14 @@ const MediaList = ({ data, shouldShow = true, noOfCards = 6 }) => {
     }, [data, slider])
 
 const handleSelectedImg = (item) => {
+  // Check if it's a GIF by URL extension or media_type
+  const isGif = item.media_type === "gif" || 
+                (item.image && (item.image.toLowerCase().includes('.gif') || 
+                               item.image.toLowerCase().includes('gif')));
+  
   const payload = {
     url: item.media_type === "video" ? item.media : item.image,
-    type: item.media_type === "video" ? "video" : "image",
+    type: item.media_type === "video" ? "video" : (isGif ? "gif" : "image"),
   };
 
   if (!profile?.license) {

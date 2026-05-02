@@ -58,12 +58,17 @@ const Login = () => {
 
       if (res.status === 200) {
         login(res.data.user);
-        setSnackbar({
-          open: true,
-          message: 'Login successful!',
-          severity: 'success',
-        });
-        setTimeout(() => navigate('/'), 1500); // Slight delay so user sees success message
+        setTimeout(() => {
+          setSnackbar({
+            open: true,
+            message: 'Login successful!',
+            severity: 'success',
+          });
+          // Navigate and reload using window.location for reliable reload
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 100);
+        }, 500);
       } else {
         setError(res.data);
         setSnackbar({

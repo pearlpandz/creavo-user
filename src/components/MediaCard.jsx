@@ -79,7 +79,12 @@ import { useRef, useState } from 'react';
 
 function MediaCard({ item, shouldShow = true, width, height }) {
     const isVideo = item.media_type === "video";
-    const isGif = item.media_type === "gif";
+    
+    // Check if it's a GIF by URL extension or media_type
+    const isGif = item.media_type === "gif" || 
+                  (item.image && (item.image.toLowerCase().includes('.gif') || 
+                                 item.image.toLowerCase().includes('gif')));
+    
     const videoRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
 
@@ -218,7 +223,7 @@ function MediaCard({ item, shouldShow = true, width, height }) {
                                     position: 'absolute',
                                     top: 8,
                                     right: 8,
-                                    color: '#5171fdff',
+                                    color: '#fff',
                                     borderRadius: '50%',
                                     width: 30,
                                     height: 30,

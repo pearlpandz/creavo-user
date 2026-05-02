@@ -11,6 +11,15 @@ import Konva from "konva";
 import EditorTour from "../components/EditorTour";
 import { useProfile, usePatchUser } from "../hook/usePageData";
 import DailyDownloadLimitBanner from "./DailyDownloadLimitBanner";
+import gifshot from "gifshot";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Button
+} from '@mui/material';
 
 function KonvaBuilder(props) {
   const {
@@ -31,6 +40,7 @@ function KonvaBuilder(props) {
     useState([]);
   const [isExporting, setIsExporting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [exportType, setExportType] = useState("video"); // Track export type
   const { data: profile } = useProfile();
   const { mutate: patchUser } = usePatchUser();
   const [showUpgradePopup, setShowUpgradePopup] = useState(false);
@@ -529,9 +539,15 @@ function KonvaBuilder(props) {
     const hasVideo = elements.some(
       (el) => el.type === "video" || el.mediaType === "video"
     );
+    
+    const hasGif = elements.some(
+      (el) => el.type === "gif" || el.mediaType === "gif"
+    );
 
     if (hasVideo) {
       downloadAsVideo();
+    } else if (hasGif) {
+      downloadAsGIF();
     } else {
       downloadAsPNG();
     }
@@ -589,6 +605,71 @@ function KonvaBuilder(props) {
       document.body.removeChild(link);
     }
   };
+
+const downloadAsGIF = async () => {
+  if (!stageRef.current) return;
+
+  setExportType("gif");
+  setIsExporting(true);
+  setProgress(0);
+
+  const stage = stageRef.current;
+  const WIDTH = 1080;
+  const HEIGHT = 1080;
+  const DURATION = 3000; // 3 seconds
+  const FPS = 20;
+  const totalFrames = (DURATION / 1000) * FPS;
+  const frames = [];
+
+  // 1. Prepare high-res clone for export
+  const clonedStage = stage.clone();
+  clonedStage.width(WIDTH);
+  clonedStage.height(HEIGHT);
+  const scale = WIDTH / stage.width();
+  clonedStage.scale({ x: scale, y: scale });
+
+  for (let i = 0; i < totalFrames; i++) {
+    clonedStage.draw();
+    const frameData = clonedStage.toDataURL({ pixelRatio: 1 });
+    frames.push(frameData);
+
+    setProgress(Math.round((i / totalFrames) * 100));
+
+    await new Promise((resolve) => setTimeout(resolve, 1000 / FPS));
+  }
+
+  // 3. Create the GIF with gifshot
+  gifshot.createGIF(
+    {
+      images: frames,
+      gifWidth: WIDTH,
+      gifHeight: HEIGHT,
+      interval: 1 / FPS, // Delay between frames (seconds)
+      numWorkers: 4,     // Multithreading for performance
+      sampleInterval: 10, // Quality (1-20, lower is better but slower)
+    },
+    (obj) => {
+      if (!obj.error) {
+        // 4. Manual trigger for download
+        const link = document.createElement("a");
+        link.download = `creavo-animation-${Date.now()}.gif`;
+        link.href = obj.image; // obj.image is the base64 GIF string
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        console.error("GIF creation failed:", obj.error);
+      }
+
+      // Final Cleanup
+      clonedStage.destroy();
+      setIsExporting(false);
+      setProgress(100);
+    }
+  );
+};
+
+
   const saveTemplate = () => {
     handleSave(elements);
   };
@@ -867,7 +948,7 @@ function KonvaBuilder(props) {
             />
             {/* <DailyDownloadLimitBanner /> */}
             <div
-              class="download-button"
+              className="download-button"
               style={{ textAlign: "center", marginTop: "20px" }}
             >
               <button
@@ -916,6 +997,10 @@ function KonvaBuilder(props) {
                       (el) => el.type === "video" || el.mediaType === "video"
                     )
                   ? "Download MP4 Video"
+                  : elements.some(
+                      (el) => el.mediaType === "gif" || el.type === "gif"
+                    )
+                  ? "Download GIF"
                   : "Download PNG Image"}
               </button>
             </div>
@@ -966,127 +1051,89 @@ function KonvaBuilder(props) {
               alignItems: "center",
               flexDirection: "column",
               zIndex: 9999,
-              color: "#fff",
-              fontSize: "20px",
-              fontWeight: 600,
             }}
           >
-            <p style={{ marginBottom: 20 }}>
-              Exporting Video... {Math.round(progress)}%
-            </p>
-
             <div
               style={{
-                width: "60%",
-                maxWidth: 500,
-                height: 20,
-                background: "rgba(255,255,255,0.2)",
-                borderRadius: 10,
-                overflow: "hidden",
+                background: "#fafbfc",
+                borderRadius: 16,
+                padding: "40px 60px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
               }}
             >
               <div
                 style={{
-                  width: `${progress}%`,
-                  height: "100%",
-                  background: `linear-gradient(90deg, #8CA2FF, #FF87C5)`,
-                  transition: "width 0.2s ease-out",
-                }}
-              />
-            </div>
-          </div>
-        )}
-
-        {showUpgradePopup && (
-          <div
-            style={{
-              position: "fixed",
-              top: 0,
-              left: 0,
-              width: "100vw",
-              height: "100vh",
-              background: "rgba(0,0,0,0.8)",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              zIndex: 10000,
-              flexDirection: "column",
-              padding: "20px",
-            }}
-          >
-            <div
-              style={{
-                background: "#fff",
-                padding: "40px 30px",
-                borderRadius: "16px",
-                maxWidth: "480px",
-                textAlign: "center",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-              }}
-            >
-              <h2
-                style={{ margin: "0 0 20px", fontSize: "28px", color: "#333" }}
-              >
-                Daily Download Limit Reached
-              </h2>
-              <p
-                style={{
-                  fontSize: "18px",
-                  color: "#555",
-                  marginBottom: "30px",
-                  lineHeight: "1.5",
+                  marginBottom: 16,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                You've reached your daily limit of <strong>{dailyLimit}</strong>{" "}
-                downloads.
-                <br />
-                {profile?.license_details ? (
-                  <>
-                    Upgrade your plan for unlimited downloads and no watermarks!
-                  </>
-                ) : (
-                  <>
-                    Upgrade to a paid plan to remove watermarks and get more
-                    downloads!
-                  </>
-                )}
-              </p>
-              <button
-                onClick={() => {
-                  window.location.href = "#/subscription";
-                }}
-                style={{
-                  padding: "14px 40px",
-                  fontSize: "18px",
-                  fontWeight: "bold",
-                  background: "#1976d2",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "8px",
-                  cursor: "pointer",
-                  marginBottom: "20px",
-                }}
-              >
-                Upgrade Plan Now
-              </button>
-              <div>
-                <button
-                  onClick={() => setShowUpgradePopup(false)}
+                <img
+                  src="creavo.svg"
+                  alt="Logo"
                   style={{
-                    background: "none",
-                    border: "none",
-                    color: "#666",
-                    fontSize: "16px",
-                    cursor: "pointer",
-                    textDecoration: "underline",
+                    width: 80,
+                    height: 80,
                   }}
-                >
-                  Close
-                </button>
+                />
+              </div>
+              <div
+                style={{
+                  fontSize: "18px",
+                  fontWeight: 500,
+                  letterSpacing: 0.5,
+                  color: "#333",
+                }}
+              >
+                Exporting Video... {Math.round(progress)}%
               </div>
             </div>
           </div>
         )}
+
+        <Dialog 
+          open={showUpgradePopup} 
+          onClose={() => setShowUpgradePopup(false)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ textAlign: 'center', pb: 1, fontSize: '1.75rem', fontWeight: 'bold' }}>
+            Daily Download Limit Reached
+          </DialogTitle>
+          <DialogContent sx={{ textAlign: 'center', pt: 1 }}>
+            <Typography variant="body1" sx={{ mb: 2, fontSize: '1.125rem', lineHeight: 1.5 }}>
+              You've reached your daily limit of <strong>{dailyLimit}</strong> downloads.
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ fontSize: '1rem' }}>
+              {profile?.license_details ? (
+                "Upgrade your plan for unlimited downloads and no watermarks!"
+              ) : (
+                "Upgrade to a paid plan to remove watermarks and get more downloads!"
+              )}
+            </Typography>
+          </DialogContent>
+          <DialogActions sx={{ px: 3, pb: 2, justifyContent: 'flex-end' }}>
+            <Button 
+              onClick={() => setShowUpgradePopup(false)}
+              color="inherit"
+              sx={{ mr: 1 }}
+            >
+              May be Later
+            </Button>
+            <Button 
+              variant="contained" 
+              onClick={() => {
+                window.location.href = "#/subscription";
+              }}
+            >
+              Upgrade Plan Now
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
       <EditorTour />
     </>

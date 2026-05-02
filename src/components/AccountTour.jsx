@@ -94,6 +94,8 @@ const AccountTour = () => {
   const finishTour = () => {
     setRun(false);
     localStorage.removeItem("continueTour");
+    // Mark the entire onboarding flow as completed
+    localStorage.setItem("onboardingTourCompleted", "true");
 
     document.body.style.overflow = "auto";
     document.documentElement.style.overflow = "auto";

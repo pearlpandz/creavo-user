@@ -1,13 +1,16 @@
 import { Box, Typography, Button, Stack } from '@mui/material';
 import React from 'react';
 import { useNavigate } from 'react-router';
+import { useDispatch } from 'react-redux';
+import { resetEditor } from '../../redux/slices/editor.slice';
 import { useProfile } from '../../hook/usePageData';
 import { useExpire } from '../../hook/useExpire';
 
 const BannerComponent = ({ detail = {} }) => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const { data: profile } = useProfile();
-    const { expireIn } = useExpire(profile)
+    const { expireIn } = useExpire(profile);
     const {
         name = "Create Stunning Posters in Just a Few Clicks",
         description = "Bring your ideas to life with our intuitive editor. Fast, flexible, and designer-approved.",
@@ -15,16 +18,19 @@ const BannerComponent = ({ detail = {} }) => {
     } = detail;
 
     const handleRedirection = () => {
+        // Reset editor state when starting new design
+        dispatch(resetEditor());
+        
         if (!profile?.license) { // if no license
             if (expireIn === 0) { // if expired
-                navigate('/subscription')
+                navigate('/subscription');
             } else { // if not expired
-                navigate('/editor')
+                navigate('/editor');
             }
         } else {
-            navigate('/editor')
+            navigate('/editor');
         }
-    }
+    };
 
     return (
         <Box
