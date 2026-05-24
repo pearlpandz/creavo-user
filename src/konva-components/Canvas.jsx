@@ -111,6 +111,25 @@ const GeneralShape = forwardRef((props, ref) => {
 const ImageBasedShape = forwardRef((props, ref) => {
   const { shapeProps, onSelect, onContextMenu, mode } = props;
 
+  // Exclude fill and gradient properties for image elements
+  const {
+    fill,
+    fillType,
+    fillLinearGradientColorStops,
+    fillLinearGradientStartPoint,
+    fillLinearGradientEndPoint,
+    fillRadialGradientColorStops,
+    fillRadialGradientStartPoint,
+    fillRadialGradientEndPoint,
+    fillRadialGradientStartRadius,
+    fillRadialGradientEndRadius,
+    fillPatternImage,
+    fillPatternOffset,
+    fillPatternScale,
+    fillPatternRotation,
+    ...imageProps
+  } = shapeProps;
+
   const isGif =
     shapeProps.mediaType === "gif" ||
     shapeProps.type === "gif" ||
@@ -234,7 +253,7 @@ const ImageBasedShape = forwardRef((props, ref) => {
   return (
     <KonvaImage
       ref={internalRef}
-      {...shapeProps}
+      {...imageProps}
       image={displayImage}
       onClick={(e) => mode === "edit" && (onSelect(shapeProps, e), e.cancelBubble = true)}
       onTap={(e) => mode === "edit" && (onSelect(shapeProps, e), e.cancelBubble = true)}
