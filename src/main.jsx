@@ -5,6 +5,7 @@ import App from './App.jsx'
 import { store } from './redux/store.js'
 import "keen-slider/keen-slider.min.css";
 import './index.css'
+import './utils/checkFileFormat';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

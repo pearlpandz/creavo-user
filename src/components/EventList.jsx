@@ -13,6 +13,10 @@ const EventList = () => {
     const currentYear = new Date().getFullYear();
     const navigate = useNavigate();
 
+    const getEventPreviewImage = (event) => {
+        return event?.media?.find((item) => item?.type === 'image')?.url || '';
+    };
+
     const nextSevenDays = Array.from({ length: 7 }, (_, i) => {
         const date = new Date();
         date.setDate(date.getDate() + i);
@@ -53,7 +57,7 @@ const EventList = () => {
                     data?.length > 0 ?
                         data?.map(event => (
                             <div key={event.id} onClick={() => handleRedirection(event)}>
-                                <EventCard name={event.name} date={event.date} image={event?.media?.[0]?.url} />
+                                <EventCard name={event.name} date={event.date} image={getEventPreviewImage(event)} />
                             </div>
                         )) : (
                             <p>No Events Found!</p>
