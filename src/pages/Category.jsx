@@ -33,16 +33,24 @@ function CategoryPage() {
 
     const allMedia = data?.pages.flatMap(page => page.media) ?? [];
 
-    const handleSelectedImg = (img) => {
+    const handleSelectedImg = (item) => {
+        const isGif = item?.media_type === 'gif' ||
+            (item?.image && (item.image.toLowerCase().includes('.gif') ||
+                item.image.toLowerCase().includes('gif')));
+
+        const payload = {
+            url: item?.media_type === 'video' ? item?.media : item?.image,
+            type: item?.media_type === 'video' ? 'video' : (isGif ? 'gif' : 'image'),
+        };
         if (!profile?.license) { // if no license
             if (expireIn === 0) { // if expired
                 navigate('/subscription')
             } else { // if not expired
-                dispatch(updateFrameImage(img))
+                dispatch(updateFrameImage(payload))
                 navigate('/editor')
             }
         } else {
-            dispatch(updateFrameImage(img))
+            dispatch(updateFrameImage(payload))
             navigate('/editor')
         }
     };
@@ -129,7 +137,7 @@ function CategoryPage() {
                     <Grid container spacing={2}>
                         {
                             allMedia?.map((item) => (
-                                <Grid key={item.id} size={{ xs: 12, sm: 4, md: 3, xl: 2 }} component='div' onClick={() => handleSelectedImg(item.image)}>
+                                <Grid key={item.id} size={{ xs: 12, sm: 4, md: 3, xl: 2 }} component='div' onClick={() => handleSelectedImg(item)}>
                                     <MediaCard item={item} shouldShow={true} width='100%' height={200} />
                                 </Grid>
                             ))
