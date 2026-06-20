@@ -166,53 +166,80 @@ const ImageBasedShape = forwardRef((props, ref) => {
     const layer = node.getLayer();
     if (!layer) return;
 
-    // ——————— GIF ANIMATION (KONVA DOCS APPROACH) ———————
+    // ——————— GIF ANIMATION ———————
     if (isGif) {
-      // Load gifler library from CDN
-      const loadGifler = () => {
-        if (window.gifler) {
-          startGifAnimation();
-        } else {
-          const script = document.createElement('script');
-          script.src = 'https://unpkg.com/gifler@0.1.0/gifler.min.js';
-          script.onload = startGifAnimation;
-          script.onerror = () => {
-            console.log("Gifler failed to load, using static image");
-            if (image) {
-              node.image(image);
-              layer.batchDraw();
-            }
-          };
-          document.head.appendChild(script);
-        }
-      };
+      let animFrameId;
 
-      const startGifAnimation = () => {
+      const startGifAnimation = (blobUrl, isWebP) => {
+        // If it's actually a WebP, render as static image
+        if (isWebP) {
+          const img = new window.Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => {
+            node.image(img);
+            layer.batchDraw();
+          };
+          img.src = blobUrl;
+          return;
+        }
+
         const canvas = document.createElement('canvas');
-        
-        // Frame callback function
+
         function onDrawFrame(ctx, frame) {
           canvas.width = frame.width;
           canvas.height = frame.height;
           ctx.drawImage(frame.buffer, 0, 0);
-          
-          // Set canvas as Konva image and redraw
           node.image(canvas);
           layer.batchDraw();
         }
-        
-        // Start GIF animation
-        window.gifler(src).frames(canvas, onDrawFrame);
-        console.log("GIF animation started with CDN gifler");
-        
-        node._gifCanvas = canvas;
+
+        window.gifler(blobUrl).frames(canvas, onDrawFrame);
+        node._gifBlobUrl = blobUrl;
       };
 
-      loadGifler();
+      const loadGif = () => {
+        fetch(src)
+          .then(res => res.arrayBuffer())
+          .then(buffer => {
+            const bytes = new Uint8Array(buffer);
+            // Check magic bytes: GIF = 47 49 46, WebP = RIFF....WEBP
+            const isGifFile = bytes[0] === 0x47 && bytes[1] === 0x49 && bytes[2] === 0x46;
+            const isWebP = bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46;
+            
+            const mimeType = isGifFile ? 'image/gif' : isWebP ? 'image/webp' : 'image/gif';
+            const blob = new Blob([buffer], { type: mimeType });
+            const blobUrl = URL.createObjectURL(blob);
+            node._gifBlobUrl = blobUrl;
+            startGifAnimation(blobUrl, isWebP);
+          })
+          .catch(() => {
+            if (image) {
+              node.image(image);
+              layer.batchDraw();
+            }
+          });
+      };
+
+      if (window.gifler) {
+        loadGif();
+      } else {
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/gifler@0.1.0/gifler.min.js';
+        script.onload = loadGif;
+        script.onerror = () => {
+          if (image) {
+            node.image(image);
+            layer.batchDraw();
+          }
+        };
+        document.head.appendChild(script);
+      }
 
       return () => {
-        if (node._gifCanvas) {
-          node._gifCanvas = null;
+        if (animFrameId) cancelAnimationFrame(animFrameId);
+        if (node._gifBlobUrl) {
+          URL.revokeObjectURL(node._gifBlobUrl);
+          node._gifBlobUrl = null;
         }
       };
     }
